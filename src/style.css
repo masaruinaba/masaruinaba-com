@@ -157,6 +157,7 @@ img {
 
 .headline {
   margin: 0;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 900;
   font-size: 48.89px;
   line-height: 1.1;
@@ -175,6 +176,8 @@ img {
 }
 
 .name {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: rgba(0, 255, 204, 1);
   font-weight: 700;
   font-size: 31.11px;
   line-height: 1;
