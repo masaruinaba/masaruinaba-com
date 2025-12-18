@@ -1,0 +1,237 @@
+:root {
+  --frame-w: 600px;
+  --frame-h: 1066.666748px;
+  --blue: #0400e1;
+  --bg: #ebecee;
+
+  color-scheme: light;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--blue);
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+.viewport {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.frame {
+  position: relative;
+  width: var(--frame-w);
+  height: var(--frame-h);
+  background: var(--bg);
+  overflow: hidden;
+  transform-origin: top center;
+  --s: min(
+    1,
+    calc((100vw - 32px) / 600px),
+    calc((100vh - 32px) / 1066.666748px)
+  );
+  transform: scale(var(--s));
+}
+
+.frame__noise {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 600px;
+  height: 1066.66687px;
+  mix-blend-mode: color-burn;
+  opacity: 0.6;
+  background-image: url("/figma/1510-650/e046e1c6f98fc64391efa9fd7822697143e9c5a3.png");
+  background-repeat: repeat;
+  background-size: 1638.4px 1638.4px;
+  background-position: top left;
+  transform: rotate(180deg);
+  pointer-events: none;
+}
+
+.frame__overlay {
+  position: absolute;
+  width: 816.1111px;
+  height: 1224.4445px;
+  left: calc(50% - 6.39px);
+  top: 316.666748px;
+  transform: translateX(-50%);
+  object-fit: cover;
+  object-position: 50% 50%;
+  mix-blend-mode: darken;
+  pointer-events: none;
+}
+
+.frame__bottomImage {
+  position: absolute;
+  left: 0;
+  top: 444.44458px;
+  width: 600px;
+  height: 622.222229px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.frame__bottomSvg {
+  position: absolute;
+  left: -0.02%;
+  top: 0;
+  width: 100.04%;
+  height: 100.04%;
+}
+
+.content {
+  position: absolute;
+  left: 44.444458px;
+  top: 44.444542px;
+  width: 511.111176px;
+  height: 978.22229px;
+  display: flex;
+  flex-direction: column;
+}
+
+.design {
+  display: flex;
+  flex-direction: column;
+  gap: 44.444px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header__role {
+  font-weight: 500;
+  font-size: 8.89px;
+  line-height: 2;
+  letter-spacing: -0.1778px;
+}
+
+.header__logo {
+  display: flex;
+  align-items: center;
+  gap: 36.111px;
+}
+
+.logoSlash {
+  font-weight: 700;
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: -0.2px;
+}
+
+.logoWord {
+  width: 35.926px;
+  height: 10px;
+}
+
+.logoMark {
+  width: 11.946px;
+  height: 11.111px;
+}
+
+.headline {
+  margin: 0;
+  font-weight: 900;
+  font-size: 48.89px;
+  line-height: 1.1;
+  letter-spacing: -0.4889px;
+}
+
+.profile {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.profile__left {
+  width: 336.111px;
+}
+
+.name {
+  font-weight: 700;
+  font-size: 31.11px;
+  line-height: 1;
+  margin-bottom: 31.111px;
+}
+
+.detail {
+  display: flex;
+  gap: 88.889px;
+  align-items: flex-start;
+}
+
+.meta {
+  width: 42.778px;
+  display: flex;
+  flex-direction: column;
+  gap: 4.444px;
+  font-weight: 500;
+  font-size: 6.11px;
+  line-height: 1.6;
+  letter-spacing: -0.1222px;
+}
+
+.bio {
+  margin: 0;
+  width: 204.444px;
+  font-weight: 500;
+  font-size: 8.89px;
+  line-height: 2;
+  letter-spacing: -0.1778px;
+}
+
+.profile__img {
+  width: 117.778px;
+  height: 128.889px;
+  background: rgba(4, 0, 225, 0.02);
+  border: 1px solid rgba(4, 0, 225, 0.1);
+}
+
+.bottom {
+  margin-top: auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  font-weight: 400;
+  font-size: 8.89px;
+  line-height: 1.3;
+  letter-spacing: -0.1778px;
+}
+
+.bottom__right {
+  text-align: right;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}
