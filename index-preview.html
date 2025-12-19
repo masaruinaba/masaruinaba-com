@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mosaic Reveal Animation</title>
 
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
     <!-- GSAP -->
     <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
 
@@ -18,309 +23,342 @@
       body {
         min-height: 100vh;
         overflow: hidden;
-        background: #000000;
+        background: #F7F7F7;
         cursor: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .cursor {
+        position: fixed;
+        width: 8px;
+        height: 8px;
+        background: #000000;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%);
+      }
+
+      .title {
+        font-family: "Inter", sans-serif;
+        font-size: 100px;
+        font-weight: 500;
+        color: #222222;
+        letter-spacing: -0.02em;
+        user-select: none;
+        position: relative;
+        z-index: 1;
       }
 
       .mosaic-container {
         position: fixed;
+        inset: 0;
         pointer-events: none;
+        z-index: 10;
+        mix-blend-mode: multiply;
       }
 
       .mosaic-card {
         position: absolute;
-        width: 200px;
-        height: 200px;
         overflow: hidden;
-        background: #000000;
+        background: transparent;
         transform: translate(-50%, -50%);
+        opacity: 0;
       }
 
-      .mosaic-tile {
+      .mosaic-strip {
         position: absolute;
-        will-change: clip-path, opacity, filter;
-      }
-
-      .mosaic-blurLayer {
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        filter: blur(6px);
-        opacity: 0.9;
-        will-change: filter, opacity;
+        left: 0;
+        width: 100%;
+        will-change: clip-path;
       }
     </style>
   </head>
   <body>
+    <div class="cursor" id="cursor"></div>
+    <h1 class="title" id="title">Image Field</h1>
     <div class="mosaic-container" id="mosaicContainer"></div>
 
     <script>
       // マウス位置
       let mouseX = window.innerWidth / 2;
       let mouseY = window.innerHeight / 2;
+      let lastMouseX = mouseX;
+      let lastMouseY = mouseY;
+      let isMoving = false;
+      let moveTimeout = null;
+
+      // カーソル要素
+      const cursorElement = document.getElementById("cursor");
 
       // 複数の画像URL
       const imageUrls = [
-        "https://picsum.photos/1200/1200?random=1",
-        "https://picsum.photos/1200/1200?random=2",
-        "https://picsum.photos/1200/1200?random=3",
-        "https://picsum.photos/1200/1200?random=4",
-        "https://picsum.photos/1200/1200?random=5",
-        "https://picsum.photos/1200/1200?random=6",
+        "https://picsum.photos/800/800?random=1",
+        "https://picsum.photos/800/800?random=2",
+        "https://picsum.photos/800/800?random=3",
+        "https://picsum.photos/800/800?random=4",
+        "https://picsum.photos/800/800?random=5",
+        "https://picsum.photos/800/800?random=6",
       ];
 
-      /**
-       * 観音扉式モザイクrevealアニメーション
-       */
-      function initMosaicReveal(cardElement, options = {}) {
-        const config = {
-          imageSrc: imageUrls[Math.floor(Math.random() * imageUrls.length)],
-          cols: 12,
-          rows: 12,
-          blurDuration: 0.3,
-          revealDuration: 0.8,
-          closeDuration: 0.6,
-          staggerEach: 0.003,
-          ...options,
-        };
-
-        const card = cardElement;
-        if (!card || !window.gsap) return;
-
-        // 既存のタイルをクリア
-        const existingTiles = card.querySelectorAll(".mosaic-tile");
-        existingTiles.forEach((tile) => tile.remove());
-
-        const blurLayer = card.querySelector("[data-blur]");
-        if (blurLayer) {
-          blurLayer.style.backgroundImage = `url("${config.imageSrc}")`;
-          blurLayer.style.backgroundSize = "cover";
-          blurLayer.style.backgroundPosition = "center";
-        }
-
-        const w = card.clientWidth || 200;
-        const h = card.clientHeight || 200;
-        const tileW = w / config.cols;
-        const tileH = h / config.rows;
-
-        const tiles = [];
-        const centerX = config.cols / 2;
-
-        // タイル生成
-        for (let y = 0; y < config.rows; y++) {
-          for (let x = 0; x < config.cols; x++) {
-            const tile = document.createElement("div");
-            tile.className = "mosaic-tile";
-
-            tile.style.width = tileW + "px";
-            tile.style.height = tileH + "px";
-            tile.style.left = x * tileW + "px";
-            tile.style.top = y * tileH + "px";
-
-            tile.style.backgroundImage = `url("${config.imageSrc}")`;
-            tile.style.backgroundSize = `${config.cols * 100}% ${config.rows * 100}%`;
-            tile.style.backgroundPosition = `${(x * 100) / (config.cols - 1)}% ${(y * 100) / (config.rows - 1)}%`;
-
-            // 中心からの距離（観音扉の開閉順序用）
-            const distanceFromCenter = Math.abs(x - centerX);
-            tile.dataset.distance = distanceFromCenter;
-            tile.dataset.x = x;
-
-            card.appendChild(tile);
-            tiles.push(tile);
-          }
-        }
-
-        // アニメーション実行関数（開く→閉じる）
-        function playAnimation() {
-          // タイムラインをクリア
-          if (card.timeline) {
-            card.timeline.kill();
-          }
-
-          // 初期状態：観音扉が閉じた状態（中央から左右に閉じる）
-          gsap.set(tiles, {
-            clipPath: "inset(0 50% 0 50%)", // 左右から50%ずつ閉じている
-            opacity: 1,
-          });
-
-          // ぼかしレイヤーの初期状態
-          if (blurLayer) {
-            gsap.set(blurLayer, {
-              filter: "blur(6px)",
-              opacity: 0.9,
-            });
-          }
-
-          const tl = gsap.timeline({ defaults: { ease: "power3.inOut" } });
-          card.timeline = tl;
-
-          // ぼかし解除
-          if (blurLayer) {
-            tl.to(
-              blurLayer,
-              {
-                filter: "blur(0px)",
-                opacity: 0,
-                duration: config.blurDuration,
-              },
-              0
-            );
-          }
-
-          // 観音扉が開く：中央から左右に開く
-          // 中心からの距離でソート（中心から外側へ）
-          let sortedTiles = [...tiles];
-          sortedTiles.sort((a, b) => {
-            const distA = parseFloat(a.dataset.distance);
-            const distB = parseFloat(b.dataset.distance);
-            if (distA !== distB) return distA - distB;
-            // 同じ距離ならランダム
-            return Math.random() - 0.5;
-          });
-
-          const staggerConfig = {
-            each: config.staggerEach,
-            from: "start",
-            ease: "power3.inOut",
-          };
-
-          // 開くアニメーション
-          tl.to(
-            sortedTiles,
-            {
-              clipPath: "inset(0)",
-              duration: config.revealDuration,
-              stagger: staggerConfig,
-            },
-            config.blurDuration * 0.5
-          );
-
-          // 閉じるアニメーション（開いた後、少し待ってから閉じる）
-          tl.to(
-            sortedTiles,
-            {
-              clipPath: "inset(0 50% 0 50%)",
-              duration: config.closeDuration,
-              stagger: {
-                each: config.staggerEach,
-                from: "end", // 外側から内側へ閉じる
-                ease: "power3.inOut",
-              },
-            },
-            `+=0.2` // 開いた後0.2秒待つ
-          );
-        }
-
-        // 初回アニメーション
-        playAnimation();
-
-        // アニメーションを繰り返し
-        const repeatInterval = setInterval(() => {
-          // 新しい画像をランダムに選択
-          config.imageSrc = imageUrls[Math.floor(Math.random() * imageUrls.length)];
-          if (blurLayer) {
-            blurLayer.style.backgroundImage = `url("${config.imageSrc}")`;
-          }
-          // タイルの背景画像も更新
-          tiles.forEach((tile) => {
-            tile.style.backgroundImage = `url("${config.imageSrc}")`;
-          });
-          playAnimation();
-        }, (config.revealDuration + config.closeDuration + 0.2) * 1000);
-
-        card.repeatInterval = repeatInterval;
-
-        return {
-          play: playAnimation,
-          destroy: () => {
-            if (card.timeline) card.timeline.kill();
-            if (card.repeatInterval) clearInterval(card.repeatInterval);
-          },
-        };
-      }
-
-      // 画像カードの管理
+      // アクティブなカードの管理
       const container = document.getElementById("mosaicContainer");
-      const cardCount = 5;
-      const cardInstances = [];
-      const cardSpacing = 250; // カード間の距離
+      const activeCards = [];
+      const gridSize = 12;
 
-      // カードを作成
-      for (let i = 0; i < cardCount; i++) {
+      /**
+       * モザイクカードを作成
+       */
+      function createMosaicCard(x, y, size) {
         const card = document.createElement("div");
         card.className = "mosaic-card";
-        card.id = `mosaic-${i}`;
+        card.style.width = size + "px";
+        card.style.height = size + "px";
 
-        const blurLayer = document.createElement("div");
-        blurLayer.className = "mosaic-blurLayer";
-        blurLayer.setAttribute("data-blur", "");
+        const imageSrc = imageUrls[Math.floor(Math.random() * imageUrls.length)];
+        const strips = [];
+        const stripHeight = 100 / gridSize;
 
-        card.appendChild(blurLayer);
+        // ストリップ（行）を生成
+        for (let i = 0; i < gridSize; i++) {
+          const strip = document.createElement("div");
+          strip.className = "mosaic-strip";
+          strip.style.top = `${i * stripHeight}%`;
+          strip.style.height = `${stripHeight + 0.5}%`;
+          strip.style.backgroundImage = `url("${imageSrc}")`;
+          strip.style.backgroundSize = `${size}px ${size}px`;
+          strip.style.backgroundPosition = `0 -${(i * stripHeight / 100) * size}px`;
+          strip.dataset.index = i;
+
+          card.appendChild(strip);
+          strips.push(strip);
+        }
+
         container.appendChild(card);
 
-        // アニメーション初期化
-        const instance = initMosaicReveal(card, {
-          cols: 12,
-          rows: 12,
-          blurDuration: 0.3,
-          revealDuration: 0.8,
-          closeDuration: 0.6,
-          staggerEach: 0.003,
-        });
-
-        // 初期位置を設定（マウス位置から一定間隔で配置）
-        const angle = (i / cardCount) * Math.PI * 2;
-        const initialX = mouseX + Math.cos(angle) * cardSpacing;
-        const initialY = mouseY + Math.sin(angle) * cardSpacing;
-
+        // 初期状態
         gsap.set(card, {
-          x: initialX,
-          y: initialY,
+          x: x,
+          y: y,
+          opacity: 1,
+          scale: 0.8,
         });
 
-        cardInstances.push({
+        gsap.set(strips, {
+          clipPath: "inset(0 50% 0 50%)",
+        });
+
+        // アニメーション
+        const center = gridSize / 2;
+        const maxDist = center;
+        const staggerTime = 0.025;
+
+        const tl = gsap.timeline({
+          onComplete: () => {
+            // 完了後にカードを削除
+            const index = activeCards.findIndex((item) => item.card === card);
+            if (index !== -1) {
+              activeCards.splice(index, 1);
+            }
+            if (card.parentNode) {
+              card.parentNode.removeChild(card);
+            }
+          },
+        });
+
+        // スケールアップ
+        tl.to(card, {
+          scale: 1,
+          duration: 0.4,
+          ease: "power2.out",
+        }, 0);
+
+        // 開く: 中央から両端へ
+        strips.forEach((strip) => {
+          const index = parseInt(strip.dataset.index);
+          const dist = Math.abs(index - center + 0.5);
+          const normalizedDist = dist / maxDist;
+          const delay = normalizedDist * staggerTime * (gridSize / 2);
+
+          tl.to(
+            strip,
+            {
+              clipPath: "inset(0 0% 0 0%)",
+              duration: 0.3,
+              ease: "power2.out",
+            },
+            delay
+          );
+        });
+
+        // 待機
+        const openDuration = staggerTime * (gridSize / 2) + 0.3;
+        tl.to({}, { duration: 0.15 }, openDuration);
+
+        // 閉じる: 両端から中央へ
+        strips.forEach((strip) => {
+          const index = parseInt(strip.dataset.index);
+          const dist = Math.abs(index - center + 0.5);
+          const normalizedDist = dist / maxDist;
+          const delay = (1 - normalizedDist) * staggerTime * (gridSize / 2);
+
+          tl.to(
+            strip,
+            {
+              clipPath: "inset(0 50% 0 50%)",
+              duration: 0.25,
+              ease: "power2.in",
+            },
+            openDuration + 0.15 + delay
+          );
+        });
+
+        // スケールダウン＆フェードアウト
+        const closeDuration = staggerTime * (gridSize / 2) + 0.25;
+        tl.to(card, {
+          scale: 0.9,
+          opacity: 0,
+          duration: 0.3,
+          ease: "power2.in",
+        }, openDuration + 0.15 + closeDuration - 0.1);
+
+        // 不規則な追従パラメータ
+        const followSpeed = 1.2 + Math.random() * 1.0;
+        const offsetX = (Math.random() - 0.5) * 180;
+        const offsetY = (Math.random() - 0.5) * 180;
+        const parallaxFactor = 0.15 + Math.random() * 0.35;
+
+        // カード情報を保存
+        const cardData = {
           card,
-          instance,
-          index: i,
+          timeline: tl,
+          offsetX,
+          offsetY,
+          followSpeed,
+          parallaxFactor,
+          targetX: x + offsetX,
+          targetY: y + offsetY,
+        };
+
+        activeCards.push(cardData);
+
+        // 初期位置へ移動
+        gsap.to(card, {
+          x: cardData.targetX,
+          y: cardData.targetY,
+          duration: followSpeed,
+          ease: "power1.out",
+        });
+
+        return cardData;
+      }
+
+      // カード位置を更新（不規則な追従）
+      function updateCardPosition(cardData) {
+        const { card, offsetX, offsetY, followSpeed, parallaxFactor } = cardData;
+
+        // パララックス効果を加えた目標位置
+        const dx = mouseX - cardData.targetX;
+        const dy = mouseY - cardData.targetY;
+        const newTargetX = mouseX + offsetX + dx * parallaxFactor;
+        const newTargetY = mouseY + offsetY + dy * parallaxFactor;
+
+        cardData.targetX = newTargetX;
+        cardData.targetY = newTargetY;
+
+        gsap.to(card, {
+          x: newTargetX,
+          y: newTargetY,
+          duration: followSpeed,
+          ease: "power1.out",
         });
       }
 
-      // マウス追従と無限ループシステム
-      let rotationOffset = 0; // 全体の回転オフセット
-
-      function updateCards() {
-        // マウス移動に応じて回転を更新（ゆっくりと回転）
-        rotationOffset += 0.002;
-
-        cardInstances.forEach(({ card, index }) => {
-          // 各カードの基本角度（均等に配置）
-          const baseAngle = (index / cardCount) * Math.PI * 2;
-          // 回転オフセットを加える
-          const angle = baseAngle + rotationOffset;
-
-          const targetX = mouseX + Math.cos(angle) * cardSpacing;
-          const targetY = mouseY + Math.sin(angle) * cardSpacing;
-
-          // スムーズに追従
+      // すべてのカードをフェードアウト
+      function fadeOutAllCards() {
+        activeCards.forEach(({ card, timeline }) => {
+          if (timeline) timeline.kill();
           gsap.to(card, {
-            x: targetX,
-            y: targetY,
-            duration: 2,
-            ease: "power1.out",
+            opacity: 0,
+            scale: 0.8,
+            duration: 0.3,
+            ease: "power2.out",
+            onComplete: () => {
+              if (card.parentNode) {
+                card.parentNode.removeChild(card);
+              }
+            },
           });
         });
+        activeCards.length = 0;
       }
 
-      // マウス位置を追跡
+      // マウス移動検知
+      let lastMoveTime = Date.now();
+      let cardCreateCooldown = 0;
+
       document.addEventListener("mousemove", (e) => {
+        const now = Date.now();
+        const timeSinceLastMove = now - lastMoveTime;
+
         mouseX = e.clientX;
         mouseY = e.clientY;
+
+        // カーソル位置を更新
+        cursorElement.style.left = mouseX + "px";
+        cursorElement.style.top = mouseY + "px";
+
+        // マウスが動いているか判定
+        const dx = mouseX - lastMouseX;
+        const dy = mouseY - lastMouseY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance > 3) {
+          isMoving = true;
+          lastMoveTime = now;
+          lastMouseX = mouseX;
+          lastMouseY = mouseY;
+
+          // 停止タイマーをクリア
+          if (moveTimeout) {
+            clearTimeout(moveTimeout);
+            moveTimeout = null;
+          }
+
+          // クールダウンを減らす
+          cardCreateCooldown = Math.max(0, cardCreateCooldown - timeSinceLastMove);
+
+          // 一定間隔で新しいカードを生成
+          const speed = timeSinceLastMove > 0 ? distance / timeSinceLastMove : 0;
+          if (cardCreateCooldown <= 0 && speed > 0.02) {
+            // スケールアップ用のサイズ（100〜200px）
+            const baseSize = 150;
+            const sizeVariation = 50;
+            const cardSize = baseSize - sizeVariation + Math.random() * sizeVariation * 2;
+
+            createMosaicCard(mouseX, mouseY, cardSize);
+            cardCreateCooldown = 150 + Math.random() * 100; // 150〜250msのクールダウン
+          }
+        } else {
+          // マウスが停止している
+          if (isMoving && timeSinceLastMove > 100) {
+            isMoving = false;
+            moveTimeout = setTimeout(() => {
+              fadeOutAllCards();
+            }, 500);
+          }
+        }
       });
 
-      // アニメーションループ（スムーズな追従のため）
+      // アニメーションループ（カード位置を更新）
       function animate() {
-        updateCards();
+        if (isMoving) {
+          activeCards.forEach((cardData) => {
+            updateCardPosition(cardData);
+          });
+        }
         requestAnimationFrame(animate);
       }
       animate();
@@ -329,6 +367,8 @@
       window.addEventListener("resize", () => {
         mouseX = window.innerWidth / 2;
         mouseY = window.innerHeight / 2;
+        lastMouseX = mouseX;
+        lastMouseY = mouseY;
       });
     </script>
   </body>

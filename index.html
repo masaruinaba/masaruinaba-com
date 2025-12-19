@@ -4,81 +4,285 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Portfolio" />
-    <title>Portfolio</title>
+    <meta name="description" content="Masaru Inaba - Freelance Designer Portfolio" />
+    <title>Masaru Inaba | Designer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
   </head>
   <body>
-    <div class="viewport" aria-label="Figma Frame 1510:650">
-      <div class="frame" role="img" aria-label="Masaru Inaba portfolio hero screen">
-        <div class="frame__noise" aria-hidden="true"></div>
-        <img class="frame__overlay" alt="" src="/figma/1510-650/135356817d96cb1a756df47fbf11b1a1baa1e432.png" />
-
-        <div class="content">
-          <div class="design">
-            <header class="header">
-              <div class="header__role">Designer</div>
-              <div class="header__logo">
-                <span class="logoSlash" aria-hidden="true">/</span>
-                <img
-                  class="logoWord"
-                  alt="Studio"
-                  src="/figma/1510-650/f0184eced21432a3a82ba9353480da5e5f4010c4.svg"
-                />
-                <img
-                  class="logoMark"
-                  alt=""
-                  aria-hidden="true"
-                  src="/figma/1510-650/b754b96ba139085b416047e1dd16e1386cb8773e.svg"
-                />
-              </div>
-            </header>
-
-            <h1 class="headline">
-              I design to reveal
-              <br />
-              what matters, quietly
-              <br />
-              and in context.
-            </h1>
-
-            <section class="profile" aria-label="プロフィール">
-              <div class="profile__left">
-                <div class="name">Masaru Inaba</div>
-                <div class="detail">
-                  <div class="meta">
-                    <div>1986,</div>
-                    <div>Nagoya, Japan</div>
-                  </div>
-                  <p class="bio">
-                    I design across web, communication, and digital systems.I focus on clarity and subtle
-                    expression in digital experiences.Based in Nagoya, I shape interfaces that balance
-                    intuition and structure.
-                  </p>
-                </div>
-              </div>
-              <div class="profile__img" aria-hidden="true"></div>
-            </section>
+    <div class="bento-container">
+      <!-- Bento Grid -->
+      <div class="bento-grid">
+        
+        <!-- Profile Card - Large -->
+        <article class="bento-card bento-card--profile" data-size="2x2" data-col="1" data-row="1">
+          <div class="profile-avatar">
+            <img src="https://api.dicebear.com/7.x/memoji/svg?seed=masaru&backgroundColor=f5f5f5" alt="Avatar" />
           </div>
-
-          <div class="bottom" aria-label="フッター情報">
-            <div class="bottom__left">
-              Imagined by
-              <br />
-              Masaru Inaba
-            </div>
-            <div class="bottom__right">
-              <a href="/index-preview.html">DEMO</a>
-            </div>
+          <div class="profile-info">
+            <h1 class="profile-name">masaru inaba</h1>
+            <p class="profile-role">Freelance Designer</p>
+            <p class="profile-company">Studio Inc. – Contract</p>
+            <p class="profile-previous">ex. AQUARING Inc.</p>
           </div>
-        </div>
+        </article>
 
-        <div class="frame__bottomImage" aria-hidden="true">
-          <img
-            class="frame__bottomSvg"
-            alt=""
-            src="/figma/1510-650/53f35e2f655a9c8f4e3d6d6715b99f54a2b7fdf4.svg"
-          />
-        </div>
+        <!-- Twitter Card -->
+        <article class="bento-card bento-card--social" data-size="1x1" data-col="3" data-row="1">
+          <div class="social-icon social-icon--twitter">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+          </div>
+          <div class="social-info">
+            <span class="social-platform">Twitter</span>
+            <span class="social-handle">@im_inaba</span>
+          </div>
+          <a href="https://twitter.com/im_inaba" class="bento-link" target="_blank" rel="noopener">
+            <span class="btn-follow">Follow</span>
+          </a>
+        </article>
+
+        <!-- Map Card -->
+        <article class="bento-card bento-card--map" data-size="1x1" data-col="4" data-row="1">
+          <div class="map-placeholder">
+            <div class="map-pin"></div>
+            <div class="map-label">Naka</div>
+          </div>
+          <span class="map-location">Nagoya, 愛知県</span>
+        </article>
+
+        <!-- Photo Card 1 - Tall -->
+        <article class="bento-card bento-card--photo" data-size="1x2" data-col="5" data-row="1">
+          <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=600&fit=crop" alt="Photo 1" class="photo-img" />
+          <div class="photo-reaction photo-reaction--yellow">💛</div>
+        </article>
+
+        <!-- Photo Card 2 - Tall -->
+        <article class="bento-card bento-card--photo" data-size="1x2" data-col="6" data-row="1">
+          <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=600&fit=crop" alt="Photo 2" class="photo-img" />
+          <div class="photo-reaction photo-reaction--blue">💙</div>
+        </article>
+
+        <!-- Instagram Card -->
+        <article class="bento-card bento-card--social" data-size="1x1" data-col="3" data-row="2">
+          <div class="social-icon social-icon--instagram">
+            <svg viewBox="0 0 24 24" fill="url(#instagram-gradient)" width="28" height="28">
+              <defs>
+                <linearGradient id="instagram-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%" style="stop-color:#FFDC80"/>
+                  <stop offset="25%" style="stop-color:#F77737"/>
+                  <stop offset="50%" style="stop-color:#E1306C"/>
+                  <stop offset="75%" style="stop-color:#C13584"/>
+                  <stop offset="100%" style="stop-color:#833AB4"/>
+                </linearGradient>
+              </defs>
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+            </svg>
+          </div>
+          <div class="social-info">
+            <span class="social-handle">@masaruinaba</span>
+          </div>
+          <a href="https://instagram.com/masaruinaba" class="bento-link" target="_blank" rel="noopener">
+            <span class="btn-follow btn-follow--green">Follow <span class="follow-count">122</span></span>
+          </a>
+        </article>
+
+        <!-- Wantedly Card -->
+        <article class="bento-card bento-card--link" data-size="1x1" data-col="4" data-row="2">
+          <div class="link-icon">
+            <svg viewBox="0 0 24 24" fill="#20a8d8" width="28" height="28">
+              <path d="M18.5 3H6L3 12l4.5 9H12l-3-6 3-6h6l3 6-3 6h4.5l3-9-4.5-9z"/>
+            </svg>
+          </div>
+          <div class="link-info">
+            <span class="link-title">稲葉 俊のプロフィール - Wantedly</span>
+            <span class="link-url">wantedly.com</span>
+          </div>
+        </article>
+
+        <!-- Section: Works -->
+        <header class="bento-section-header" data-col="1" data-row="3">
+          <h2>Works</h2>
+        </header>
+
+        <!-- Work Card 1 -->
+        <article class="bento-card bento-card--work" data-size="2x1" data-col="1" data-row="4">
+          <div class="work-info">
+            <div class="work-icon">
+              <img src="https://via.placeholder.com/40x40/000/fff?text=五" alt="五色-五縁" />
+            </div>
+            <h3 class="work-title">互色-互縁</h3>
+            <span class="work-url">goshiki-goen.jp</span>
+          </div>
+          <div class="work-preview">
+            <img src="https://via.placeholder.com/200x120/f5f5f5/000?text=Preview" alt="五色-互縁 Preview" />
+          </div>
+        </article>
+
+        <!-- Work Card 2 -->
+        <article class="bento-card bento-card--work" data-size="2x1" data-col="3" data-row="4">
+          <div class="work-info">
+            <div class="work-icon work-icon--dark">
+              <img src="https://via.placeholder.com/40x40/000/d4a853?text=萬" alt="萬珍軒" />
+            </div>
+            <h3 class="work-title">萬珍軒</h3>
+            <span class="work-url">manchinken.com</span>
+          </div>
+          <div class="work-preview">
+            <img src="https://via.placeholder.com/200x120/000/d4a853?text=萬珍軒" alt="萬珍軒 Preview" />
+          </div>
+        </article>
+
+        <!-- Work Card 3 - écrit -->
+        <article class="bento-card bento-card--work bento-card--work-simple" data-size="2x2" data-col="1" data-row="5">
+          <div class="work-info">
+            <div class="work-icon work-icon--outline">
+              <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M10 30 L20 10 L30 30"/>
+              </svg>
+            </div>
+            <h3 class="work-title">écrit architects</h3>
+            <span class="work-url">ecrit.jp</span>
+          </div>
+          <div class="work-visual">
+            <svg viewBox="0 0 100 100" class="work-graphic">
+              <path d="M30 70 L50 20 L70 70" fill="none" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </div>
+        </article>
+
+        <!-- Work Card 4 - MIKATA -->
+        <article class="bento-card bento-card--work" data-size="2x1" data-col="3" data-row="5">
+          <div class="work-info">
+            <div class="work-icon work-icon--blue">
+              <svg viewBox="0 0 40 40" fill="#0033cc">
+                <rect x="8" y="12" width="24" height="16" rx="2"/>
+                <rect x="12" y="16" width="16" height="8" fill="white"/>
+              </svg>
+            </div>
+            <h3 class="work-title">MIKATA</h3>
+            <span class="work-url">mi-kata.jp</span>
+          </div>
+          <div class="work-preview work-preview--blue">
+            <span class="work-preview-text">MIKATA</span>
+          </div>
+        </article>
+
+        <!-- Work Card 5 - L'AS -->
+        <article class="bento-card bento-card--work" data-size="2x1" data-col="3" data-row="6">
+          <div class="work-info">
+            <div class="work-icon work-icon--mesh">
+              <svg viewBox="0 0 40 40" fill="none" stroke="#b8a090" stroke-width="0.5">
+                <line x1="5" y1="10" x2="35" y2="10"/>
+                <line x1="5" y1="15" x2="35" y2="15"/>
+                <line x1="5" y1="20" x2="35" y2="20"/>
+                <line x1="5" y1="25" x2="35" y2="25"/>
+                <line x1="5" y1="30" x2="35" y2="30"/>
+                <line x1="10" y1="5" x2="10" y2="35"/>
+                <line x1="15" y1="5" x2="15" y2="35"/>
+                <line x1="20" y1="5" x2="20" y2="35"/>
+                <line x1="25" y1="5" x2="25" y2="35"/>
+                <line x1="30" y1="5" x2="30" y2="35"/>
+              </svg>
+            </div>
+            <h3 class="work-title">L'AS INTERNATIONAL INC.</h3>
+            <span class="work-url">lasinternational.co.jp</span>
+          </div>
+          <div class="work-preview work-preview--dark">
+            <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=300&h=180&fit=crop" alt="L'AS Preview" />
+          </div>
+        </article>
+
+        <!-- Work Card 6 - katuretumatumura -->
+        <article class="bento-card bento-card--work" data-size="2x1" data-col="1" data-row="7">
+          <div class="work-info">
+            <div class="work-icon work-icon--orange">
+              <svg viewBox="0 0 40 40" fill="#c45c30">
+                <polygon points="20,8 32,20 20,32 8,20"/>
+              </svg>
+            </div>
+            <h3 class="work-title">katuretumatumura</h3>
+            <span class="work-url">katuretumatumura.jp</span>
+          </div>
+          <div class="work-preview">
+            <img src="https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=300&h=180&fit=crop" alt="katuretumatumura Preview" />
+          </div>
+        </article>
+
+        <!-- More Link -->
+        <article class="bento-card bento-card--link" data-size="1x1" data-col="3" data-row="7">
+          <div class="link-icon link-icon--chain">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+            </svg>
+          </div>
+          <div class="link-info">
+            <span class="link-title">more</span>
+            <span class="link-url">masaru.myportfolio.com</span>
+          </div>
+        </article>
+
+        <!-- Section: My Home -->
+        <header class="bento-section-header" data-col="1" data-row="8">
+          <h2>My Home</h2>
+        </header>
+
+        <!-- Home Photo Grid -->
+        <article class="bento-card bento-card--photo bento-card--photo-home" data-size="2x2" data-col="2" data-row="9">
+          <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=500&h=600&fit=crop" alt="Home Interior" class="photo-img" />
+        </article>
+
+        <article class="bento-card bento-card--photo" data-size="1x1" data-col="4" data-row="9">
+          <img src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=300&h=300&fit=crop" alt="Home Exterior" class="photo-img" />
+        </article>
+
+        <article class="bento-card bento-card--photo" data-size="1x2" data-col="4" data-row="10">
+          <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=300&h=500&fit=crop" alt="Home Detail" class="photo-img" />
+        </article>
+
+        <article class="bento-card bento-card--photo" data-size="2x1" data-col="1" data-row="11">
+          <img src="https://images.unsplash.com/photo-1600566752355-35792bedcfea?w=400&h=250&fit=crop" alt="Home View" class="photo-img" />
+        </article>
+
+        <!-- Photo Credit Card -->
+        <article class="bento-card bento-card--link bento-card--credit" data-size="1x1" data-col="3" data-row="11">
+          <div class="link-icon">
+            <span class="credit-initial">L</span>
+          </div>
+          <div class="link-info">
+            <span class="link-title">Photo by Luckiis</span>
+            <span class="link-url">luckiis.com</span>
+          </div>
+        </article>
+
+        <!-- Section: Photo -->
+        <header class="bento-section-header" data-col="1" data-row="12">
+          <h2>Photo</h2>
+        </header>
+
+        <!-- Photo Gallery -->
+        <article class="bento-card bento-card--photo" data-size="1x2" data-col="1" data-row="13">
+          <img src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=300&h=500&fit=crop" alt="Nature Photo 1" class="photo-img" />
+        </article>
+
+        <article class="bento-card bento-card--photo" data-size="2x1" data-col="3" data-row="13">
+          <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500&h=300&fit=crop" alt="Beach Photo" class="photo-img" />
+        </article>
+
+        <!-- Quote Cards -->
+        <article class="bento-card bento-card--quote" data-size="1x1" data-col="2" data-row="14">
+          <span class="quote-mark">"</span>
+          <p class="quote-text">頭はやわらかく。身体もやわらかく</p>
+        </article>
+
+        <article class="bento-card bento-card--quote" data-size="1x1" data-col="3" data-row="14">
+          <span class="quote-mark">"</span>
+          <p class="quote-text">可能な限り最小限に</p>
+        </article>
+
       </div>
     </div>
 
