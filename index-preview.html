@@ -6,6 +6,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Portfolio" />
     <title>Portfolio</title>
+
+    <!-- GSAP（CDNで最短導入） -->
+    <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+
+    <!-- Mosaic card styles -->
+    <style>
+      /* 既存のレイアウトを壊さないため、profile__imgの箱に収める */
+      .mosaic-card {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        min-height: 220px; /* もし親が高さを持たない場合の保険 */
+        overflow: hidden;
+        border-radius: 12px; /* いらなければ削除 */
+        background: #0b0b0b;
+      }
+
+      .mosaic-tile {
+        position: absolute;
+        will-change: transform, opacity, filter, clip-path;
+      }
+
+      /* scale版用の初期状態 */
+      .mosaic-tile--scale {
+        transform: scale(0);
+        transform-origin: 50% 50%;
+      }
+
+      /* 画像全体の質感補助（任意） */
+      .mosaic-blurLayer {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        filter: blur(6px);
+        opacity: 0.9;
+        will-change: filter, opacity;
+      }
+    </style>
   </head>
   <body>
     <div class="viewport" aria-label="Figma Frame 1510:650">
@@ -56,7 +94,13 @@
                   </p>
                 </div>
               </div>
-              <div class="profile__img" aria-hidden="true"></div>
+
+              <!-- ここをモザイクカードに置き換え -->
+              <div class="profile__img mosaic-card" id="mosaic" aria-label="Mosaic image card">
+                <!-- ぼかし解除の質感用（任意） -->
+                <div class="mosaic-blurLayer" data-blur></div>
+                <!-- タイルはJSで生成 -->
+              </div>
             </section>
           </div>
 
@@ -82,7 +126,223 @@
       </div>
     </div>
 
+    <!-- 既存のVite entry -->
     <script type="module" src="/src/main.ts"></script>
+
+    <!-- モザイクrevealアニメーション（関数化・設定可能） -->
+    <script>
+      /**
+       * モザイクrevealアニメーションを初期化
+       * @param {Object} options - 設定オブジェクト
+       * @param {string} options.cardId - カード要素のID
+       * @param {string} options.imageSrc - 画像URL
+       * @param {number} options.cols - タイルの列数
+       * @param {number} options.rows - タイルの行数
+       * @param {string} options.animationType - アニメーションタイプ: 'scale' | 'clip'
+       * @param {string} options.direction - 展開方向: 'center' | 'vertical' | 'random'
+       * @param {number} options.blurDuration - ぼかし解除の時間（秒）
+       * @param {number} options.revealDuration - revealアニメーションの時間（秒）
+       * @param {number} options.staggerEach - 各タイルの遅延時間（秒）
+       * @param {number} options.finalScaleDuration - 最終スケールアニメーションの時間（秒）
+       * @param {boolean} options.useIntersectionObserver - IntersectionObserverを使用するか
+       */
+      function initMosaicReveal(options = {}) {
+        const config = {
+          cardId: "mosaic",
+          imageSrc: "https://picsum.photos/1200/1200",
+          cols: 18,
+          rows: 10,
+          animationType: "clip", // 'scale' | 'clip'
+          direction: "center", // 'center' | 'vertical' | 'random'
+          blurDuration: 1.0,
+          revealDuration: 0.95,
+          staggerEach: 0.01,
+          finalScaleDuration: 0.6,
+          useIntersectionObserver: true,
+          ...options,
+        };
+
+        const card = document.getElementById(config.cardId);
+        if (!card || !window.gsap) return;
+
+        const blurLayer = card.querySelector("[data-blur]");
+        if (blurLayer) {
+          blurLayer.style.backgroundImage = `url("${config.imageSrc}")`;
+          blurLayer.style.backgroundSize = "cover";
+          blurLayer.style.backgroundPosition = "center";
+        }
+
+        const w = card.clientWidth || 520;
+        const h = card.clientHeight || 280;
+        const tileW = w / config.cols;
+        const tileH = h / config.rows;
+
+        const tiles = [];
+        const centerX = config.cols / 2;
+        const centerY = config.rows / 2;
+
+        // タイル生成
+        for (let y = 0; y < config.rows; y++) {
+          for (let x = 0; x < config.cols; x++) {
+            const tile = document.createElement("div");
+            tile.className = `mosaic-tile mosaic-tile--${config.animationType}`;
+
+            tile.style.width = tileW + "px";
+            tile.style.height = tileH + "px";
+            tile.style.left = x * tileW + "px";
+            tile.style.top = y * tileH + "px";
+
+            tile.style.backgroundImage = `url("${config.imageSrc}")`;
+            tile.style.backgroundSize = `${config.cols * 100}% ${config.rows * 100}%`;
+            tile.style.backgroundPosition = `${(x * 100) / (config.cols - 1)}% ${(y * 100) / (config.rows - 1)}%`;
+
+            // 中心からの距離を計算（stagger用）
+            const dx = x - centerX;
+            const dy = y - centerY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const maxDistance = Math.sqrt(centerX * centerX + centerY * centerY);
+            tile.dataset.distance = distance / maxDistance; // 0-1に正規化
+            tile.dataset.y = y; // 縦方向の位置
+
+            card.appendChild(tile);
+            tiles.push(tile);
+          }
+        }
+
+        // アニメーション実行関数
+        function playAnimation() {
+          // 初期状態を設定
+          if (config.animationType === "scale") {
+            gsap.set(tiles, { scale: 0, opacity: 1 });
+          } else {
+            // clip-path版: 初期状態で非表示
+            gsap.set(tiles, {
+              clipPath: "inset(100% 0 0 0)",
+              opacity: 1,
+            });
+          }
+
+          // カード全体の初期スケール
+          gsap.set(card, { scale: 1.06 });
+
+          const tl = gsap.timeline({ defaults: { ease: "power2.out" } });
+
+          // ぼかし解除
+          if (blurLayer) {
+            tl.to(
+              blurLayer,
+              {
+                filter: "blur(0px)",
+                opacity: 0,
+                duration: config.blurDuration,
+              },
+              0
+            );
+          }
+
+          // タイルrevealアニメーション
+          // 方向に応じてタイル配列を事前にソート
+          let sortedTiles = [...tiles];
+          if (config.direction === "center") {
+            // 中心から外へ（距離に基づく、軽いランダム要素を追加）
+            sortedTiles.sort((a, b) => {
+              const distA = parseFloat(a.dataset.distance);
+              const distB = parseFloat(b.dataset.distance);
+              // 距離が近い順、同じ距離ならランダム要素を追加
+              return distA - distB + (Math.random() - 0.5) * 0.15;
+            });
+          } else if (config.direction === "vertical") {
+            // 縦方向の流れ（上から下、軽いランダム）
+            sortedTiles.sort((a, b) => {
+              const yA = parseInt(a.dataset.y);
+              const yB = parseInt(b.dataset.y);
+              if (yA !== yB) return yA - yB;
+              // 同じ行内でランダム
+              return Math.random() - 0.5;
+            });
+          } else {
+            // random（完全ランダム）
+            sortedTiles.sort(() => Math.random() - 0.5);
+          }
+
+          const staggerConfig = {
+            each: config.staggerEach,
+            from: "start",
+            ease: "power2.out",
+          };
+
+          if (config.animationType === "scale") {
+            tl.to(
+              sortedTiles,
+              {
+                scale: 1,
+                duration: config.revealDuration,
+                stagger: staggerConfig,
+              },
+              0.05
+            );
+          } else {
+            // clip-path版: inset(100% 0 0 0) → inset(0)
+            tl.to(
+              sortedTiles,
+              {
+                clipPath: "inset(0)",
+                duration: config.revealDuration,
+                stagger: staggerConfig,
+              },
+              0.05
+            );
+          }
+
+          // reveal後の画像全体スケール（1.06 → 1.0）
+          tl.to(
+            card,
+            {
+              scale: 1.0,
+              duration: config.finalScaleDuration,
+              ease: "power2.out",
+            },
+            `-=${config.finalScaleDuration * 0.3}`
+          );
+        }
+
+        // IntersectionObserverでスクロール発火
+        if (config.useIntersectionObserver && "IntersectionObserver" in window) {
+          const observer = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  playAnimation();
+                  observer.unobserve(card);
+                }
+              });
+            },
+            {
+              threshold: 0.1,
+              rootMargin: "50px",
+            }
+          );
+          observer.observe(card);
+        } else {
+          // IntersectionObserver未対応または無効時は即座に実行
+          playAnimation();
+        }
+      }
+
+      // 初期化（設定オブジェクトでカスタマイズ可能）
+      initMosaicReveal({
+        cardId: "mosaic",
+        imageSrc: "https://picsum.photos/1200/1200",
+        cols: 18,
+        rows: 10,
+        animationType: "clip", // 'scale' に変更するとscale版に
+        direction: "center", // 'center' | 'vertical' | 'random'
+        blurDuration: 1.0,
+        revealDuration: 0.95,
+        staggerEach: 0.01,
+        finalScaleDuration: 0.6,
+        useIntersectionObserver: true,
+      });
+    </script>
   </body>
 </html>
-
