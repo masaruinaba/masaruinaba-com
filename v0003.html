@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scroll-driven Pinned Text Sequence</title>
+
+    <!-- Google Fonts: Geist -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@700;800&display=swap" rel="stylesheet">
+
+    <!-- GSAP -->
+    <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+    <script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"></script>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: #000000;
+        background-image: linear-gradient(to bottom, #FF4800 0%, #FF7E20 75%, #FFCFAD 99%);
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        color: #f7f7f7;
+        font-family: "Geist", -apple-system, BlinkMacSystemFont, sans-serif;
+        overflow-x: hidden;
+        position: relative;
+      }
+
+      /* noiseオーバーレイ - グラデーションの上にかぶせる */
+      body::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('http://localhost:3845/assets/e046e1c6f98fc64391efa9fd7822697143e9c5a3.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        opacity: 0.15;
+        pointer-events: none;
+        z-index: 9999;
+      }
+
+      .scroll-section {
+        /* 無限スクロール風に非常に長く */
+        position: relative;
+      }
+
+      .pin {
+        height: 100vh;
+        position: relative;
+      }
+
+      .stage {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        z-index: 1;
+      }
+
+      .scene {
+        position: absolute;
+        left: 50%;
+        top: 48%; /* やや上に調整して天地中央に */
+        transform: translate(-50%, -50%);
+        white-space: nowrap;
+        font-size: 84px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        color: #f7f7f7;
+      }
+
+      @media (max-width: 768px) {
+        .scene {
+          font-size: 56px;
+        }
+      }
+
+      .scene1 {
+        z-index: 2; /* 初期: Scene1が前面 */
+      }
+
+      .scene2 {
+        z-index: 1; /* 初期: Scene2が背面 */
+      }
+
+      .char {
+        display: inline-block;
+        will-change: transform;
+      }
+    </style>
+</head>
+<body>
+    <section class="scroll-section">
+        <div class="pin">
+            <div class="stage">
+                <div class="scene scene1"></div>
+                <div class="scene scene2"></div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+      gsap.registerPlugin(ScrollTrigger);
+
+      // ===== 調整可能なパラメータ =====
+      const cycleDistance = 4500; // 1サイクルのスクロール距離（ゆっくりに）
+      const numCycles = 50; // 繰り返し回数（たくさん）
+      const endDistance = cycleDistance * numCycles; // 総スクロール距離
+      const yOut = window.innerHeight * 0.6; // 完全に消える距離（上へ）
+      const yIn = window.innerHeight * 0.6; // 入ってくる距離（下から）
+      const localAmp = window.innerHeight * 0.12; // 文字ごとの微妙なオフセット（より繊細）
+      const globalAmp = yOut; // グローバルリフトの振幅
+      const gamma = 2.0; // 末尾優先の開始時間の広がり（より強い末尾優先）
+
+      // Scene1 ENTER フェーズ
+      const enter1StartP = 0.02;
+      const enter1EndP = 0.15;
+
+      // Scene1 HOLD フェーズ（余白を感じる長さ）
+      const hold1StartP = 0.15;
+      const hold1EndP = 0.30;
+
+      // Scene1 EXIT フェーズ（Scene2 ENTERと完全に重なる、長めに）
+      const exit1StartP = 0.30;
+      const exit1EndP = 0.60;
+
+      // Scene2 ENTER フェーズ（Scene1 EXITと完全に重なる、同時に動く）
+      const enter2StartP = 0.30;
+      const enter2EndP = 0.60;
+
+      // Scene2 HOLD フェーズ
+      const hold2StartP = 0.60;
+      const hold2EndP = 0.75;
+
+      // Scene2 EXIT フェーズ
+      const exit2StartP = 0.75;
+      const exit2EndP = 0.95;
+
+      // ===== ヘルパー関数 =====
+      function clamp01(x) {
+        return Math.max(0, Math.min(1, x));
+      }
+
+      function smoothstep(t) {
+        t = clamp01(t);
+        return t * t * (3 - 2 * t);
+      }
+
+      function lerp(a, b, t) {
+        return a + (b - a) * t;
+      }
+
+      // ===== 文字分割関数 =====
+      function splitTextToSpans(text) {
+        let html = '';
+        for (let i = 0; i < text.length; i++) {
+          const char = text[i];
+          if (char === ' ') {
+            html += '<span class="char">&nbsp;</span>';
+          } else {
+            html += `<span class="char">${char}</span>`;
+          }
+        }
+        return html;
+      }
+
+      // ===== DOM セットアップ =====
+      const scene1 = document.querySelector('.scene1');
+      const scene2 = document.querySelector('.scene2');
+      
+      scene1.innerHTML = splitTextToSpans('Reduction is an ethical choice.');
+      scene2.innerHTML = splitTextToSpans('Simplicity is hard to dislike.');
+
+      const chars1 = Array.from(scene1.querySelectorAll('.char'));
+      const chars2 = Array.from(scene2.querySelectorAll('.char'));
+
+      if (!chars1.length || !chars2.length) {
+        console.error('文字が見つかりません。文字分割が機能していません。');
+      }
+
+      const total1 = chars1.length;
+      const total2 = chars2.length;
+
+      // 末尾が先に動くように、末尾が index 0 になる並びにする
+      const tailFirst1 = chars1.slice().reverse();
+      const tailFirst2 = chars2.slice().reverse();
+
+      // ===== EXIT アニメーション関数（2層構造） =====
+      function computeExitY(pExit, charIndex, totalChars) {
+        // pExit: EXITフェーズ内の進捗 (0..1)
+        // charIndex: 末尾が0、先頭がtotalChars-1
+
+        // グローバルリフト（遅く、繊細）
+        // グローバルはEXIT進捗の30%以降から開始（より遅く）
+        const globalT = clamp01((pExit - 0.30) / 0.70);
+        const globalY = -globalAmp * smoothstep(globalT);
+
+        // ローカルリフト（末尾優先の微妙な波）
+        const iNorm = charIndex / (totalChars - 1); // 0..1 (末尾=0, 先頭=1)
+        const start = Math.pow(iNorm, gamma) * 0.60; // 末尾が早く開始（より長い期間）
+        const dur = 0.60; // 幅広い期間でスナップを避ける
+        const t = clamp01((pExit - start) / dur);
+        const localY = -localAmp * smoothstep(t);
+
+        // 最終的なY = グローバル + ローカル
+        return globalY + localY;
+      }
+
+      // ===== ENTER アニメーション関数（Scene1用、シンプル） =====
+      function computeEnterY(pEnter, charIndex, totalChars) {
+        // pEnter: ENTERフェーズ内の進捗 (0..1)
+        const iNorm = charIndex / (totalChars - 1);
+        const start = Math.pow(iNorm, gamma) * 0.60; // より長い期間
+        const dur = 0.60;
+        const t = clamp01((pEnter - start) / dur);
+        const enterCharY = 12; // より小さなENTERオフセット（繊細）
+        return enterCharY * (1 - smoothstep(t));
+      }
+
+      // ===== Scene2 ENTER アニメーション関数（2層構造、末尾から下から上がる） =====
+      function computeEnterY2(pEnter, charIndex, totalChars) {
+        // pEnter: ENTERフェーズ内の進捗 (0..1)
+        // charIndex: 末尾が0、先頭がtotalChars-1
+
+        // グローバル上昇（ゆっくり、全体が下から上がる）
+        // 進捗の20%以降から開始（より遅く）
+        const globalT = clamp01((pEnter - 0.15) / 0.85);
+        const globalY = yIn * (1 - smoothstep(globalT)); // 下から0へ
+
+        // ローカル上昇（末尾優先の微妙な波）
+        const iNorm = charIndex / (totalChars - 1); // 0..1 (末尾=0, 先頭=1)
+        const start = Math.pow(iNorm, gamma) * 0.50; // 末尾が早く開始
+        const dur = 0.65; // 幅広い期間でスナップを避ける
+        const t = clamp01((pEnter - start) / dur);
+        const localY = localAmp * (1 - smoothstep(t)); // 下から0へ
+
+        // 最終的なY = グローバル + ローカル（下からの位置）
+        return globalY + localY;
+      }
+
+      // 文字のtransformを高速に更新
+      const setY1 = tailFirst1.map((el) => gsap.quickSetter(el, 'y', 'px'));
+      const setY2 = tailFirst2.map((el) => gsap.quickSetter(el, 'y', 'px'));
+
+      // Sceneコンテナの位置制御用
+      const setScene1Y = gsap.quickSetter(scene1, 'y', 'px');
+      const setScene2Y = gsap.quickSetter(scene2, 'y', 'px');
+
+      // 初期状態
+      const vh = window.innerHeight;
+      gsap.set(scene1, { y: 0 });
+      gsap.set(scene2, { y: 0 });
+      // 文字は画面下に配置（ENTERで上がってくる）
+      gsap.set(chars1, { y: yIn + localAmp, opacity: 1 });
+      gsap.set(chars2, { y: yIn + localAmp, opacity: 1 });
+      
+      // 初期のvisibilityとz-index設定
+      scene1.style.visibility = 'hidden';
+      scene2.style.visibility = 'hidden';
+      scene1.style.zIndex = '2';
+      scene2.style.zIndex = '1';
+
+      // scroll-sectionの高さを動的に設定
+      document.querySelector('.scroll-section').style.height = `${endDistance}px`;
+
+      // ===== ScrollTrigger セットアップ =====
+      ScrollTrigger.create({
+        trigger: '.scroll-section',
+        start: 'top top',
+        end: `+=${endDistance}`,
+        pin: '.pin',
+        scrub: true,
+        onUpdate: (self) => {
+          // 繰り返し: progressを1サイクル内の進捗に変換
+          const rawP = self.progress;
+          // 何サイクル目かを計算し、そのサイクル内の進捗を取得
+          const cycleProgress = (rawP * numCycles) % 1;
+          const p = cycleProgress; // 0..1の範囲でループ
+
+          // ===== Scene1 の処理 =====
+          
+          // Pre-roll: 何も表示しない
+          if (p < enter1StartP) {
+            setScene1Y(0);
+            // 文字を画面下に配置
+            for (let i = 0; i < total1; i++) {
+              setY1[i](yIn + localAmp);
+            }
+            scene1.style.visibility = 'hidden';
+            scene2.style.visibility = 'hidden';
+            scene1.style.zIndex = '2';
+            scene2.style.zIndex = '1';
+          }
+          
+          // Scene1 ENTER - 末尾から下から上がる動き
+          else if (p >= enter1StartP && p <= enter1EndP) {
+            scene1.style.visibility = 'visible';
+            scene1.style.zIndex = '2';
+            scene2.style.zIndex = '1';
+            
+            const pEnter = clamp01((p - enter1StartP) / (enter1EndP - enter1StartP));
+            // コンテナは中央に固定、文字だけが動く
+            setScene1Y(0);
+            
+            // 文字を末尾から先に下から上がる
+            for (let i = 0; i < total1; i++) {
+              const charY = computeEnterY2(pEnter, i, total1);
+              setY1[i](charY);
+              tailFirst1[i].style.opacity = '1';
+            }
+          }
+          
+          // Scene1 HOLD（余白を感じる長さ）
+          else if (p > enter1EndP && p <= hold1EndP) {
+            scene1.style.zIndex = '2';
+            scene2.style.zIndex = '1';
+            setScene1Y(0); // コンテナは中央に固定
+            // 文字はすべて表示状態、y=0にリセット
+            tailFirst1.forEach((char, idx) => {
+              char.style.opacity = '1';
+              setY1[idx](0);
+            });
+          }
+          
+          // Scene1 EXIT - 2層構造で繊細に（Scene2 ENTERと同時に実行）
+          if (p > exit1StartP && p <= exit1EndP) {
+            scene1.style.visibility = 'visible'; // 表示を維持
+            scene1.style.zIndex = '1'; // Scene2が前面に
+            scene2.style.zIndex = '2';
+            setScene1Y(0); // コンテナは動かさない（重要！）
+            const pExit = clamp01((p - exit1StartP) / (exit1EndP - exit1StartP));
+            
+            // 2層構造で計算（末尾優先 → 全体リフト）
+            for (let i = 0; i < total1; i++) {
+              const charY = computeExitY(pExit, i, total1);
+              setY1[i](charY);
+              tailFirst1[i].style.opacity = '1'; // opacityは1のまま
+            }
+          }
+          
+          // Scene1 EXIT完了後は非表示
+          else if (p > exit1EndP) {
+            scene1.style.visibility = 'hidden'; // EXIT完了後に非表示
+            scene1.style.zIndex = '1';
+            scene2.style.zIndex = '2';
+            setScene1Y(0);
+            // すべての文字を完全に外へ
+            tailFirst1.forEach((char, idx) => {
+              setY1[idx](-yOut);
+            });
+          }
+
+          // ===== Scene2 の処理 =====
+          
+          // Scene2 pre-ENTER: 文字を画面下に配置
+          if (p < enter2StartP) {
+            scene2.style.visibility = 'hidden';
+            setScene2Y(0);
+            for (let i = 0; i < total2; i++) {
+              setY2[i](yIn + localAmp);
+            }
+          }
+          
+          // Scene2 ENTER - 末尾から下から上がる動き（Scene1 EXITと同時に実行）
+          else if (p >= enter2StartP && p <= enter2EndP) {
+            scene2.style.visibility = 'visible';
+            scene2.style.zIndex = '2'; // Scene2が前面に（cross中）
+            scene1.style.zIndex = '1';
+            
+            const pEnter = clamp01((p - enter2StartP) / (enter2EndP - enter2StartP));
+            // コンテナは中央に固定、文字だけが動く
+            setScene2Y(0);
+            
+            // 文字を末尾から先に下から上がる（Scene1 EXITと同じ構造）
+            for (let i = 0; i < total2; i++) {
+              const charY = computeEnterY2(pEnter, i, total2);
+              setY2[i](charY);
+              tailFirst2[i].style.opacity = '1';
+            }
+          }
+          
+          // Scene2 HOLD
+          else if (p > enter2EndP && p <= hold2EndP) {
+            scene2.style.zIndex = '2'; // Scene2が前面に
+            scene1.style.zIndex = '1';
+            setScene2Y(0); // コンテナは中央に固定
+            // 文字はすべて表示状態、y=0にリセット
+            tailFirst2.forEach((char, idx) => {
+              char.style.opacity = '1';
+              setY2[idx](0);
+            });
+          }
+          
+          // Scene2 EXIT - 2層構造で繊細に
+          else if (p > exit2StartP && p <= exit2EndP) {
+            scene2.style.zIndex = '2';
+            setScene2Y(0); // コンテナは動かさない（重要！）
+            const pExit = clamp01((p - exit2StartP) / (exit2EndP - exit2StartP));
+            
+            // 2層構造で計算（末尾優先 → 全体リフト）
+            for (let i = 0; i < total2; i++) {
+              const charY = computeExitY(pExit, i, total2);
+              setY2[i](charY);
+              tailFirst2[i].style.opacity = '1'; // opacityは1のまま
+            }
+          }
+          
+          // Scene2 EXIT完了後は非表示
+          else if (p > exit2EndP) {
+            scene2.style.visibility = 'hidden';
+            setScene2Y(0);
+            // すべての文字を完全に外へ
+            tailFirst2.forEach((char, idx) => {
+              setY2[idx](-yOut);
+            });
+          }
+        }
+      });
+    </script>
+</body>
+</html>

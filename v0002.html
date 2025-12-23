@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Eye-Following Card</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- GSAP -->
+    <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        overflow: hidden;
+        background: #0062AD;
+        font-family: "Inter", sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: none;
+      }
+
+      /* 目のコンテナ */
+      .eye-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 80px;
+      }
+
+      /* 目のコンテナ */
+      .eye {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        background: #FFFFFF;
+        border-radius: 50%;
+        overflow: hidden;
+      }
+
+      /* 瞳（黒い丸） */
+      .pupil {
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        background: #000000;
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        transition: transform 0.1s ease-out;
+        will-change: transform;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="eye-container">
+      <div class="eye" id="eyeLeft">
+        <div class="pupil" id="pupilLeft"></div>
+      </div>
+      <div class="eye" id="eyeRight">
+        <div class="pupil" id="pupilRight"></div>
+      </div>
+    </div>
+
+    <script>
+      // マウス位置
+      let mouseX = 0;
+      let mouseY = 0;
+
+      // 目の要素
+      const eyeLeft = document.getElementById('eyeLeft');
+      const eyeRight = document.getElementById('eyeRight');
+      const pupilLeft = document.getElementById('pupilLeft');
+      const pupilRight = document.getElementById('pupilRight');
+
+      /**
+       * 瞳の位置を計算して更新
+       */
+      function updatePupilPosition(eye, pupil) {
+        const eyeRect = eye.getBoundingClientRect();
+        const eyeCenterX = eyeRect.left + eyeRect.width / 2;
+        const eyeCenterY = eyeRect.top + eyeRect.height / 2;
+
+        // マウス位置から目の中心へのベクトル
+        const dx = mouseX - eyeCenterX;
+        const dy = mouseY - eyeCenterY;
+
+        // 目の半径（白い目の半径 - 瞳の半径）
+        const eyeRadius = eyeRect.width / 2;
+        const pupilRadius = pupil.offsetWidth / 2;
+        const maxDistance = eyeRadius - pupilRadius;
+
+        // 距離を計算
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        // 瞳の移動量を制限（白い目の範囲内に収める）
+        let moveX = dx;
+        let moveY = dy;
+
+        if (distance > maxDistance) {
+          moveX = (dx / distance) * maxDistance;
+          moveY = (dy / distance) * maxDistance;
+        }
+
+        // GSAPでスムーズにアニメーション
+        gsap.to(pupil, {
+          x: moveX,
+          y: moveY,
+          duration: 0.3,
+          ease: 'power2.out',
+        });
+      }
+
+      /**
+       * マウス移動イベント
+       */
+      document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+
+        updatePupilPosition(eyeLeft, pupilLeft);
+        updatePupilPosition(eyeRight, pupilRight);
+      });
+
+      // 初期位置を設定
+      window.addEventListener('load', () => {
+        mouseX = window.innerWidth / 2;
+        mouseY = window.innerHeight / 2;
+      });
+    </script>
+  </body>
+</html>
+
