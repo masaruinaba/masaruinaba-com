@@ -1,5 +1,5 @@
 import './style.css'
-import { Renderer, Camera, Transform, Program, Mesh, Plane, Texture } from 'ogl'
+import { Renderer, Camera, Transform, Program, Mesh, Plane, Texture, type OGLRenderingContext } from 'ogl'
 import Lenis from 'lenis'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -114,7 +114,7 @@ const fragmentShader = /* glsl */ `
 
 class CylinderGallery {
   private renderer!: Renderer
-  private gl!: WebGL2RenderingContext | WebGLRenderingContext
+  private gl!: OGLRenderingContext
   private camera!: Camera
   private scene!: Transform
   private planes: Mesh[] = []
@@ -414,7 +414,6 @@ class CylinderGallery {
   private animate = (): void => {
     requestAnimationFrame(this.animate)
 
-    const { imageCount } = CONFIG.cylinder
     const { totalLoops } = CONFIG.scroll
     const tempoSettings = CONFIG.tempo[state.currentTempo]
 
