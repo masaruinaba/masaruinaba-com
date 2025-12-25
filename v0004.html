@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drum Roll Logo Mini-App - Final Refined</title>
+  
+  <!-- GSAP & ScrollTrigger -->
+  <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+  <script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* ページ背景：完全に不透明な黒 (#0b0b0c) */
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      background-color: #0b0b0c;
+      color: #ffffff;
+      overflow-x: hidden;
+    }
+
+    /* スクロール量を確保 */
+    #scroll-spacer {
+      width: 100%;
+      height: 800vh;
+      pointer-events: none;
+    }
+
+    .app-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ==========================================================================
+       カードUI
+       ========================================================================== */
+    .card {
+      width: 640px;
+      height: 640px; /* 見切れを防ぐため高さを十分に確保 */
+      background-color: #0b0b0c;
+      border-radius: 40px;
+      position: relative;
+      overflow: hidden; 
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: auto;
+      perspective: 3000px; /* 歪みを抑えるために非常に大きく設定 */
+    }
+
+    /* ==========================================================================
+       ドラムロール構造
+       ========================================================================== */
+    .drum-slice-track {
+      position: relative;
+      width: 500px;
+      height: 14.85px; /* 104px / 7 slices */
+      transform-style: preserve-3d;
+      z-index: 1;
+      /* 重なりを諦め、各段を独立させるために overflow: hidden を検討したが、
+         3D空間を維持するためここでは指定せず、radiusを調整して干渉を避ける */
+    }
+
+    .drum-cylinder {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+
+    /* ドラムの1面 */
+    .face {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 104px; /* 座布団の天地サイズはロゴ全高 */
+      margin-top: -52px;
+      backface-visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    /* 座布団スタック */
+    .pad-stack {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .pad {
+      position: absolute;
+      border-radius: 12px;
+      background-color: #0b0b0c; 
+    }
+
+    /* ロゴのスライス表示（絶対につぶさない） */
+    .logo-slice-container {
+      position: relative;
+      width: 447px;
+      height: 14.85px; /* ここでスライス分だけ表示 */
+      overflow: hidden;
+      z-index: 10;
+    }
+
+    .logo-slice-container svg {
+      position: absolute;
+      left: 0;
+      width: 447px;
+      height: 104px; /* SVG本体は常に104px固定 */
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div id="scroll-spacer"></div>
+  
+  <div class="app-container">
+    <div class="card" 
+         id="drum-card-1"
+         data-slices="7"
+         data-faces="14"
+         data-radius="260" 
+         data-ease="0.1">
+    </div>
+  </div>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    async function fetchCleanSvg(url) {
+      try {
+        const res = await fetch(url);
+        const text = await res.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(text, 'image/svg+xml');
+        const svg = doc.querySelector('svg');
+        if (svg) {
+          svg.removeAttribute('opacity');
+          svg.querySelectorAll('*').forEach(el => {
+            el.removeAttribute('opacity');
+            el.removeAttribute('fill-opacity');
+            el.removeAttribute('stroke-opacity');
+            if (el.hasAttribute('fill') && el.getAttribute('fill') !== 'none') {
+              el.setAttribute('fill', '#ffffff');
+            }
+            if (el.hasAttribute('stroke') && el.getAttribute('stroke') !== 'none') {
+              el.setAttribute('stroke', '#ffffff');
+            }
+          });
+        }
+        return svg;
+      } catch (e) {
+        console.error('SVG fetch error:', e);
+        return null;
+      }
+    }
+
+    async function initDrumLogoCard(cardEl) {
+      const slicesCount = parseInt(cardEl.dataset.slices || 7);
+      const facesCount = parseInt(cardEl.dataset.faces || 14);
+      const radius = parseFloat(cardEl.dataset.radius || 260);
+      const ease = parseFloat(cardEl.dataset.ease || 0.1);
+
+      const logoUrl = 'http://localhost:3845/assets/626f6d0026039a3b7ec1eeb374903017df131363.svg';
+      const baseSvg = await fetchCleanSvg(logoUrl);
+      if (!baseSvg) return;
+
+      const logoWidth = 447;
+      const logoHeight = 104;
+      const sliceH = logoHeight / slicesCount;
+      const angleStep = 360 / facesCount;
+
+      const cylinders = [];
+      const setters = [];
+
+      for (let s = 0; s < slicesCount; s++) {
+        const track = document.createElement('div');
+        track.className = 'drum-slice-track';
+        track.style.height = `${sliceH}px`;
+
+        const cylinder = document.createElement('div');
+        cylinder.className = 'drum-cylinder';
+        
+        for (let f = 0; f < facesCount; f++) {
+          const face = document.createElement('div');
+          face.className = 'face';
+          const angle = f * angleStep;
+          face.style.transform = `translate(-50%, -50%) rotateX(${angle}deg) translateZ(${radius}px)`;
+
+          // 1. 座布団（重なりを諦め、1枚にする）
+          const pads = document.createElement('div');
+          pads.className = 'pad-stack';
+          const pad = document.createElement('div');
+          pad.className = 'pad';
+          pad.style.width = `520px`;
+          pad.style.height = `${logoHeight}px`;
+          pads.appendChild(pad);
+          face.appendChild(pads);
+
+          // 2. ロゴスライス
+          const logoContainer = document.createElement('div');
+          logoContainer.className = 'logo-slice-container';
+          
+          const svg = baseSvg.cloneNode(true);
+          svg.style.top = `-${s * sliceH}px`;
+          
+          logoContainer.appendChild(svg);
+          face.appendChild(logoContainer);
+          cylinder.appendChild(face);
+        }
+
+        track.appendChild(cylinder);
+        cardEl.appendChild(track);
+        cylinders.push(cylinder);
+        setters.push(gsap.quickSetter(cylinder, "rotationX", "deg"));
+      }
+
+      let targetRot = 0;
+      let currentRot = 0;
+      let isVisible = true;
+
+      // 天地で終わらず、スクロール量（delta）を回転量に加算し続ける
+      window.addEventListener('wheel', (e) => {
+        // スクロール方向に応じて回転の目的地を増減させる
+        targetRot += e.deltaY * 0.2; 
+      }, { passive: true });
+
+      const observer = new IntersectionObserver((entries) => {
+        isVisible = entries[0].isIntersecting;
+      });
+      observer.observe(cardEl);
+
+      gsap.ticker.add(() => {
+        if (!isVisible) return;
+        
+        // 慣性
+        currentRot += (targetRot - currentRot) * ease;
+
+        cylinders.forEach((_, i) => {
+          const phase = i * 15; 
+          // 天地リミットなしで延々回る
+          setters[i](-(currentRot + phase));
+        });
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initDrumLogoCard(document.getElementById('drum-card-1'));
+    });
+  </script>
+</body>
+</html>
