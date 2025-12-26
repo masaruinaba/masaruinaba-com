@@ -76,6 +76,10 @@
     </div>
 
     <script>
+      // プレビューモードの検出
+      const urlParams = new URLSearchParams(window.location.search);
+      const isPreview = urlParams.get('preview') === 'true';
+      
       // マウス位置
       let mouseX = 0;
       let mouseY = 0;
@@ -127,18 +131,39 @@
       /**
        * マウス移動イベント
        */
-      document.addEventListener('mousemove', (e) => {
+      const handleMouseMove = (e) => {
         mouseX = e.clientX;
         mouseY = e.clientY;
 
         updatePupilPosition(eyeLeft, pupilLeft);
         updatePupilPosition(eyeRight, pupilRight);
-      });
+      };
+      
+      if (!isPreview) {
+        document.addEventListener('mousemove', handleMouseMove);
+      }
 
       // 初期位置を設定
       window.addEventListener('load', () => {
         mouseX = window.innerWidth / 2;
         mouseY = window.innerHeight / 2;
+        
+        // プレビューモード: 自動で目の動きをシミュレート
+        if (isPreview) {
+          let previewAngle = 0;
+          const centerX = window.innerWidth / 2;
+          const centerY = window.innerHeight / 2;
+          const radius = Math.min(window.innerWidth, window.innerHeight) * 0.2;
+          
+          setInterval(() => {
+            previewAngle += 0.03;
+            mouseX = centerX + Math.cos(previewAngle) * radius;
+            mouseY = centerY + Math.sin(previewAngle) * radius;
+            
+            updatePupilPosition(eyeLeft, pupilLeft);
+            updatePupilPosition(eyeRight, pupilRight);
+          }, 50);
+        }
       });
     </script>
   </body>

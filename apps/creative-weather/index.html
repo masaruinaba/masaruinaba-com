@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creative Weather</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="surface" id="surface">
+    <!-- 背景キャンバス（ホバー時に広がる） -->
+    <canvas class="bg-canvas" id="bg-canvas"></canvas>
+    
+    <!-- 数値表示（画面右上） -->
+    <div class="card-values" id="card-values">
+      <div class="value-item">
+        <span class="value-label">Focus</span>
+        <span class="value" id="focus-value">—</span>
+      </div>
+      <div class="value-item">
+        <span class="value-label">Clarity</span>
+        <span class="value" id="clarity-value">—</span>
+      </div>
+      <div class="value-item">
+        <span class="value-label">Momentum</span>
+        <span class="value" id="momentum-value">—</span>
+      </div>
+    </div>
+    
+    <!-- カード中央エリア -->
+    <div class="card-area">
+      <div class="card" id="card">
+        <canvas id="canvas"></canvas>
+        <div class="card-label" id="card-label">Tokyo</div>
+      </div>
+    </div>
+    
+    <!-- フッター都市リスト -->
+    <footer class="city-footer">
+      <div class="city-list" id="city-list"></div>
+    </footer>
+  </div>
+
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>

@@ -149,6 +149,10 @@
   </div>
 
   <script>
+    // プレビューモードの検出
+    const urlParams = new URLSearchParams(window.location.search);
+    const isPreview = urlParams.get('preview') === 'true';
+    
     gsap.registerPlugin(ScrollTrigger);
 
     async function fetchCleanSvg(url) {
@@ -244,10 +248,18 @@
       let isVisible = true;
 
       // 天地で終わらず、スクロール量（delta）を回転量に加算し続ける
-      window.addEventListener('wheel', (e) => {
-        // スクロール方向に応じて回転の目的地を増減させる
-        targetRot += e.deltaY * 0.2; 
-      }, { passive: true });
+      if (!isPreview) {
+        window.addEventListener('wheel', (e) => {
+          // スクロール方向に応じて回転の目的地を増減させる
+          targetRot += e.deltaY * 0.2; 
+        }, { passive: true });
+      } else {
+        // プレビューモード: 自動で回転
+        let previewSpeed = 0.5;
+        setInterval(() => {
+          targetRot += previewSpeed;
+        }, 16);
+      }
 
       const observer = new IntersectionObserver((entries) => {
         isVisible = entries[0].isIntersecting;

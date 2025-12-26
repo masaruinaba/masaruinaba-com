@@ -82,6 +82,10 @@
     <div class="mosaic-container" id="mosaicContainer"></div>
 
     <script>
+      // プレビューモードの検出
+      const urlParams = new URLSearchParams(window.location.search);
+      const isPreview = urlParams.get('preview') === 'true';
+      
       // マウス位置
       let mouseX = window.innerWidth / 2;
       let mouseY = window.innerHeight / 2;
@@ -299,7 +303,7 @@
       let lastMoveTime = Date.now();
       let cardCreateCooldown = 0;
 
-      document.addEventListener("mousemove", (e) => {
+      const handleMouseMoveEvent = (e) => {
         const now = Date.now();
         const timeSinceLastMove = now - lastMoveTime;
 
@@ -350,7 +354,53 @@
             }, 500);
           }
         }
-      });
+      };
+      
+      // マウス移動イベントリスナー
+      if (!isPreview) {
+        document.addEventListener("mousemove", handleMouseMoveEvent);
+      } else {
+        // プレビューモード: 自動アニメーション
+        let previewInterval = null;
+        let previewAngle = 0;
+        let previewCardInterval = null;
+        
+        const startPreviewAnimation = () => {
+          const centerX = window.innerWidth / 2;
+          const centerY = window.innerHeight / 2;
+          const radius = Math.min(window.innerWidth, window.innerHeight) * 0.3;
+          
+          // マウス位置を自動で動かす
+          previewInterval = setInterval(() => {
+            previewAngle += 0.02;
+            mouseX = centerX + Math.cos(previewAngle) * radius;
+            mouseY = centerY + Math.sin(previewAngle) * radius;
+            lastMouseX = mouseX;
+            lastMouseY = mouseY;
+            isMoving = true;
+            
+            // カーソル位置を更新
+            cursorElement.style.left = mouseX + "px";
+            cursorElement.style.top = mouseY + "px";
+          }, 50);
+          
+          // カード生成を強制的に実行（プレビューモード用）
+          previewCardInterval = setInterval(() => {
+            if (isMoving) {
+              const baseSize = 150;
+              const sizeVariation = 50;
+              const cardSize = baseSize - sizeVariation + Math.random() * sizeVariation * 2;
+              createMosaicCard(mouseX, mouseY, cardSize);
+            }
+          }, 200); // 200msごとにカードを生成
+        };
+        
+        window.addEventListener('load', () => {
+          setTimeout(() => {
+            startPreviewAnimation();
+          }, 500);
+        });
+      }
 
       // アニメーションループ（カード位置を更新）
       function animate() {

@@ -44,7 +44,10 @@
     .sidebar {
       position: absolute;
       left: 198px;
-      top: 420.1px;
+      top: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
       z-index: 100;
       pointer-events: none;
     }
@@ -65,8 +68,8 @@
       position: absolute;
       left: 50%; /* 画面右半分 */
       top: 0;
+      bottom: 0;
       width: 50%; /* 画面右半分 */
-      height: 100%;
       display: flex;
       align-items: center;
       justify-content: center; /* 右半分の中で中央配置 */
@@ -87,7 +90,7 @@
     .card {
       width: 460px; /* 460pxの正方形 */
       height: 460px; /* 460pxの正方形 */
-      border-radius: var(--card-radius);
+      border-radius: 0px;
       overflow: hidden;
       position: relative;
       cursor: pointer;
@@ -263,7 +266,7 @@
       
       card.innerHTML = `
         <div class="thumbnail-wrapper">
-          <iframe src="${item.url}" class="card-thumbnail-iframe"></iframe>
+          <iframe src="${item.url}?preview=true" class="card-thumbnail-iframe"></iframe>
         </div>
       `;
       
@@ -484,7 +487,7 @@
       
       card.innerHTML = `
         <div class="thumbnail-wrapper">
-          <iframe src="${item.url}" class="card-thumbnail-iframe"></iframe>
+          <iframe src="${item.url}?preview=true" class="card-thumbnail-iframe"></iframe>
         </div>
       `;
       

@@ -104,6 +104,10 @@
   </div>
 
   <script>
+    // プレビューモードの検出
+    const urlParams = new URLSearchParams(window.location.search);
+    const isPreview = urlParams.get('preview') === 'true';
+    
     // 全切除：タイトル文字などは一切なし
     
     const TOTAL_NODES = 2500;
@@ -227,12 +231,34 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
       });
 
-      window.addEventListener('click', onDocClick);
+      if (!isPreview) {
+        window.addEventListener('click', onDocClick);
+      }
       document.getElementById('reset-btn').addEventListener('click', resetNetwork);
       document.getElementById('scale-slider').addEventListener('input', (e) => {
         const scale = parseFloat(e.target.value);
         scene.scale.set(scale, scale, scale);
       });
+      
+      // プレビューモード: 自動でモーフィングを開始
+      if (isPreview) {
+        window.addEventListener('load', () => {
+          setTimeout(() => {
+            // ランダムな文字を選択してモーフィング
+            const randomLetter = LETTERS[Math.floor(Math.random() * LETTERS.length)];
+            morph(randomLetter);
+            
+            // 定期的に別の文字にモーフィング
+            setInterval(() => {
+              if (!isMorphing) {
+                const nextLetter = LETTERS[Math.floor(Math.random() * LETTERS.length)];
+                morph(nextLetter);
+              }
+            }, 3000);
+          }, 1000);
+        });
+      }
+      
       animate();
     }
 

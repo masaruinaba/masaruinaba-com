@@ -112,6 +112,10 @@
     </section>
 
     <script>
+      // プレビューモードの検出
+      const urlParams = new URLSearchParams(window.location.search);
+      const isPreview = urlParams.get('preview') === 'true';
+      
       gsap.registerPlugin(ScrollTrigger);
 
       // ===== 調整可能なパラメータ =====
@@ -275,19 +279,13 @@
       // scroll-sectionの高さを動的に設定
       document.querySelector('.scroll-section').style.height = `${endDistance}px`;
 
-      // ===== ScrollTrigger セットアップ =====
-      ScrollTrigger.create({
-        trigger: '.scroll-section',
-        start: 'top top',
-        end: `+=${endDistance}`,
-        pin: '.pin',
-        scrub: true,
-        onUpdate: (self) => {
-          // 繰り返し: progressを1サイクル内の進捗に変換
-          const rawP = self.progress;
-          // 何サイクル目かを計算し、そのサイクル内の進捗を取得
-          const cycleProgress = (rawP * numCycles) % 1;
-          const p = cycleProgress; // 0..1の範囲でループ
+      // ===== アニメーション更新関数（ScrollTriggerとプレビューモードの両方で使用） =====
+      const updateAnimation = (progress) => {
+        // 繰り返し: progressを1サイクル内の進捗に変換
+        const rawP = progress;
+        // 何サイクル目かを計算し、そのサイクル内の進捗を取得
+        const cycleProgress = (rawP * numCycles) % 1;
+        const p = cycleProgress; // 0..1の範囲でループ
 
           // ===== Scene1 の処理 =====
           
@@ -426,8 +424,52 @@
               setY2[idx](-yOut);
             });
           }
+      };
+      
+      // ===== ScrollTrigger セットアップ =====
+      const scrollTrigger = ScrollTrigger.create({
+        trigger: '.scroll-section',
+        start: 'top top',
+        end: `+=${endDistance}`,
+        pin: '.pin',
+        scrub: true,
+        onUpdate: (self) => {
+          updateAnimation(self.progress);
         }
       });
+      
+      // プレビューモード: 自動スクロールアニメーション
+      if (isPreview) {
+        let previewProgress = 0;
+        let previewDirection = 1;
+        
+        const animatePreview = () => {
+          previewProgress += 0.002 * previewDirection;
+          
+          if (previewProgress >= 1) {
+            previewProgress = 1;
+            previewDirection = -1;
+          } else if (previewProgress <= 0) {
+            previewProgress = 0;
+            previewDirection = 1;
+          }
+          
+          // アニメーション更新関数を直接呼び出す
+          updateAnimation(previewProgress);
+          
+          requestAnimationFrame(animatePreview);
+        };
+        
+        // ScrollTriggerの初期化を待つ
+        window.addEventListener('load', () => {
+          setTimeout(() => {
+            ScrollTrigger.refresh();
+            setTimeout(() => {
+              animatePreview();
+            }, 100);
+          }, 500);
+        });
+      }
     </script>
 </body>
 </html>
