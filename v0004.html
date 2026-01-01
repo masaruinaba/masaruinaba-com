@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Drum Roll Logo Mini-App - Final Refined</title>
+  <title>v0005</title>
   
-  <!-- GSAP & ScrollTrigger -->
+  <!-- Three.js (v145 is stable for global scripts) & GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
-  <script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"></script>
 
   <style>
     * {
@@ -16,136 +17,90 @@
       box-sizing: border-box;
     }
 
-    /* ページ背景：完全に不透明な黒 (#0b0b0c) */
-    html, body {
-      width: 100%;
-      min-height: 100vh;
+    body {
       background-color: #0b0b0c;
-      color: #ffffff;
-      overflow-x: hidden;
-    }
-
-    /* スクロール量を確保 */
-    #scroll-spacer {
-      width: 100%;
-      height: 800vh;
-      pointer-events: none;
-    }
-
-    .app-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    /* ==========================================================================
-       カードUI
-       ========================================================================== */
-    .card {
-      width: 640px;
-      height: 640px; /* 見切れを防ぐため高さを十分に確保 */
-      background-color: #0b0b0c;
-      border-radius: 40px;
-      position: relative;
-      overflow: hidden; 
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      pointer-events: auto;
-      perspective: 3000px; /* 歪みを抑えるために非常に大きく設定 */
-    }
-
-    /* ==========================================================================
-       ドラムロール構造
-       ========================================================================== */
-    .drum-slice-track {
-      position: relative;
-      width: 500px;
-      height: 14.85px; /* 104px / 7 slices */
-      transform-style: preserve-3d;
-      z-index: 1;
-      /* 重なりを諦め、各段を独立させるために overflow: hidden を検討したが、
-         3D空間を維持するためここでは指定せず、radiusを調整して干渉を避ける */
-    }
-
-    .drum-cylinder {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 100%;
-      height: 100%;
-      transform-style: preserve-3d;
-      will-change: transform;
-    }
-
-    /* ドラムの1面 */
-    .face {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 104px; /* 座布団の天地サイズはロゴ全高 */
-      margin-top: -52px;
-      backface-visibility: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-    }
-
-    /* 座布団スタック */
-    .pad-stack {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-    }
-
-    .pad {
-      position: absolute;
-      border-radius: 12px;
-      background-color: #0b0b0c; 
-    }
-
-    /* ロゴのスライス表示（絶対につぶさない） */
-    .logo-slice-container {
-      position: relative;
-      width: 447px;
-      height: 14.85px; /* ここでスライス分だけ表示 */
+      margin: 0;
       overflow: hidden;
-      z-index: 10;
     }
 
-    .logo-slice-container svg {
-      position: absolute;
-      left: 0;
-      width: 447px;
-      height: 104px; /* SVG本体は常に104px固定 */
-      display: block;
+    /* Control UI Container */
+    .controls-ui {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      padding: 8px 16px;
+      border-radius: 100px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .reset-button {
+      padding: 6px 14px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      font-family: "Inter", sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-radius: 100px;
+    }
+
+    .reset-button:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Scale UI */
+    .scale-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .scale-control label {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .scale-control input[type="range"] {
+      width: 80px;
+      height: 2px;
+      -webkit-appearance: none;
+      background: rgba(255, 255, 255, 0.2);
+      outline: none;
+      border-radius: 2px;
+    }
+
+    .scale-control input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 10px;
+      height: 10px;
+      background: #ffffff;
+      border-radius: 50%;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <div id="scroll-spacer"></div>
-  
-  <div class="app-container">
-    <div class="card" 
-         id="drum-card-1"
-         data-slices="7"
-         data-faces="14"
-         data-radius="260" 
-         data-ease="0.1">
+
+  <div id="webgl-container"></div>
+  <div class="controls-ui">
+    <div class="scale-control">
+      <label>Scale</label>
+      <input type="range" id="scale-slider" min="0.5" max="3" step="0.1" value="1">
     </div>
+    <button class="reset-button" id="reset-btn">Reset</button>
   </div>
 
   <script>
@@ -153,136 +108,242 @@
     const urlParams = new URLSearchParams(window.location.search);
     const isPreview = urlParams.get('preview') === 'true';
     
-    gsap.registerPlugin(ScrollTrigger);
+    // 全切除：タイトル文字などは一切なし
+    
+    const TOTAL_NODES = 2500;
+    const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    
+    let scene, camera, renderer, controls, raycaster, mouse;
+    let nodes = [];
+    let letterTextures = {};
+    let lines;
+    let isMorphing = false;
 
-    async function fetchCleanSvg(url) {
-      try {
-        const res = await fetch(url);
-        const text = await res.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(text, 'image/svg+xml');
-        const svg = doc.querySelector('svg');
-        if (svg) {
-          svg.removeAttribute('opacity');
-          svg.querySelectorAll('*').forEach(el => {
-            el.removeAttribute('opacity');
-            el.removeAttribute('fill-opacity');
-            el.removeAttribute('stroke-opacity');
-            if (el.hasAttribute('fill') && el.getAttribute('fill') !== 'none') {
-              el.setAttribute('fill', '#ffffff');
-            }
-            if (el.hasAttribute('stroke') && el.getAttribute('stroke') !== 'none') {
-              el.setAttribute('stroke', '#ffffff');
-            }
-          });
+    // --- Letter Sampling ---
+    const sCanvas = document.createElement('canvas');
+    const sCtx = sCanvas.getContext('2d');
+
+    function getLetterPoints(letter) {
+      const size = 256;
+      sCanvas.width = size;
+      sCanvas.height = size;
+      
+      sCtx.fillStyle = 'black';
+      sCtx.fillRect(0, 0, size, size);
+      sCtx.fillStyle = 'white';
+      // フォントを太く、確実に読み込まれるように指定
+      sCtx.font = `900 ${size * 0.8}px sans-serif`;
+      sCtx.textAlign = 'center';
+      sCtx.textBaseline = 'middle';
+      sCtx.fillText(letter, size / 2, size / 2);
+
+      const data = sCtx.getImageData(0, 0, size, size).data;
+      const points = [];
+      
+      for (let y = 0; y < size; y += 2) {
+        for (let x = 0; x < size; x += 2) {
+          const i = (y * size + x) * 4;
+          if (data[i] > 128) {
+            points.push({
+              x: (x / size - 0.5) * 800,
+              y: (0.5 - y / size) * 800,
+              z: (Math.random() - 0.5) * 60
+            });
+          }
         }
-        return svg;
-      } catch (e) {
-        console.error('SVG fetch error:', e);
-        return null;
+      }
+
+      const result = [];
+      for (let i = 0; i < TOTAL_NODES; i++) {
+        result.push(points[i % points.length]);
+      }
+      return result;
+    }
+
+    // --- Character Textures ---
+    function initTextures() {
+      LETTERS.split('').forEach(char => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 64;
+        canvas.height = 64;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'white';
+        ctx.font = '900 50px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(char, 32, 32);
+        const tex = new THREE.CanvasTexture(canvas);
+        letterTextures[char] = tex;
+      });
+    }
+
+    function init() {
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
+      camera.position.z = 1200;
+
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setClearColor(0x0b0b0c, 1);
+      document.getElementById('webgl-container').appendChild(renderer.domElement);
+
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+
+      raycaster = new THREE.Raycaster();
+      mouse = new THREE.Vector2();
+
+      initTextures();
+
+      // Node Creation
+      for (let i = 0; i < TOTAL_NODES; i++) {
+        const char = LETTERS[Math.floor(Math.random() * LETTERS.length)];
+        const x = (Math.random() - 0.5) * 2000;
+        const y = (Math.random() - 0.5) * 2000;
+        const z = (Math.random() - 0.5) * 2000;
+
+        const mat = new THREE.SpriteMaterial({ map: letterTextures[char], transparent: true, opacity: 0.8 });
+        const sprite = new THREE.Sprite(mat);
+        sprite.position.set(x, y, z);
+        sprite.scale.set(30, 30, 1);
+        
+        scene.add(sprite);
+        nodes.push({
+          sprite: sprite,
+          char: char,
+          pos: sprite.position,
+          base: new THREE.Vector3(x, y, z),
+          offset: new THREE.Vector3(0, 0, 0)
+        });
+      }
+
+      // Line Connections
+      const lineGeom = new THREE.BufferGeometry();
+      const linePos = new Float32Array(TOTAL_NODES * 6);
+      lineGeom.setAttribute('position', new THREE.BufferAttribute(linePos, 3));
+      const lineMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.1 });
+      lines = new THREE.LineSegments(lineGeom, lineMat);
+      scene.add(lines);
+
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      if (!isPreview) {
+        window.addEventListener('click', onDocClick);
+      }
+      document.getElementById('reset-btn').addEventListener('click', resetNetwork);
+      document.getElementById('scale-slider').addEventListener('input', (e) => {
+        const scale = parseFloat(e.target.value);
+        scene.scale.set(scale, scale, scale);
+      });
+      
+      // プレビューモード: 自動でモーフィングを開始
+      if (isPreview) {
+        window.addEventListener('load', () => {
+          setTimeout(() => {
+            // ランダムな文字を選択してモーフィング
+            const randomLetter = LETTERS[Math.floor(Math.random() * LETTERS.length)];
+            morph(randomLetter);
+            
+            // 定期的に別の文字にモーフィング
+            setInterval(() => {
+              if (!isMorphing) {
+                const nextLetter = LETTERS[Math.floor(Math.random() * LETTERS.length)];
+                morph(nextLetter);
+              }
+            }, 3000);
+          }, 1000);
+        });
+      }
+      
+      animate();
+    }
+
+    function onDocClick(e) {
+      if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return; // UI干渉防止
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      
+      const hits = raycaster.intersectObjects(nodes.map(n => n.sprite));
+      if (hits.length > 0) {
+        const hitNode = nodes.find(n => n.sprite === hits[0].object);
+        morph(hitNode.char);
       }
     }
 
-    async function initDrumLogoCard(cardEl) {
-      const slicesCount = parseInt(cardEl.dataset.slices || 7);
-      const facesCount = parseInt(cardEl.dataset.faces || 14);
-      const radius = parseFloat(cardEl.dataset.radius || 260);
-      const ease = parseFloat(cardEl.dataset.ease || 0.1);
+    function resetNetwork() {
+      if (isMorphing) return;
+      isMorphing = true;
+      
+      nodes.forEach((node, i) => {
+        const x = (Math.random() - 0.5) * 2000;
+        const y = (Math.random() - 0.5) * 2000;
+        const z = (Math.random() - 0.5) * 2000;
 
-      const logoUrl = 'http://localhost:3845/assets/626f6d0026039a3b7ec1eeb374903017df131363.svg';
-      const baseSvg = await fetchCleanSvg(logoUrl);
-      if (!baseSvg) return;
-
-      const logoWidth = 447;
-      const logoHeight = 104;
-      const sliceH = logoHeight / slicesCount;
-      const angleStep = 360 / facesCount;
-
-      const cylinders = [];
-      const setters = [];
-
-      for (let s = 0; s < slicesCount; s++) {
-        const track = document.createElement('div');
-        track.className = 'drum-slice-track';
-        track.style.height = `${sliceH}px`;
-
-        const cylinder = document.createElement('div');
-        cylinder.className = 'drum-cylinder';
-        
-        for (let f = 0; f < facesCount; f++) {
-          const face = document.createElement('div');
-          face.className = 'face';
-          const angle = f * angleStep;
-          face.style.transform = `translate(-50%, -50%) rotateX(${angle}deg) translateZ(${radius}px)`;
-
-          // 1. 座布団（重なりを諦め、1枚にする）
-          const pads = document.createElement('div');
-          pads.className = 'pad-stack';
-          const pad = document.createElement('div');
-          pad.className = 'pad';
-          pad.style.width = `520px`;
-          pad.style.height = `${logoHeight}px`;
-          pads.appendChild(pad);
-          face.appendChild(pads);
-
-          // 2. ロゴスライス
-          const logoContainer = document.createElement('div');
-          logoContainer.className = 'logo-slice-container';
-          
-          const svg = baseSvg.cloneNode(true);
-          svg.style.top = `-${s * sliceH}px`;
-          
-          logoContainer.appendChild(svg);
-          face.appendChild(logoContainer);
-          cylinder.appendChild(face);
-        }
-
-        track.appendChild(cylinder);
-        cardEl.appendChild(track);
-        cylinders.push(cylinder);
-        setters.push(gsap.quickSetter(cylinder, "rotationX", "deg"));
-      }
-
-      let targetRot = 0;
-      let currentRot = 0;
-      let isVisible = true;
-
-      // 天地で終わらず、スクロール量（delta）を回転量に加算し続ける
-      if (!isPreview) {
-        window.addEventListener('wheel', (e) => {
-          // スクロール方向に応じて回転の目的地を増減させる
-          targetRot += e.deltaY * 0.2; 
-        }, { passive: true });
-      } else {
-        // プレビューモード: 自動で回転
-        let previewSpeed = 0.5;
-        setInterval(() => {
-          targetRot += previewSpeed;
-        }, 16);
-      }
-
-      const observer = new IntersectionObserver((entries) => {
-        isVisible = entries[0].isIntersecting;
-      });
-      observer.observe(cardEl);
-
-      gsap.ticker.add(() => {
-        if (!isVisible) return;
-        
-        // 慣性
-        currentRot += (targetRot - currentRot) * ease;
-
-        cylinders.forEach((_, i) => {
-          const phase = i * 15; 
-          // 天地リミットなしで延々回る
-          setters[i](-(currentRot + phase));
+        gsap.to(node.base, {
+          x: x,
+          y: y,
+          z: z,
+          duration: 2,
+          ease: "power2.inOut",
+          delay: Math.random() * 0.5,
+          onComplete: () => { if(i === TOTAL_NODES - 1) isMorphing = false; }
         });
       });
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      initDrumLogoCard(document.getElementById('drum-card-1'));
-    });
+    function morph(letter) {
+      if (isMorphing) return;
+      isMorphing = true;
+      const targets = getLetterPoints(letter);
+      
+      nodes.forEach((node, i) => {
+        const t = targets[i];
+        gsap.to(node.base, {
+          x: t.x + (Math.random() - 0.5) * 20,
+          y: t.y + (Math.random() - 0.5) * 20,
+          z: t.z,
+          duration: 1.5,
+          ease: "expo.inOut",
+          delay: Math.random() * 0.4,
+          onComplete: () => { if(i === TOTAL_NODES - 1) isMorphing = false; }
+        });
+      });
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+
+      const lPos = lines.geometry.attributes.position.array;
+      const t = Date.now() * 0.001;
+
+      nodes.forEach((n, i) => {
+        // 微細な浮遊
+        n.offset.x = Math.sin(t + i * 0.1) * 3;
+        n.offset.y = Math.cos(t * 0.9 + i * 0.1) * 3;
+        
+        n.sprite.position.copy(n.base).add(n.offset);
+
+        // 線を更新
+        const next = nodes[(i + 1) % TOTAL_NODES];
+        lPos[i * 6] = n.sprite.position.x;
+        lPos[i * 6 + 1] = n.sprite.position.y;
+        lPos[i * 6 + 2] = n.sprite.position.z;
+        lPos[i * 6 + 3] = next.sprite.position.x;
+        lPos[i * 6 + 4] = next.sprite.position.y;
+        lPos[i * 6 + 5] = next.sprite.position.z;
+      });
+
+      lines.geometry.attributes.position.needsUpdate = true;
+      renderer.render(scene, camera);
+    }
+
+    init();
   </script>
 </body>
 </html>

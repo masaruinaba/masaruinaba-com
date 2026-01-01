@@ -247,13 +247,19 @@
     const modalIframe = document.getElementById('modal-iframe');
     const closeModal = document.getElementById('close-modal');
 
-    // データ定義 (10件リピート)
+    // データ定義（v000から始まるHTMLファイル + apps配下）
     const projectData = [
-      { url: 'apps/halftone-clock/', id: 'HALFTONE CLOCK' },
-      { url: 'apps/creative-weather/', id: 'CREATIVE WEATHER' },
+      { url: 'v0001.html', id: 'V0001' },
+      { url: 'v0002.html', id: 'V0002' },
+      { url: 'v0003.html', id: 'V0003' },
+      { url: 'v0004.html', id: 'V0004' },
+      { url: 'apps/layered-clock/index.html', id: 'LayeredClock' },
+      { url: 'apps/creative-weather/index.html', id: 'CreativeWeather' },
     ];
-    // 2回繰り返して10件にする
+    // 2回繰り返して無限スクロール用に拡張
     const fullList = [...projectData, ...projectData];
+
+    let lastClickedCard = null;
 
     // カード生成 (すべてiframeサムネイル)
     fullList.forEach((item, index) => {
@@ -267,7 +273,10 @@
         </div>
       `;
       
-      card.addEventListener('click', () => openModal(item.url, card));
+      card.addEventListener('click', () => {
+        lastClickedCard = card;
+        openModal(item.url, card);
+      });
       track.appendChild(card);
     });
 
@@ -473,27 +482,6 @@
           duration: 0.5, ease: "expo.inOut" 
         }, "-=0.35");
     }
-
-    let lastClickedCard = null;
-
-    // カード生成 (すべてiframeサムネイル)
-    fullList.forEach((item, index) => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.setAttribute('data-url', item.url);
-      
-      card.innerHTML = `
-        <div class="thumbnail-wrapper">
-          <iframe src="${item.url}?preview=true" class="card-thumbnail-iframe"></iframe>
-        </div>
-      `;
-      
-      card.addEventListener('click', () => {
-        lastClickedCard = card;
-        openModal(item.url, card);
-      });
-      track.appendChild(card);
-    });
 
     closeModal.addEventListener('click', () => hideModal(lastClickedCard));
     window.addEventListener('keydown', (e) => {
