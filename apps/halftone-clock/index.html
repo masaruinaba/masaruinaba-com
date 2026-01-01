@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clock Studio</title>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Space+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="dot-grid"></div>
+  
+  <button id="theme-toggle" class="icon-btn theme-button" title="Toggle Theme">
+    <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 6.34-1.41 1.41"/></svg>
+    <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+  </button>
+
+  <button id="toggle-layer" class="icon-btn layer-button" title="Layer">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3 3 9l9 6 9-6-9-6Z"/>
+      <path d="m3 15 9 6 9-6"/>
+    </svg>
+  </button>
+
+  <div class="main-container">
+    <div class="canvas-wrapper">
+      <canvas id="canvas" aria-label="Clock canvas"></canvas>
+    </div>
+  </div>
+
+  <!-- Footer Navigation -->
+  <footer class="app-footer">
+    <div class="footer-section actions">
+      <button class="text-link active" data-mode="smooth">Smooth</button>
+      <button class="text-link" data-mode="tick">Tick</button>
+      <button class="text-link" data-mode="sweep">Sweep</button>
+    </div>
+    <div class="footer-section knob-section">
+      <div id="knob-container" class="knob-container">
+        <div id="random-knob" class="knob">
+          <div class="knob-indicator"></div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- World Time -->
+  <aside class="world-time">
+    <div class="world-time-track">
+      <div class="world-time-city active" data-tz="local">TOKYO</div>
+      <div class="world-time-city" data-tz="Europe/London">LONDON</div>
+      <div class="world-time-city" data-tz="America/New_York">NEW YORK</div>
+      <div class="world-time-city" data-tz="Europe/Berlin">BERLIN</div>
+      <div class="world-time-city" data-tz="Europe/Paris">PARIS</div>
+    </div>
+  </aside>
+
+  <!-- Selected City (left display) -->
+  <div class="selected-city-left" id="selected-city-left">TOKYO</div>
+  <div class="layer-label" id="layer-label">MID</div>
+
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>
