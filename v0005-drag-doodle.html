@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>v0005</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=BioRhyme:wght@400;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#20453B;
+      --from:#4D6961;
+      --to:#FCFBFA;
+      --final:#BCD3CD;
+
+      --ink1:#FAE370;
+      --ink2:#FF9475;
+      --ink3:#528CFF;
+      --white:#FCFBFA;
+    }
+
+    html, body { height: 100%; margin: 0; }
+    body{
+      background: var(--bg);
+      overflow-x: hidden;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .scroll-space{ height: 420vh; }
+
+    /* 左下配置 */
+    .stage{
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: end start;
+      padding: 64px;
+      pointer-events: none;
+    }
+
+    .block{
+      pointer-events: auto;
+      width: min(1100px, 92vw);
+      display: grid;
+      gap: 38px; /* 22px + 16px */
+      justify-items: start;
+      text-align: left;
+    }
+
+    .title{
+      margin: 0;
+      font-weight: 500;
+      letter-spacing: -1px;
+      line-height: 0.86;
+      font-size: clamp(72px, 7.6vw, 132px);
+      max-width: 28ch;
+      white-space: pre-wrap; /* 改行反映 */
+    }
+
+    .body{
+      margin: 0;
+      font-weight: 400;
+      letter-spacing: 0.5px;
+      line-height: 32px;
+      font-size: 12px;
+      max-width: 78ch;
+      white-space: pre-wrap; /* 改行反映 */
+    }
+
+    .word{
+      display: inline-block;
+      white-space: pre;
+      opacity: 0;
+      color: var(--from);
+      will-change: opacity, color;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    /* hover対象語 */
+    .kw{
+      position: relative;
+      display: inline-block;
+      padding: 0.02em 0.06em 0.18em;
+      cursor: default;
+      user-select: none;
+
+      /* hover語はBioRhyme */
+      font-family: "BioRhyme", ui-serif, Georgia, serif;
+    }
+
+    /* ✅ タイトルのホバー対象語：ホバーで白 */
+    .title .kw.is-active{
+      color: var(--to) !important;
+    }
+
+    body.hover-locked .kw{ pointer-events: none; }
+
+    .mark{
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 120ms ease;
+    }
+    .kw.is-active .mark{ opacity: 1; }
+
+    .path{
+      fill: none;
+      stroke: var(--ink1);
+      stroke-width: 10;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* Scroll Down */
+    .scroll-cue{
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      font: 12px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: 0.06em;
+      user-select: none;
+      pointer-events: none;
+      mix-blend-mode: screen;
+      white-space: nowrap;
+
+      background: linear-gradient(
+        90deg,
+        rgba(252,251,250,0.20) 0%,
+        rgba(252,251,250,0.20) 35%,
+        var(--white) 50%,
+        rgba(252,251,250,0.20) 65%,
+        rgba(252,251,250,0.20) 100%
+      );
+      background-size: 240% 100%;
+      background-position: 100% 0%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+
+      opacity: 1;
+    }
+
+    @keyframes sweepReverse {
+      0%   { background-position: 100% 0%; }
+      100% { background-position: 0% 0%; }
+    }
+
+    body.hover-locked .scroll-cue{
+      animation: sweepReverse 1.45s linear infinite;
+    }
+
+    body:not(.hover-locked) .scroll-cue{
+      opacity: 0;
+      animation: none;
+      transition: opacity 220ms ease;
+    }
+
+    /* SVG（左上固定） */
+    #hover-object-layer {
+      position: fixed;
+      top: 64px;
+      left: 64px;
+      width: 70px;
+      height: 70px;
+      pointer-events: none;
+      z-index: 100;
+      opacity: 0;
+      transform: scale(0.8);
+      transition: opacity 220ms ease, transform 220ms ease;
+    }
+    #hover-object-layer.is-on {
+      opacity: 1;
+      transform: scale(1);
+    }
+    #hover-object-layer img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    /* ゴーストテキスト（右下固定） */
+    #fixed-ghost-container {
+      position: fixed;
+      right: 64px;
+      bottom: 64px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end; /* 右寄せ */
+      gap: 6px;
+      pointer-events: none;
+      z-index: 100;
+    }
+    .fixed-ghost-item {
+      font-size: 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      opacity: 0;
+      color: var(--to);
+      transition: opacity 600ms ease;
+    }
+    .fixed-ghost-item.is-visible {
+      opacity: 0.15; /* 極小・薄い */
+    }
+    .fixed-ghost-item.is-hovered {
+      opacity: 0.8; /* ホバー時に強調 */
+    }
+
+    .kw {
+      position: relative;
+      display: inline-block;
+      vertical-align: baseline;
+    }
+  </style>
+</head>
+
+<body class="hover-locked">
+  <div id="fixed-ghost-container"></div>
+  <div id="hover-object-layer">
+    <img src="" alt="">
+  </div>
+  <div class="scroll-cue" aria-hidden="true">(Scroll Down)</div>
+
+  <div class="stage">
+    <div class="block">
+      <p class="title" id="title"></p>
+      <p class="body" id="body"></p>
+    </div>
+  </div>
+
+  <div class="scroll-space"></div>
+
+<script>
+function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
+function lerp(a,b,t){ return a + (b-a)*t; }
+function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
+function easeInOutCubic(t){ return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2; }
+
+function hexToRgb(hex){
+  const h = hex.replace('#','').trim();
+  const n = parseInt(h, 16);
+  return { r:(n>>16)&255, g:(n>>8)&255, b:n&255 };
+}
+function rgbToHex({r,g,b}){
+  const to = (v)=> v.toString(16).padStart(2,'0');
+  return `#${to(r)}${to(g)}${to(b)}`;
+}
+function lerpColor(hexA, hexB, t){
+  const a = hexToRgb(hexA), b = hexToRgb(hexB);
+  return rgbToHex({
+    r: Math.round(lerp(a.r,b.r,t)),
+    g: Math.round(lerp(a.g,b.g,t)),
+    b: Math.round(lerp(a.b,b.b,t)),
+  });
+}
+
+const HOVER_WORDS = new Set(["happy", "new", "year"]); // 小文字で統一（比較時に小文字化）
+
+const TITLE_TEXT = "Happy moments,\nNew directions, the\nYear ahead.";
+const BODY_TEXT =
+  "A new year begins across web, communication, and digital systems.\n" +
+  "I focus on clarity and subtle expression in what I make.\n" +
+  "With intention and balance, I shape what follows.\n" +
+  "Happy New Year, and what comes next.";
+
+const titleEl = document.getElementById('title');
+const bodyEl  = document.getElementById('body');
+
+const rootStyle = getComputedStyle(document.documentElement);
+const FROM = rootStyle.getPropertyValue('--from').trim();
+const TO   = rootStyle.getPropertyValue('--to').trim();
+const FINAL = rootStyle.getPropertyValue('--final').trim();
+
+let allWords = [];
+let wordLines = [];
+let lineToWordRange = [];
+let titleLastWordIndex = -1;
+
+function buildWordSpans(container, text, enableHover){
+  container.innerHTML = '';
+  // 改行を保持するために、改行文字を特別に処理
+  const tokens = text.split(/(\s+|\n)/);
+
+  tokens.forEach(tok => {
+    if(tok.trim() === '' && !tok.includes('\n')){
+      const sp = document.createElement('span');
+      sp.textContent = tok;
+      container.appendChild(sp);
+      return;
+    }
+
+    // 改行文字の場合はそのまま追加
+    if(tok === '\n'){
+      const br = document.createElement('br');
+      container.appendChild(br);
+      return;
+    }
+
+    const span = document.createElement('span');
+    span.className = 'word';
+
+    if(enableHover && HOVER_WORDS.has(tok.toLowerCase())){
+      span.classList.add('kw');
+      const normalizedTok = tok.toLowerCase();
+      span.dataset.markFamily = (normalizedTok === 'context.') ? 'circle' : 'underline';
+      span.dataset.kwName = normalizedTok.replace(/[.,]/g, '');
+    }
+
+    span.textContent = tok;
+    container.appendChild(span);
+  });
+}
+
+function buildDom(){
+  buildWordSpans(titleEl, TITLE_TEXT, true);
+  buildWordSpans(bodyEl, BODY_TEXT, false);
+  const titleWords = Array.from(titleEl.querySelectorAll('.word'));
+  const bodyWords = Array.from(bodyEl.querySelectorAll('.word'));
+  allWords = [...titleWords, ...bodyWords];
+  
+  // タイトルの最後の単語のインデックスを保存
+  titleLastWordIndex = titleWords.length - 1;
+
+  // ゴーストコンテナの初期化
+  const ghostContainer = document.getElementById('fixed-ghost-container');
+  ghostContainer.innerHTML = '';
+  HOVER_WORDS.forEach(word => {
+    const item = document.createElement('div');
+    item.className = 'fixed-ghost-item';
+    item.textContent = word.replace(/[.,]/g, '');
+    item.dataset.kwName = word.replace(/[.,]/g, '').toLowerCase();
+    ghostContainer.appendChild(item);
+  });
+
+  setupHover();
+}
+
+function computeLines(){
+  wordLines = new Array(allWords.length).fill(0);
+  lineToWordRange = [];
+
+  let currentLine = -1;
+  let lastTop = null;
+
+  for(let i=0;i<allWords.length;i++){
+    const top = allWords[i].offsetTop;
+
+    if(lastTop === null || Math.abs(top - lastTop) > 2){
+      currentLine += 1;
+      lastTop = top;
+      lineToWordRange[currentLine] = { start: i, end: i+1 };
+    }else{
+      lineToWordRange[currentLine].end = i+1;
+    }
+
+    wordLines[i] = currentLine;
+  }
+}
+
+buildDom();
+
+requestAnimationFrame(() => {
+  computeLines();
+  applyScroll();
+});
+
+window.addEventListener('resize', () => {
+  computeLines();
+  applyScroll();
+});
+
+// ---- line lead + word chase ----
+const LEAD_LINES = 1;
+const BASE_FADE = 0.18;
+const START_AT = 0.06;
+const END_AT   = 0.92;
+const CHASE_SOFT = 0.22;
+
+function applyScroll(){
+  const doc = document.documentElement;
+  const max = Math.max(1, doc.scrollHeight - window.innerHeight);
+  const norm = window.scrollY / max;
+
+  const unlock = norm > 0.002;
+  document.body.classList.toggle('hover-locked', !unlock);
+
+  const n = allWords.length;
+  if(n === 0) return;
+
+  const p = clamp((norm - START_AT) / Math.max(0.0001, (END_AT - START_AT)), 0, 1);
+  const chase = p * n;
+
+  /* ✅ 終端で配列外にならないようにクランプ（本文が消えるバグ防止） */
+  const curWord = clamp(Math.floor(chase), 0, n-1);
+
+  const curLine = wordLines[curWord] ?? 0;
+  const maxLeadLine = curLine + LEAD_LINES;
+
+  for(let i=0;i<n;i++){
+    const el = allWords[i];
+    const line = wordLines[i] ?? 0;
+
+    /* ✅ 一度表示された行は消えない（スクロールしても残る） */
+    const baseVisible = (line <= maxLeadLine) && (p > 0);
+
+    if(!baseVisible){
+      el.style.opacity = '0';
+      if(!el.classList.contains('kw')) el.style.color = FROM;
+      continue;
+    }
+
+    const baseOp = easeOutCubic(clamp(p / 0.25, 0, 1)) * BASE_FADE;
+    el.style.opacity = String(baseOp);
+
+    const t = clamp((chase - i) / CHASE_SOFT, 0, 1);
+    const tt = easeInOutCubic(t);
+
+    const op = lerp(baseOp, 1, tt);
+    el.style.opacity = String(op);
+
+    /* すべての文字をスクロールに応じて色変化させる（最終色は FINAL） */
+    el.style.color = lerpColor(FROM, FINAL, tt);
+  }
+
+  // タイトルの最後の単語が表示されたら、全てのゴーストを表示
+  if(titleLastWordIndex >= 0){
+    const titleLastWord = allWords[titleLastWordIndex];
+    if(titleLastWord){
+      const lastOp = parseFloat(titleLastWord.style.opacity || '0');
+      if(lastOp > 0.5){
+        document.querySelectorAll('.fixed-ghost-item').forEach(ghost => {
+          ghost.classList.add('is-visible');
+        });
+      }
+    }
+  }
+}
+
+window.addEventListener('scroll', () => {
+  if(applyScroll._raf) return;
+  applyScroll._raf = requestAnimationFrame(() => {
+    applyScroll._raf = 0;
+    applyScroll();
+  });
+}, { passive:true });
+
+// ---- hover objects (SVG) ----
+const VECTORS = Array.from({length:64},(_,i)=>`/v0005/Vector-${String(i+1).padStart(2,'0')}.svg`);
+const loadedVectors = new Set();
+let lastVectorIdx = -1;
+
+const hoverLayer = document.getElementById('hover-object-layer');
+const hoverImg   = hoverLayer.querySelector('img');
+
+function preloadVectors(){
+  VECTORS.forEach((url, idx) => {
+    const img = new Image();
+    img.onload = () => loadedVectors.add(idx);
+    img.src = url;
+  });
+}
+preloadVectors();
+
+function showRandomVector(el){
+  if(loadedVectors.size === 0) return;
+
+  let idx = -1;
+  let attempts = 0;
+  while(attempts < 10){
+    const r = Math.floor(Math.random() * VECTORS.length);
+    if(r !== lastVectorIdx && loadedVectors.has(r)){
+      idx = r;
+      break;
+    }
+    attempts++;
+  }
+  if(idx === -1) idx = Array.from(loadedVectors)[0];
+
+  lastVectorIdx = idx;
+  hoverImg.src = VECTORS[idx];
+  hoverLayer.classList.add('is-on');
+
+  // ゴーストを強調
+  const name = el.dataset.kwName;
+  const ghost = document.querySelector(`.fixed-ghost-item[data-kw-name="${name}"]`);
+  if(ghost) ghost.classList.add('is-hovered');
+}
+
+function hideVector(){
+  hoverLayer.classList.remove('is-on');
+  document.querySelectorAll('.fixed-ghost-item').forEach(g => g.classList.remove('is-hovered'));
+}
+
+// ---- hover marks（5種） ----
+const INKS = ["#FAE370","#FF9475","#528CFF"];
+function pickInk(){ return INKS[Math.floor(Math.random()*INKS.length)]; }
+
+function mulberry32(seed){
+  return function(){
+    let t = seed += 0x6D2B79F5;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function ensureSvg(el){
+  let svg = el.querySelector('svg.mark');
+  if(!svg){
+    svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.classList.add('mark');
+    svg.setAttribute('preserveAspectRatio','none');
+    el.appendChild(svg);
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.classList.add('g');
+    svg.appendChild(g);
+  }
+  return svg;
+}
+function clearGroup(svg){
+  const g = svg.querySelector('g.g');
+  while(g.firstChild) g.removeChild(g.firstChild);
+  return g;
+}
+function drawOn(path){
+  const len = path.getTotalLength();
+  path.style.strokeDasharray = `${len}`;
+  path.style.strokeDashoffset = `${len}`;
+  path.getBoundingClientRect();
+  path.style.transition = 'stroke-dashoffset 340ms cubic-bezier(.2,.8,.2,1)';
+  path.style.strokeDashoffset = '0';
+}
+function makePath(d, stroke, strokeWidth){
+  const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+  p.classList.add('path');
+  p.setAttribute('d', d);
+  p.style.stroke = stroke;
+  p.style.strokeWidth = `${strokeWidth}`;
+  return p;
+}
+function strokeWidthForText(){
+  const fs = parseFloat(getComputedStyle(titleEl).fontSize || '96');
+  return clamp(fs * 0.10, 7, 15);
+}
+
+function dUnderline(w, h, seed, yRatio=0.86){
+  const rnd = mulberry32(seed);
+  const padL = Math.max(3, w*0.04);
+  const padR = Math.max(3, w*0.04);
+  const x0 = padL, x3 = w - padR;
+  const y = h * yRatio;
+
+  const bow = Math.max(1.0, Math.min(6.0, w*0.03));
+  const dir = (rnd()<0.5)?-1:1;
+  const dy = dir * bow * (0.22 + rnd()*0.34);
+
+  const c1x = x0 + (x3-x0)*(0.30 + rnd()*0.05);
+  const c2x = x0 + (x3-x0)*(0.70 - rnd()*0.05);
+
+  return `M ${x0.toFixed(2)} ${y.toFixed(2)} C ${c1x.toFixed(2)} ${(y+dy).toFixed(2)}, ${c2x.toFixed(2)} ${(y+dy).toFixed(2)}, ${x3.toFixed(2)} ${y.toFixed(2)}`;
+}
+function dZigzag(w, h, seed){
+  const rnd = mulberry32(seed);
+  const padL = Math.max(3, w*0.04);
+  const padR = Math.max(3, w*0.04);
+  const x0 = padL, x1 = w - padR;
+  const y = h*0.86;
+
+  const amp = Math.max(2.0, Math.min(10.0, w*0.05));
+  const teeth = 10 + Math.floor(rnd()*6);
+  let d = `M ${x0.toFixed(2)} ${y.toFixed(2)}`;
+  for(let i=1;i<=teeth;i++){
+    const t = i/teeth;
+    const x = x0 + (x1-x0)*t;
+    const yy = y + ((i%2===0)?-1:1) * amp * (0.55 + rnd()*0.35);
+    d += ` L ${x.toFixed(2)} ${yy.toFixed(2)}`;
+  }
+  return d;
+}
+function dSlash(w,h,seed){
+  const rnd = mulberry32(seed);
+  const pad = Math.max(6, w*0.06);
+  const x0 = pad, x1 = w - pad;
+  const y0 = h * (0.78 + rnd()*0.06);
+  const y1 = h * (0.46 + rnd()*0.06);
+  const cx = (x0+x1)/2;
+  const cy = (y0+y1)/2 + (rnd()<0.5?-1:1) * Math.min(10, w*0.04);
+  return `M ${x0.toFixed(2)} ${y0.toFixed(2)} Q ${cx.toFixed(2)} ${cy.toFixed(2)} ${x1.toFixed(2)} ${y1.toFixed(2)}`;
+}
+function dCircle(w,h,seed){
+  const rnd = mulberry32(seed);
+  const pad = Math.max(6, Math.min(16, w*0.18));
+  const cx = w/2, cy = h/2 + 1;
+  const rx = (w/2) - pad;
+  const ry = (h/2) - pad;
+  const K = 0.5522847498;
+
+  const j = Math.min(w,h) * 0.018;
+  const jx = (rnd()-0.5)*j;
+  const jy = (rnd()-0.5)*j;
+
+  const _rx = rx*(0.98 + rnd()*0.05);
+  const _ry = ry*(0.98 + rnd()*0.05);
+
+  const c = (v)=> v.toFixed(2);
+  const x0 = cx + _rx + jx, y0 = cy + jy;
+  const x1 = cx,          y1 = cy + _ry + jy;
+  const x2 = cx - _rx + jx, y2 = cy + jy;
+  const x3 = cx,          y3 = cy - _ry + jy;
+
+  return [
+    `M ${c(x0)} ${c(y0)}`,
+    `C ${c(cx + _rx)} ${c(cy + K*_ry)}, ${c(cx + K*_rx)} ${c(cy + _ry)}, ${c(x1)} ${c(y1)}`,
+    `C ${c(cx - K*_rx)} ${c(cy + _ry)}, ${c(cx - _rx)} ${c(cy + K*_ry)}, ${c(x2)} ${c(y2)}`,
+    `C ${c(cx - _rx)} ${c(cy - K*_ry)}, ${c(cx - K*_rx)} ${c(cy - _ry)}, ${c(x3)} ${c(y3)}`,
+    `C ${c(cx + K*_rx)} ${c(cy - _ry)}, ${c(cx + _rx)} ${c(cy - K*_ry)}, ${c(x0)} ${c(y0)}`,
+  ].join(' ');
+}
+
+const PRESETS = [
+  { family:'underline', build:(w,h,s)=>[dUnderline(w,h,s,0.86)] },
+  { family:'underline', build:(w,h,s)=>[dZigzag(w,h,s)] },
+  { family:'underline', build:(w,h,s)=>[dUnderline(w,h,s,0.86)], dashed:true },
+  { family:'underline', build:(w,h,s)=>[dSlash(w,h,s)] },
+  { family:'circle',   build:(w,h,s)=>[dCircle(w,h,s)] },
+];
+
+function choosePreset(family){
+  const list = PRESETS.filter(p => p.family === family);
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+function redrawMark(el, seed){
+  const family = el.dataset.markFamily || 'underline';
+  const preset = choosePreset(family);
+
+  const svg = ensureSvg(el);
+  const g = clearGroup(svg);
+
+  const w = el.clientWidth;
+  const h = el.clientHeight;
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  svg.setAttribute('width', w);
+  svg.setAttribute('height', h);
+
+  const ink = pickInk();
+  const sw = strokeWidthForText();
+
+  const ds = preset.build(w,h,seed);
+  ds.forEach((d) => {
+    const p = makePath(d, ink, sw);
+    if(preset.dashed){
+      p.style.strokeDasharray = `${Math.max(10, sw*1.8)} ${Math.max(8, sw*1.4)}`;
+      p.style.strokeDashoffset = `${Math.floor(Math.random()*10)}`;
+    }
+    g.appendChild(p);
+    drawOn(p);
+  });
+}
+
+function setupHover(){
+  const kws = Array.from(titleEl.querySelectorAll('.kw'));
+  kws.forEach((el, idx) => {
+    ensureSvg(el);
+    let seed = (Date.now() + idx*9999) | 0;
+
+    el.addEventListener('mouseenter', () => {
+      if(document.body.classList.contains('hover-locked')) return;
+      el.classList.add('is-active');
+      seed = (seed + 37 + (Math.random()*100000|0)) | 0;
+      redrawMark(el, seed);
+      showRandomVector(el);
+    });
+
+    el.addEventListener('mouseleave', () => {
+      el.classList.remove('is-active');
+      hideVector();
+    });
+
+    window.addEventListener('resize', () => {
+      if(el.classList.contains('is-active')) {
+        redrawMark(el, seed);
+      }
+    });
+  });
+}
+</script>
+</body>
+</html>
