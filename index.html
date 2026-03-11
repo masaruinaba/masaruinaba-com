@@ -269,13 +269,21 @@
         .thumbnail { width: 8px; height: 8px; }
         .title { font-size: 14px; }
 
-        /* Year(2), Type(3), URL/File(5) 列を非表示 */
+        /* Year(2), Type(3), URL/File(5) 列を幅0で非表示
+           display:none だと table-layout:fixed が幅を保持して colspan がずれるため */
         .works-table th:nth-child(2),
         .works-table td:nth-child(2),
         .works-table th:nth-child(3),
         .works-table td:nth-child(3),
         .works-table th:nth-child(5),
-        .works-table td:nth-child(5) { display: none; }
+        .works-table td:nth-child(5) {
+          width: 0 !important;
+          padding: 0 !important;
+          overflow: hidden;
+          white-space: nowrap;
+          font-size: 0;
+          border: none;
+        }
 
         /* dot | Title | expand-btn */
         .works-table th:nth-child(1) { width: 24px; }
@@ -302,7 +310,11 @@
         }
 
         /* Detail row */
-        .work-detail-cell { padding: 0 !important; }
+        .work-detail-cell {
+          padding: 0 !important;
+          border-top: 1px solid rgba(0,0,0,0.08) !important;
+          text-align: left !important;
+        }
         .work-detail-inner {
           overflow: hidden;
           max-height: 0;
@@ -314,7 +326,7 @@
           display: flex;
           flex-direction: column;
           gap: 16px;
-          border-top: 1px solid rgba(0,0,0,0.06);
+          text-align: left;
         }
         .work-detail-preview {
           width: 100%;
