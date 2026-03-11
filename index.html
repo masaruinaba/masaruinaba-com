@@ -290,9 +290,8 @@
         .works-table th:nth-child(4) { width: auto; font-size: 0; }
         .works-table th:nth-child(6) { width: 40px; text-align: center; }
 
-        /* body直下の固定フッター要素を非表示（モバイルフッターに移すため） */
-        body > .app-icon-link,
-        body > .footer-links { display: none !important; }
+        /* モバイルフッター（インライン）は非表示 */
+        .mobile-footer { display: none !important; }
 
         /* モバイルフッター */
         .mobile-footer {
@@ -1277,14 +1276,6 @@
           updateEyes(e.clientX, e.clientY, pcLink, pcPupilL, pcPupilR);
         });
 
-        // SP: touchmove → mobile footer icon
-        const mfLink  = document.querySelector('.mobile-footer .app-icon-link');
-        const mfPupilL = document.getElementById('mfPupilL');
-        const mfPupilR = document.getElementById('mfPupilR');
-        document.addEventListener('touchmove', (e) => {
-          const t = e.touches[0];
-          updateEyes(t.clientX, t.clientY, mfLink, mfPupilL, mfPupilR);
-        }, { passive: true });
       });
     </script>
     <a class="app-icon-link" href="https://kids-math-iwua.vercel.app/index.html" target="_blank" rel="noopener">
