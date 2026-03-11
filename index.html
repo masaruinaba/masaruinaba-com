@@ -1245,6 +1245,10 @@
         renderWorks();
         renderStudioWorks();
 
+        // スクロール時・カーソルがウィンドウ外に出た時にプレビューを隠す
+        document.querySelector('.table-wrapper').addEventListener('scroll', hideCursorPreview);
+        document.addEventListener('mouseleave', hideCursorPreview);
+
         // App icon eye-following
         const SVG_SIZE = 281;
         const leftEye  = { cx: 88.394,  cy: 141.174, px: 101.644, py: 165.944 };
