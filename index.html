@@ -261,54 +261,104 @@
       }
 
       @media (max-width: 768px) {
-        .container {
-          padding: 0;
-        }
+        .container { padding: 0; }
+        .header { padding: 32px 16px 0 16px; }
+        .header h1 { font-size: 20px; }
+        .section-label { font-size: 16px; padding: 32px 16px 0 16px; }
+        .works-table th, .works-table td { padding: 10px 8px; }
+        .thumbnail { width: 8px; height: 8px; }
+        .title { font-size: 14px; }
 
-        .header {
-          padding: 32px 16px 0 16px;
-        }
-
-        .header h1 {
-          font-size: 20px;
-        }
-
-        .works-table th,
-        .works-table td {
-          padding: 10px 8px;
-        }
-
-        .thumbnail {
-          width: 8px;
-          height: 8px;
-        }
-
-        /* Year・Type列を非表示 */
+        /* Year(2), Type(3), URL/File(5) 列を非表示 */
         .works-table th:nth-child(2),
         .works-table td:nth-child(2),
         .works-table th:nth-child(3),
-        .works-table td:nth-child(3) {
-          display: none;
-        }
+        .works-table td:nth-child(3),
+        .works-table th:nth-child(5),
+        .works-table td:nth-child(5) { display: none; }
 
-        /* SP時のカラム幅調整 */
+        /* dot | Title | expand-btn */
         .works-table th:nth-child(1) { width: 24px; }
         .works-table th:nth-child(4) { width: auto; }
-        .works-table th:nth-child(5) { width: 38%; }
-        .works-table th:nth-child(6) { width: 24px; }
+        .works-table th:nth-child(6) { width: 40px; text-align: center; }
 
-        .title {
-          font-size: 14px;
+        /* Arrow非表示、expand icon表示 */
+        .arrow-icon { display: none !important; }
+        .expand-icon {
+          display: flex !important;
+          align-items: center;
+          justify-content: center;
+          width: 24px;
+          height: 24px;
+          font-size: 20px;
+          color: #999;
+          line-height: 1;
+          transition: transform 0.25s ease, color 0.2s ease;
+          margin-left: auto;
+        }
+        .work-row.is-expanded .expand-icon {
+          transform: rotate(45deg);
+          color: #222;
         }
 
-        .filename {
-          font-size: 9px;
+        /* Detail row */
+        .work-detail-cell { padding: 0 !important; }
+        .work-detail-inner {
+          overflow: hidden;
+          max-height: 0;
+          transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        .work-detail-row.is-open .work-detail-inner { max-height: 600px; }
+        .work-detail-content {
+          padding: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          border-top: 1px solid rgba(0,0,0,0.06);
+        }
+        .work-detail-preview {
+          width: 100%;
+          aspect-ratio: 4/3;
+          overflow: hidden;
+          background: #e0e0e0;
+        }
+        .work-detail-preview img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+        .work-detail-meta-list {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .work-detail-meta-item {
+          display: flex;
+          align-items: baseline;
+          gap: 16px;
+          font-family: "IBM Plex Mono", monospace;
+          font-size: 11px;
+        }
+        .work-detail-meta-label {
+          color: #999;
+          width: 36px;
+          flex-shrink: 0;
+        }
+        .work-detail-meta-value {
+          color: #222;
+          text-decoration: none;
+          word-break: break-all;
+        }
+        a.work-detail-meta-value {
+          text-decoration: underline;
+          text-underline-offset: 3px;
+        }
+      }
 
-        .section-label {
-          font-size: 16px;
-          padding: 32px 16px 0 16px;
-        }
+      @media (min-width: 769px) {
+        .work-detail-row { display: none !important; }
+        .expand-icon { display: none !important; }
       }
       .footer-links {
         position: fixed;
@@ -625,19 +675,20 @@
       function renderClientWorks() {
         const tbody = document.getElementById('clientWorksTableBody');
         clientWorks.forEach(work => {
-          // Pass full URL as file so createWorkRow opens it correctly
-          // Display shows clean domain
           const displayWork = {
             ...work,
             file: work.url,
             displayFile: work.url.replace('https://', '').replace(/\/$/, '')
           };
           const row = createWorkRow(displayWork);
+          const detailRow = createDetailRow(displayWork);
+          row._detailRow = detailRow;
 
           row.addEventListener('mouseenter', () => showCursorPreview(work.image));
           row.addEventListener('mouseleave', hideCursorPreview);
 
           tbody.appendChild(row);
+          tbody.appendChild(detailRow);
         });
       }
 
@@ -731,6 +782,77 @@
           thumbnail: null
         }
       ];
+
+      /**
+       * Create accordion detail row (mobile only)
+       */
+      function createDetailRow(work) {
+        const detailRow = document.createElement('tr');
+        detailRow.className = 'work-detail-row';
+
+        const cell = document.createElement('td');
+        cell.colSpan = 6;
+        cell.className = 'work-detail-cell';
+
+        const inner = document.createElement('div');
+        inner.className = 'work-detail-inner';
+
+        const content = document.createElement('div');
+        content.className = 'work-detail-content';
+
+        // Preview: client works → webp image, others → color block
+        const preview = document.createElement('div');
+        preview.className = 'work-detail-preview';
+        if (work.image) {
+          const img = document.createElement('img');
+          img.src = work.image;
+          img.alt = work.title;
+          preview.appendChild(img);
+        } else {
+          preview.style.background = adjustColorForHover(work.color);
+        }
+        content.appendChild(preview);
+
+        // Meta list: Year / Type / URL or File
+        const metaList = document.createElement('div');
+        metaList.className = 'work-detail-meta-list';
+
+        const urlLabel = work.image ? 'URL' : 'File';
+        const urlValue = work.displayFile || work.file.replace(/\/$/, '');
+
+        [
+          { label: 'Year', value: work.year },
+          { label: 'Type', value: work.type },
+          { label: urlLabel, value: urlValue, href: work.file },
+        ].forEach(({ label, value, href }) => {
+          const item = document.createElement('div');
+          item.className = 'work-detail-meta-item';
+
+          const labelEl = document.createElement('span');
+          labelEl.className = 'work-detail-meta-label';
+          labelEl.textContent = label;
+
+          const valueEl = href ? document.createElement('a') : document.createElement('span');
+          valueEl.className = 'work-detail-meta-value';
+          valueEl.textContent = value;
+          if (href) {
+            valueEl.href = href;
+            valueEl.target = '_blank';
+            valueEl.rel = 'noopener';
+          }
+
+          item.appendChild(labelEl);
+          item.appendChild(valueEl);
+          metaList.appendChild(item);
+        });
+
+        content.appendChild(metaList);
+        inner.appendChild(content);
+        cell.appendChild(inner);
+        detailRow.appendChild(cell);
+
+        return detailRow;
+      }
 
       /**
        * Create work row
@@ -829,13 +951,18 @@
         filenameCell.textContent = work.displayFile || work.file.replace(/\/index\.html$/, '').replace(/\/$/, '');
         filenameCell.setAttribute('data-text-color', secondaryTextColor);
         
-        // Arrow
+        // Arrow (desktop) + Expand icon (mobile)
         const arrowCell = document.createElement('td');
         const arrowSpan = document.createElement('span');
         arrowSpan.className = 'arrow-icon';
         arrowSpan.textContent = '→';
         arrowSpan.setAttribute('data-text-color', textColor);
         arrowCell.appendChild(arrowSpan);
+
+        const expandIcon = document.createElement('span');
+        expandIcon.className = 'expand-icon';
+        expandIcon.textContent = '+';
+        arrowCell.appendChild(expandIcon);
         
         row.appendChild(thumbnailCell);
         row.appendChild(yearCell);
@@ -973,9 +1100,18 @@
           }, 0);
         });
         
-        // Make entire row clickable
-        row.addEventListener('click', () => {
-          window.open(work.file, '_blank');
+        // Click: mobile → accordion toggle / desktop → open link
+        row.addEventListener('click', (e) => {
+          if (window.innerWidth <= 768) {
+            // アコーディオン内のリンクはそのまま通す
+            if (e.target.tagName === 'A') return;
+            const isExpanded = row.classList.toggle('is-expanded');
+            if (row._detailRow) {
+              row._detailRow.classList.toggle('is-open', isExpanded);
+            }
+          } else {
+            window.open(work.file, '_blank');
+          }
         });
         
         return row;
@@ -989,9 +1125,14 @@
 
         works.forEach(work => {
           const row = createWorkRow(work);
+          const detailRow = createDetailRow(work);
+          row._detailRow = detailRow;
+
           row.addEventListener('mouseenter', () => showCursorPreview(work.file, 'iframe'));
           row.addEventListener('mouseleave', hideCursorPreview);
+
           tbody.appendChild(row);
+          tbody.appendChild(detailRow);
         });
       }
 
@@ -1003,9 +1144,14 @@
 
         studioWorks.forEach(work => {
           const row = createWorkRow(work);
+          const detailRow = createDetailRow(work);
+          row._detailRow = detailRow;
+
           row.addEventListener('mouseenter', () => showCursorPreview(work.file, 'iframe'));
           row.addEventListener('mouseleave', hideCursorPreview);
+
           tbody.appendChild(row);
+          tbody.appendChild(detailRow);
         });
       }
 
