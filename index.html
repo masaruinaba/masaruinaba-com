@@ -743,7 +743,12 @@
         gsap.to(cursorPreview, {
           opacity: 0,
           duration: 0.2,
-          ease: 'power2.in'
+          ease: 'power2.in',
+          onComplete: () => {
+            // iframe を完全に非表示・アンロードしてスクロールイベントの横取りを防ぐ
+            cursorPreviewFrame.style.display = 'none';
+            cursorPreviewFrame.src = '';
+          }
         });
       }
 
