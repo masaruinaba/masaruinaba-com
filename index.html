@@ -372,6 +372,22 @@
         .work-detail-row { display: none !important; }
         .expand-icon { display: none !important; }
       }
+      .app-icon-link {
+        position: fixed;
+        bottom: 24px;
+        left: 24px;
+        width: 24px;
+        height: 24px;
+        display: block;
+        z-index: 100;
+        opacity: 0.8;
+        transition: opacity 0.2s ease;
+      }
+
+      .app-icon-link:hover {
+        opacity: 1;
+      }
+
       .footer-links {
         position: fixed;
         bottom: 24px;
@@ -1174,6 +1190,9 @@
         renderStudioWorks();
       });
     </script>
+    <a class="app-icon-link" href="https://kids-math-iwua.vercel.app/index.html" target="_blank" rel="noopener">
+      <img src="/app-icon.svg" alt="Kids Math" width="24" height="24">
+    </a>
     <nav class="footer-links">
       <a href="https://x.com/im_inaba" target="_blank" rel="noopener">@im_inaba</a>
       <a href="https://x.com/masaruinaba" target="_blank" rel="noopener">@masaruinaba</a>
