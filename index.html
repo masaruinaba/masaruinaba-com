@@ -264,7 +264,7 @@
         .container {
           padding: 0;
         }
-        
+
         .header {
           padding: 32px 16px 0 16px;
         }
@@ -275,12 +275,39 @@
 
         .works-table th,
         .works-table td {
-          padding: 8px 6px;
+          padding: 10px 8px;
         }
 
         .thumbnail {
           width: 8px;
           height: 8px;
+        }
+
+        /* Year・Type列を非表示 */
+        .works-table th:nth-child(2),
+        .works-table td:nth-child(2),
+        .works-table th:nth-child(3),
+        .works-table td:nth-child(3) {
+          display: none;
+        }
+
+        /* SP時のカラム幅調整 */
+        .works-table th:nth-child(1) { width: 24px; }
+        .works-table th:nth-child(4) { width: auto; }
+        .works-table th:nth-child(5) { width: 38%; }
+        .works-table th:nth-child(6) { width: 24px; }
+
+        .title {
+          font-size: 14px;
+        }
+
+        .filename {
+          font-size: 9px;
+        }
+
+        .section-label {
+          font-size: 16px;
+          padding: 32px 16px 0 16px;
         }
       }
       .footer-links {
