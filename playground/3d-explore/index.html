@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3D Explore — Masaru Inaba</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="3D Explore — Masaru Inaba" />
+    <meta property="og:description" content="Three-dimensional web exploration experiment by Masaru Inaba." />
+    <meta property="og:image" content="/ogp.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="3D Explore — Masaru Inaba" />
+    <meta name="twitter:description" content="Three-dimensional web exploration experiment by Masaru Inaba." />
+    <meta name="twitter:image" content="/ogp.png" />
+  <meta name="description" content="Three-dimensional web exploration experiment by Masaru Inaba." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --bg: #0b0b0c;
+      --ui-bg: rgba(20, 20, 22, 0.85);
+      --ui-border: rgba(255, 255, 255, 0.12);
+      --accent: #ffffff;
+      --font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: #ffffff;
+      font-family: var(--font-family);
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    canvas {
+      display: block;
+      cursor: grab;
+    }
+    canvas:active { cursor: grabbing; }
+
+    /* --- Refined UI (v0006/v0007 Style) --- */
+    .controls-ui {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translate(-50%, 0);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 2000;
+      background: var(--ui-bg);
+      backdrop-filter: blur(24px);
+      padding: 8px 16px;
+      border-radius: 100px;
+      border: 1px solid var(--ui-border);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .ui-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 12px;
+      border-right: 1px solid var(--ui-border);
+    }
+    .ui-section:last-child { border-right: none; }
+
+    .ui-label {
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.35);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      font-weight: 500;
+    }
+
+    .icon-action-btn {
+      width: 34px;
+      height: 34px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .icon-action-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: scale(1.05);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    .icon-action-btn.active {
+      background: #ffffff;
+      color: #000000;
+      border-color: #ffffff;
+    }
+    .icon-action-btn svg { width: 16px; height: 16px; }
+
+    /* Material Selector */
+    .selector-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .selector-trigger {
+      font-size: 10px;
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 6px 14px;
+      border-radius: 100px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 160px;
+      transition: all 0.3s;
+    }
+    .selector-trigger:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.2); }
+    .selector-trigger svg { width: 12px; height: 12px; opacity: 0.5; }
+
+    .selector-menu {
+      position: absolute;
+      bottom: calc(100% + 12px);
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: var(--ui-bg);
+      backdrop-filter: blur(32px);
+      border: 1px solid var(--ui-border);
+      border-radius: 16px;
+      padding: 6px;
+      min-width: 180px;
+      max-height: 350px;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .selector-menu.is-open {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+    .selector-menu::-webkit-scrollbar { width: 4px; }
+    .selector-menu::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+
+    .selector-option {
+      padding: 8px 14px;
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.6);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .selector-option:hover { background: rgba(255, 255, 255, 0.06); color: #ffffff; }
+    .selector-option.selected { color: #ffffff; background: rgba(255, 255, 255, 0.1); font-weight: 600; }
+
+    /* Recording Indicator */
+    .recording-indicator {
+      position: fixed;
+      top: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      padding: 8px 24px;
+      border-radius: 100px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      z-index: 3000;
+    }
+    .recording-indicator.is-active { display: flex; }
+    .recording-indicator::before { 
+      content: ""; 
+      width: 6px; 
+      height: 6px; 
+      background: #ff4d4d; 
+      border-radius: 50%; 
+      box-shadow: 0 0 10px #ff4d4d;
+      animation: blink 1s infinite;
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    #info {
+      position: fixed;
+      top: 24px;
+      left: 24px;
+      font-size: 10px;
+      opacity: 0.4;
+      pointer-events: none;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+  <div id="rec-indicator" class="recording-indicator">RECORDING <span id="rec-timer">10S</span></div>
+
+  <div class="controls-ui">
+    <div class="ui-section">
+      <span class="ui-label">Material</span>
+      <div class="selector-container">
+        <div class="selector-trigger" id="mat-trigger" onclick="toggleMenu('mat-menu')">
+          <span id="current-mat-label">Organic Glass</span>
+          <i data-lucide="chevron-up"></i>
+        </div>
+        <div id="mat-menu" class="selector-menu">
+          <!-- Generated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <div class="ui-section">
+      <span class="ui-label">Scene</span>
+      <div class="selector-container">
+        <div class="selector-trigger" style="min-width: 120px;" id="bg-trigger" onclick="toggleMenu('bg-menu')">
+          <span id="current-bg-label">Deep Dark</span>
+          <i data-lucide="chevron-up"></i>
+        </div>
+        <div id="bg-menu" class="selector-menu" style="min-width: 140px;">
+          <!-- Generated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <div class="ui-section">
+      <div class="icon-action-btn active" id="play-pause-btn" onclick="togglePlay()" title="Play/Pause">
+        <i data-lucide="pause"></i>
+      </div>
+      <div class="icon-action-btn" onclick="randomizeAll()" title="Randomize">
+        <i data-lucide="refresh-cw"></i>
+      </div>
+      <div class="icon-action-btn" onclick="startRecording()" title="Record 10s">
+        <i data-lucide="video"></i>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+
+    // --- Scene Setup ---
+    let scene, camera, renderer, controls, studioObject;
+    let isPlaying = true;
+    let isRecording = false;
+    let recordedChunks = [];
+    let mediaRecorder;
+
+    const materials = [
+      { name: 'Inflated Leather', props: { color: 0x111111, roughness: 0.6, metalness: 0.1, clearcoat: 0.2, sheen: 0.5, sheenRoughness: 0.8, sheenColor: 0x444444 } },
+      { name: 'Pillow Soft', props: { color: 0xf5f5f0, roughness: 0.9, metalness: 0, sheen: 1, sheenRoughness: 0.5, sheenColor: 0xffffff } },
+      { name: 'Liquid Chrome', props: { color: 0xffffff, metalness: 1, roughness: 0.02, clearcoat: 1, envMapIntensity: 2 } },
+      { name: 'Glass Vessel (Green)', props: { color: 0xffffff, transmission: 1, roughness: 0.05, ior: 1.5, thickness: 1, attenuationColor: 0x88ffaa, attenuationDistance: 0.5 } },
+      { name: 'Bio-Organic', props: { color: 0x22ff88, transmission: 0.8, roughness: 0.2, thickness: 2, ior: 1.3, emissive: 0x004411, emissiveIntensity: 0.5 } },
+      { name: 'Metallic Ring', props: { color: 0xbbbbbb, metalness: 1, roughness: 0.1, clearcoat: 1, envMapIntensity: 1.5 } },
+      { name: 'Matte Rubber', props: { color: 0x0a0a0a, roughness: 0.85, metalness: 0 } },
+      { name: 'Frosted Glass', props: { color: 0xffffff, transmission: 1, roughness: 0.4, thickness: 1.2, ior: 1.4 } },
+      { name: 'Inflatable Plastic', props: { color: 0xffffff, transmission: 0.5, opacity: 0.8, transparent: true, roughness: 0.1, thickness: 0.5, ior: 1.3 } },
+      { name: 'Brushed Aluminum', props: { color: 0xdddddd, metalness: 1, roughness: 0.45 } },
+      { name: 'High-Fashion Black', props: { color: 0x000000, roughness: 0.3, metalness: 0.2, clearcoat: 1, clearcoatRoughness: 0.1 } },
+      { name: 'Transparent Resin', props: { color: 0xeeffff, transmission: 1, roughness: 0.02, ior: 1.45, thickness: 2 } },
+      { name: 'Soft Velvet', props: { color: 0x440066, sheen: 1, sheenRoughness: 0.4, sheenColor: 0xaa66ff } },
+      { name: 'Polished Marble', props: { color: 0xffffff, roughness: 0.05, clearcoat: 1 } },
+      { name: 'Copper Foil', props: { color: 0xb87333, metalness: 1, roughness: 0.25, iridescence: 0.2 } },
+      { name: 'Holographic Soft', props: { color: 0xffffff, iridescence: 1, iridescenceIOR: 1.3, roughness: 0.2, clearcoat: 1 } },
+      { name: 'Neon Core', props: { color: 0x000000, emissive: 0x00ff88, emissiveIntensity: 8 } },
+      { name: 'Smoky Glass', props: { color: 0x222222, transmission: 1, roughness: 0.1, thickness: 2, attenuationColor: 0x000000, attenuationDistance: 0.2 } },
+      { name: 'Cyber Metal', props: { color: 0x111111, metalness: 0.8, roughness: 0.2, emissive: 0x0044ff, emissiveIntensity: 0.2 } },
+      { name: 'Iridescent Glass', props: { color: 0xffffff, transmission: 1, iridescence: 1, iridescenceIOR: 1.5, roughness: 0.05, ior: 1.5 } }
+    ];
+
+    const backgrounds = [
+      { name: 'Pure White', color: 0xffffff },
+      { name: 'Deep Dark', color: 0x0b0b0c },
+      { name: 'Studio Gray', color: 0x1a1a1b },
+      { name: 'Cyber Punk', color: 0x050010 },
+      { name: 'Earth Clay', color: 0x2a2420 }
+    ];
+
+    function init() {
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(backgrounds[0].color);
+
+      camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 0, 10);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.2;
+      document.body.appendChild(renderer.domElement);
+
+      controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+
+      // --- Lighting ---
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+
+      const pointLight1 = new THREE.PointLight(0xffffff, 80);
+      pointLight1.position.set(5, 5, 5);
+      scene.add(pointLight1);
+
+      const pointLight2 = new THREE.PointLight(0xffffff, 40);
+      pointLight2.position.set(-5, -5, 5);
+      scene.add(pointLight2);
+
+      // --- Environment Map for reflections ---
+      const pmremGenerator = new THREE.PMREMGenerator(renderer);
+      pmremGenerator.compileEquirectangularShader();
+      scene.environment = pmremGenerator.fromScene(new THREE.Scene()).texture; // Simple fallback
+
+      // --- Shape Implementation ---
+    // Figma design: A thick diagonal bar. Bottom face is square.
+    // Making it slightly longer as requested.
+    const barLength = 7.5; // Increased from 6.5
+    const barThickness = 1.2;
+    const geometry = new THREE.BoxGeometry(barThickness, barLength, barThickness);
+    
+    // Rotate 45 degrees to match Figma's diagonal
+    geometry.rotateZ(Math.PI / 4);
+
+    studioObject = new THREE.Mesh(geometry, new THREE.MeshPhysicalMaterial(materials[0].props));
+    scene.add(studioObject);
+
+      // --- UI Generation ---
+      const matMenu = document.getElementById('mat-menu');
+      materials.forEach((m, i) => {
+        const opt = document.createElement('div');
+        opt.className = `selector-option ${i === 0 ? 'selected' : ''}`;
+        opt.textContent = m.name;
+        opt.onclick = () => selectMaterial(i);
+        matMenu.appendChild(opt);
+      });
+
+      const bgMenu = document.getElementById('bg-menu');
+      backgrounds.forEach((bg, i) => {
+        const opt = document.createElement('div');
+        opt.className = `selector-option ${i === 0 ? 'selected' : ''}`;
+        opt.textContent = bg.name;
+        opt.onclick = () => selectBackground(i);
+        bgMenu.appendChild(opt);
+      });
+
+      window.addEventListener('resize', onWindowResize);
+      animate();
+      lucide.createIcons();
+    }
+
+    function selectMaterial(index) {
+      const mat = materials[index];
+      studioObject.material = new THREE.MeshPhysicalMaterial(mat.props);
+      document.getElementById('current-mat-label').textContent = mat.name;
+      document.querySelectorAll('#mat-menu .selector-option').forEach((opt, i) => {
+        opt.classList.toggle('selected', i === index);
+      });
+      document.getElementById('mat-menu').classList.remove('is-open');
+    }
+
+    function selectBackground(index) {
+      const bg = backgrounds[index];
+      scene.background = new THREE.Color(bg.color);
+      document.getElementById('current-bg-label').textContent = bg.name;
+      document.querySelectorAll('#bg-menu .selector-option').forEach((opt, i) => {
+        opt.classList.toggle('selected', i === index);
+      });
+      document.getElementById('bg-menu').classList.remove('is-open');
+      
+      // Adjust text color based on background
+      const color = new THREE.Color(bg.color);
+      const luminance = (0.299 * color.r + 0.587 * color.g + 0.114 * color.b);
+      document.body.style.color = luminance > 0.5 ? '#000' : '#fff';
+    }
+
+    window.toggleMenu = (id) => {
+      const menu = document.getElementById(id);
+      const otherId = id === 'mat-menu' ? 'bg-menu' : 'mat-menu';
+      document.getElementById(otherId).classList.remove('is-open');
+      menu.classList.toggle('is-open');
+    };
+
+    window.togglePlay = () => {
+      isPlaying = !isPlaying;
+      const btn = document.getElementById('play-pause-btn');
+      btn.innerHTML = `<i data-lucide="${isPlaying ? 'pause' : 'play'}"></i>`;
+      btn.classList.toggle('active', !isPlaying);
+      lucide.createIcons();
+    };
+
+    window.randomizeAll = () => {
+      selectMaterial(Math.floor(Math.random() * materials.length));
+      selectBackground(Math.floor(Math.random() * backgrounds.length));
+      studioObject.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, Math.random()*Math.PI);
+    };
+
+    window.startRecording = () => {
+      if (isRecording) return;
+      isRecording = true;
+      recordedChunks = [];
+      const stream = renderer.domElement.captureStream(60);
+      
+      let mimeType = 'video/mp4;codecs=h264';
+      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm;codecs=h264';
+      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
+
+      mediaRecorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 12000000 });
+      mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunks, { type: mimeType });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `studio-exploration-${Date.now()}.mp4`;
+        a.click();
+        isRecording = false;
+        document.getElementById('rec-indicator').classList.remove('is-active');
+      };
+
+      mediaRecorder.start();
+      document.getElementById('rec-indicator').classList.add('is-active');
+      let timeLeft = 10;
+      const itv = setInterval(() => {
+        document.getElementById('rec-timer').textContent = `${--timeLeft}S`;
+        if (timeLeft <= 0) clearInterval(itv);
+      }, 1000);
+      setTimeout(() => mediaRecorder.stop(), 10000);
+    };
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      if (isPlaying) {
+        studioObject.rotation.y += 0.006;
+        studioObject.rotation.x += 0.004;
+      }
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    init();
+
+    // Close menus when clicking outside
+    window.addEventListener('click', (e) => {
+      if (!e.target.closest('.selector-container')) {
+        document.getElementById('mat-menu').classList.remove('is-open');
+        document.getElementById('bg-menu').classList.remove('is-open');
+      }
+    });
+  </script>
+</body>
+</html>

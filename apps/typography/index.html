@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Typography Explorer — Masaru Inaba</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Typography Explorer — Masaru Inaba" />
+    <meta property="og:description" content="An interactive Google Fonts explorer by Masaru Inaba." />
+    <meta property="og:image" content="/ogp.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Typography Explorer — Masaru Inaba" />
+    <meta name="twitter:description" content="An interactive Google Fonts explorer by Masaru Inaba." />
+    <meta name="twitter:image" content="/ogp.png" />
+  <meta name="description" content="An interactive Google Fonts explorer by Masaru Inaba." />
+  
+  <!-- Preconnect for Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Base fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Roboto:wght@100;300;400;500;700;900&family=Montserrat:wght@100;200;300;400;500;600;700;800;900&family=Poppins:wght@100;200;300;400;500;600;700;800;900&family=Oswald:wght@200;300;400;500;600;700&family=Lato:wght@100;300;400;700;900&family=Open+Sans:wght@300;400;500;600;700;800&family=Raleway:wght@100;200;300;400;500;600;700;800;900&family=Source+Sans+3:wght@200;300;400;500;600;700;800;900&family=Merriweather:wght@300;400;700;900&family=Lora:wght@400;500;600;700&family=Crimson+Text:wght@400;600;700&family=Libre+Baskerville:wght@400;700&family=EB+Garamond:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@300;400;500;600;700&family=Source+Serif+4:wght@200;300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@100;200;300;400;500;600;700&family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&family=Fira+Code:wght@300;400;500;600;700&family=Source+Code+Pro:wght@200;300;400;500;600;700;800;900&family=Bebas+Neue&family=Anton&family=Archivo+Black&family=Black+Ops+One&family=Passion+One:wght@400;700;900&family=Righteous&family=Abril+Fatface&family=Alfa+Slab+One&family=Noto+Sans+JP:wght@100;200;300;400;500;600;700;800;900&family=Noto+Serif+JP:wght@200;300;400;500;600;700;900&family=M+PLUS+1p:wght@100;300;400;500;700;800;900&family=M+PLUS+Rounded+1c:wght@100;300;400;500;700;800;900&family=Kosugi+Maru&family=Sawarabi+Gothic&family=Sawarabi+Mincho&family=Zen+Kaku+Gothic+New:wght@300;400;500;700;900&family=Zen+Maru+Gothic:wght@300;400;500;700;900&family=Shippori+Mincho:wght@400;500;600;700;800&family=Kiwi+Maru:wght@300;400;500&family=Caveat:wght@400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=Pacifico&family=Great+Vibes&family=Satisfy&family=Sacramento&family=Permanent+Marker&family=Shadows+Into+Light&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+    </div>
+    <nav class="header-nav">
+      <button class="nav-btn active" data-view="explore">Explore</button>
+      <button class="nav-btn" data-view="showcase">Showcase</button>
+      <button class="nav-btn" data-view="inuse">Fonts in Use</button>
+    </nav>
+    <div class="header-right">
+      <button class="theme-toggle" aria-label="Toggle theme">
+        <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"/>
+          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+        </svg>
+        <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title">
+        <span class="hero-title-line" data-font="Playfair Display">Typography</span>
+        <span class="hero-title-line" data-font="Inter">defines</span>
+        <span class="hero-title-line" data-font="Noto Sans JP">experience.</span>
+      </h1>
+      <p class="hero-subtitle">Explore 100+ Google Fonts available in Studio.<br>Search, filter, and preview to find your perfect typography.</p>
+    </div>
+    <div class="hero-marquee">
+      <div class="marquee-track">
+        <span style="font-family: 'Playfair Display'">Playfair Display</span>
+        <span style="font-family: 'Inter'">Inter</span>
+        <span style="font-family: 'Noto Sans JP'">Noto Sans JP</span>
+        <span style="font-family: 'Montserrat'">Montserrat</span>
+        <span style="font-family: 'EB Garamond'">EB Garamond</span>
+        <span style="font-family: 'Bebas Neue'">Bebas Neue</span>
+        <span style="font-family: 'JetBrains Mono'">JetBrains Mono</span>
+        <span style="font-family: 'Shippori Mincho'">Shippori Mincho</span>
+        <span style="font-family: 'Playfair Display'">Playfair Display</span>
+        <span style="font-family: 'Inter'">Inter</span>
+        <span style="font-family: 'Noto Sans JP'">Noto Sans JP</span>
+        <span style="font-family: 'Montserrat'">Montserrat</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Controls Bar -->
+  <div class="controls-bar">
+    <div class="controls-left">
+      <!-- Search -->
+      <div class="search-wrapper">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="m21 21-4.3-4.3"/>
+        </svg>
+        <input type="text" class="search-input" placeholder="フォントを検索..." id="searchInput">
+      </div>
+      
+      <!-- Filter Pills -->
+      <div class="filter-pills">
+        <button class="pill active" data-category="all">All</button>
+        <button class="pill" data-category="sans-serif">Sans Serif</button>
+        <button class="pill" data-category="serif">Serif</button>
+        <button class="pill" data-category="display">Display</button>
+        <button class="pill" data-category="handwriting">Handwriting</button>
+        <button class="pill" data-category="monospace">Monospace</button>
+      </div>
+      
+      <!-- Language Filter -->
+      <div class="lang-filter">
+        <button class="lang-btn active" data-lang="all">All</button>
+        <button class="lang-btn" data-lang="latin">Latin</button>
+        <button class="lang-btn" data-lang="japanese">日本語</button>
+      </div>
+    </div>
+    
+    <div class="controls-right">
+      <!-- Font Size Slider -->
+      <div class="slider-group">
+        <label class="slider-label">Size</label>
+        <input type="range" class="slider" id="fontSizeSlider" min="16" max="120" value="48">
+        <span class="slider-value" id="fontSizeValue">48px</span>
+      </div>
+      
+      <!-- Font Weight Slider -->
+      <div class="slider-group">
+        <label class="slider-label">Weight</label>
+        <input type="range" class="slider" id="fontWeightSlider" min="100" max="900" step="100" value="400">
+        <span class="slider-value" id="fontWeightValue">400</span>
+      </div>
+      
+      <!-- View Toggle -->
+      <div class="view-toggle">
+        <button class="view-btn active" data-layout="list" aria-label="List view">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        <button class="view-btn" data-layout="grid" aria-label="Grid view">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview Text Editor -->
+  <div class="preview-editor">
+    <label class="preview-label">Preview Text</label>
+    <input type="text" class="preview-input" id="previewText" value="The quick brown fox jumps over the lazy dog">
+    <div class="preset-texts">
+      <button class="preset-btn" data-text="The quick brown fox jumps over the lazy dog">English</button>
+      <button class="preset-btn" data-text="あのイーハトーヴォのすきとおった風">日本語</button>
+      <button class="preset-btn" data-text="ABCDEFGHIJKLMNOPQRSTUVWXYZ">Uppercase</button>
+      <button class="preset-btn" data-text="0123456789">Numbers</button>
+      <button class="preset-btn" data-text="@#$%&*!?">Symbols</button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="main-content" id="mainContent">
+    <!-- Explore View -->
+    <section class="view-section explore-view active" id="exploreView">
+      <div class="font-list" id="fontList"></div>
+    </section>
+
+    <!-- Showcase View -->
+    <section class="view-section showcase-view" id="showcaseView">
+      <div class="showcase-grid" id="showcaseGrid"></div>
+    </section>
+
+    <!-- Fonts in Use View -->
+    <section class="view-section inuse-view" id="inuseView">
+      <div class="inuse-grid" id="inuseGrid"></div>
+    </section>
+  </main>
+
+  <!-- Font Detail Modal -->
+  <div class="modal" id="fontModal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <button class="modal-close" aria-label="Close">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <div class="modal-body">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modalFontName"></h2>
+          <span class="modal-category" id="modalCategory"></span>
+        </div>
+        <div class="modal-preview" id="modalPreview"></div>
+        <div class="modal-glyphs">
+          <h3>Character Set</h3>
+          <div class="glyph-grid" id="glyphGrid"></div>
+        </div>
+        <div class="modal-weights">
+          <h3>Available Weights</h3>
+          <div class="weight-samples" id="weightSamples"></div>
+        </div>
+        <div class="modal-actions">
+          <a href="#" class="action-btn primary" id="googleFontsLink" target="_blank" rel="noopener noreferrer">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+              <polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+            Google Fonts で見る
+          </a>
+          <button class="action-btn secondary" id="copyFontFamily">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            font-family をコピー
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
+

@@ -6,13 +6,19 @@ export default defineConfig({
     rollupOptions: {
       input: {
         index: resolve(__dirname, "index.html"),
-        v0001: resolve(__dirname, "v0001-mosaic-reveal.html"),
-        v0002: resolve(__dirname, "v0002-eye-following.html"),
-        v0003: resolve(__dirname, "v0003-scroll-text-sequence.html"),
-        v0004: resolve(__dirname, "v0004-letter-morphing.html"),
-        sitemap: resolve(__dirname, "sitemap.html"),
+        // Playground
+        "mosaic-reveal": resolve(__dirname, "playground/mosaic-reveal/index.html"),
+        "eye-following": resolve(__dirname, "playground/eye-following/index.html"),
+        "scroll-text": resolve(__dirname, "playground/scroll-text/index.html"),
+        "letter-morphing": resolve(__dirname, "playground/letter-morphing/index.html"),
+        "hover-text-path": resolve(__dirname, "playground/hover-text-path/index.html"),
+        "font-patterns": resolve(__dirname, "playground/font-patterns/index.html"),
+        "3d-explore": resolve(__dirname, "playground/3d-explore/index.html"),
+        // Apps
         "layered-clock": resolve(__dirname, "apps/layered-clock/index.html"),
         "creative-weather": resolve(__dirname, "apps/creative-weather/index.html"),
+        "design-board": resolve(__dirname, "apps/design-board/index.html"),
+        "typography": resolve(__dirname, "apps/typography/index.html"),
       },
     },
   },

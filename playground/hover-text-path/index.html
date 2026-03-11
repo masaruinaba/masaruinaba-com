@@ -3,7 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>v0005</title>
+  <title>Hover Text Path — Masaru Inaba</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Hover Text Path — Masaru Inaba" />
+    <meta property="og:description" content="Text following SVG path on hover — experiment by Masaru Inaba." />
+    <meta property="og:image" content="/ogp.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Hover Text Path — Masaru Inaba" />
+    <meta name="twitter:description" content="Text following SVG path on hover — experiment by Masaru Inaba." />
+    <meta name="twitter:image" content="/ogp.png" />
+  <meta name="description" content="Text following SVG path on hover — experiment by Masaru Inaba." />
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -241,6 +250,10 @@
   <div class="scroll-space"></div>
 
 <script>
+// プレビューモードの検出
+const urlParams = new URLSearchParams(window.location.search);
+const isPreview = urlParams.get('preview') === 'true';
+
 function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
 function lerp(a,b,t){ return a + (b-a)*t; }
 function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
@@ -389,10 +402,19 @@ const CHASE_SOFT = 0.22;
 function applyScroll(){
   const doc = document.documentElement;
   const max = Math.max(1, doc.scrollHeight - window.innerHeight);
-  const norm = window.scrollY / max;
+  let norm = window.scrollY / max;
 
-  const unlock = norm > 0.002;
-  document.body.classList.toggle('hover-locked', !unlock);
+  // プレビューモードでは常にhover-lockedを解除
+  if (isPreview) {
+    document.body.classList.remove('hover-locked');
+    // プレビューモードでは、スクロール位置が0でもテキストを表示するために最小値を設定
+    if (norm < START_AT) {
+      norm = START_AT + 0.1; // テキストが表示される位置に調整
+    }
+  } else {
+    const unlock = norm > 0.002;
+    document.body.classList.toggle('hover-locked', !unlock);
+  }
 
   const n = allWords.length;
   if(n === 0) return;
@@ -454,8 +476,55 @@ window.addEventListener('scroll', () => {
   });
 }, { passive:true });
 
+// プレビューモード: 自動スクロールアニメーション
+if (isPreview) {
+  // プレビューモードでは初期状態でhover-lockedを解除
+  document.body.classList.remove('hover-locked');
+  
+  let previewScrollY = 0;
+  let previewDirection = 1;
+  
+  const animatePreview = () => {
+    // スクロール高さを再計算（リサイズ対応）
+    const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    
+    previewScrollY += 0.8 * previewDirection;
+    
+    if (previewScrollY >= maxScroll) {
+      previewScrollY = maxScroll;
+      previewDirection = -1;
+    } else if (previewScrollY <= 0) {
+      // 最小スクロール位置をSTART_ATに合わせる
+      const minScroll = maxScroll * START_AT;
+      previewScrollY = minScroll;
+      previewDirection = 1;
+    }
+    
+    window.scrollTo(0, previewScrollY);
+    applyScroll();
+    
+    requestAnimationFrame(animatePreview);
+  };
+  
+  // DOM構築と初期化を待つ
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      // 初期スクロール位置をテキストが表示される位置に設定
+      const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      const initialScroll = maxScroll * (START_AT + 0.1);
+      window.scrollTo(0, initialScroll);
+      previewScrollY = initialScroll;
+      applyScroll();
+      
+      setTimeout(() => {
+        animatePreview();
+      }, 100);
+    }, 500);
+  });
+}
+
 // ---- hover objects (SVG) ----
-const VECTORS = Array.from({length:64},(_,i)=>`/v0005/Vector-${String(i+1).padStart(2,'0')}.svg`);
+const VECTORS = Array.from({length:64},(_,i)=>`/playground/hover-text-path/Vector-${String(i+1).padStart(2,'0')}.svg`);
 const loadedVectors = new Set();
 let lastVectorIdx = -1;
 
@@ -693,6 +762,80 @@ function setupHover(){
       }
     });
   });
+  
+  // プレビューモード: 概要文まで表示した後にホバーを繰り返す
+  if (isPreview) {
+    let currentIndex = 0;
+    let isAnimating = false;
+    let hoverStarted = false;
+    
+    const triggerHover = (index) => {
+      if (isAnimating || kws.length === 0) return;
+      
+      isAnimating = true;
+      const el = kws[index];
+      if (!el) {
+        isAnimating = false;
+        return;
+      }
+      
+      // ホバー開始
+      el.classList.add('is-active');
+      let seed = (Date.now() + index*9999) | 0;
+      seed = (seed + 37 + (Math.random()*100000|0)) | 0;
+      redrawMark(el, seed);
+      showRandomVector(el);
+      
+      // 2秒後にホバー終了
+      setTimeout(() => {
+        el.classList.remove('is-active');
+        hideVector();
+        isAnimating = false;
+      }, 2000);
+    };
+    
+    // 概要文まで表示されるのを待つ
+    const checkBodyTextVisible = () => {
+      if (allWords.length === 0) return false;
+      
+      // 本文の最初の単語を確認（タイトルの後）
+      const bodyStartIndex = titleLastWordIndex + 1;
+      if (bodyStartIndex >= allWords.length) return false;
+      
+      const bodyFirstWord = allWords[bodyStartIndex];
+      if (!bodyFirstWord) return false;
+      
+      const opacity = parseFloat(bodyFirstWord.style.opacity || '0');
+      // 本文が表示されているか確認（opacity > 0.5）
+      return opacity > 0.5;
+    };
+    
+    // 初期化を待つ
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        // 概要文が表示されるまで待機
+        const waitForBodyText = setInterval(() => {
+          if (checkBodyTextVisible() && !hoverStarted) {
+            hoverStarted = true;
+            clearInterval(waitForBodyText);
+            
+            // 概要文が表示されたら、少し待ってからホバーを開始
+            setTimeout(() => {
+              triggerHover(0);
+              
+              // 3秒ごとに次のホバーに切り替え
+              setInterval(() => {
+                if (!isAnimating) {
+                  currentIndex = (currentIndex + 1) % kws.length;
+                  triggerHover(currentIndex);
+                }
+              }, 3000);
+            }, 1000);
+          }
+        }, 100);
+      }, 1000);
+    });
+  }
 }
 </script>
 </body>

@@ -3,7 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scroll-driven Pinned Text Sequence</title>
+    <title>Scroll Text Sequence — Masaru Inaba</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Scroll Text Sequence — Masaru Inaba" />
+    <meta property="og:description" content="Scroll-driven pinned text sequence animation by Masaru Inaba." />
+    <meta property="og:image" content="/ogp.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Scroll Text Sequence — Masaru Inaba" />
+    <meta name="twitter:description" content="Scroll-driven pinned text sequence animation by Masaru Inaba." />
+    <meta name="twitter:image" content="/ogp.png" />
+    <meta name="description" content="Scroll-driven pinned text sequence animation by Masaru Inaba." />
 
     <!-- Google Fonts: Geist -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -438,34 +447,33 @@
         }
       });
       
-      // プレビューモード: 自動スクロールアニメーション
+      // プレビューモード: テキストを表示状態（HOLDフェーズ）に収める
       if (isPreview) {
-        let previewProgress = 0;
-        let previewDirection = 1;
-        
-        const animatePreview = () => {
-          previewProgress += 0.002 * previewDirection;
-          
-          if (previewProgress >= 1) {
-            previewProgress = 1;
-            previewDirection = -1;
-          } else if (previewProgress <= 0) {
-            previewProgress = 0;
-            previewDirection = 1;
-          }
-          
-          // アニメーション更新関数を直接呼び出す
-          updateAnimation(previewProgress);
-          
-          requestAnimationFrame(animatePreview);
-        };
-        
         // ScrollTriggerの初期化を待つ
         window.addEventListener('load', () => {
           setTimeout(() => {
             ScrollTrigger.refresh();
             setTimeout(() => {
-              animatePreview();
+              // Scene1のHOLDフェーズの中央位置に固定（テキストが表示されている状態）
+              const holdProgress = (hold1StartP + hold1EndP) / 2;
+              
+              // アニメーションを直接更新（サイクル内の進捗として）
+              // 複数回呼び出して確実に表示されるようにする
+              updateAnimation(holdProgress);
+              
+              // 少し待ってから再度更新（初期化を確実にする）
+              setTimeout(() => {
+                updateAnimation(holdProgress);
+              }, 50);
+              
+              // 定期的にアニメーションを更新して表示を維持
+              const maintainDisplay = () => {
+                updateAnimation(holdProgress);
+                requestAnimationFrame(maintainDisplay);
+              };
+              setTimeout(() => {
+                maintainDisplay();
+              }, 100);
             }, 100);
           }, 500);
         });

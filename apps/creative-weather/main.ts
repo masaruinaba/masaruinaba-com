@@ -239,6 +239,10 @@ class BitmapRenderer {
 // App Controller
 // ============================================================
 
+// プレビューモードの検出
+const urlParams = new URLSearchParams(window.location.search);
+const isPreview = urlParams.get('preview') === 'true';
+
 class App {
   private cardRenderer: BitmapRenderer;
   private bgRenderer: BitmapRenderer;
@@ -250,6 +254,7 @@ class App {
   private momentumEl: HTMLElement;
   private cityListEl: HTMLElement;
   private activeButton: HTMLButtonElement | null = null;
+  private previewInterval: number | null = null;
   
   constructor() {
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -272,9 +277,23 @@ class App {
     this.setupInteractions();
     this.setupResize();
     this.startLoop();
+    
+    // プレビューモード: 自動で都市を切り替え
+    if (isPreview) {
+      this.startPreviewAnimation();
+    }
   }
   
   private setupInteractions() {
+    // プレビューモードではインタラクションを無効化
+    if (isPreview) {
+      // プレビューモードでは常にホバー状態を維持
+      this.surfaceEl.classList.add('expanded');
+      this.cardRenderer.setHover(true);
+      this.bgRenderer.setHover(true);
+      return;
+    }
+    
     // ホバー時の状態深化
     this.cardEl.addEventListener('mouseenter', () => {
       this.surfaceEl.classList.add('expanded');
@@ -360,6 +379,13 @@ class App {
       requestAnimationFrame(animate);
     };
     requestAnimationFrame(animate);
+  }
+  
+  private startPreviewAnimation() {
+    // 2秒ごとに都市を自動切り替え
+    this.previewInterval = window.setInterval(() => {
+      this.selectRandomCity();
+    }, 2000);
   }
 }
 

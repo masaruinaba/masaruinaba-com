@@ -2,6 +2,10 @@
 // Conceptual Clock Studio - Enhanced Designs & Interaction
 // ============================================================
 
+// プレビューモードの検出
+const urlParams = new URLSearchParams(window.location.search);
+const isPreview = urlParams.get('preview') === 'true';
+
 type SecondsMode = 'smooth' | 'tick' | 'sweep';
 
 interface CityItem {
@@ -99,6 +103,11 @@ class BraunClock {
     this.setupEvents();
     this.updateDesign();
     this.loop();
+    
+    // プレビューモード: 自動でレイヤーモードを有効化し、ノブを自動回転
+    if (isPreview) {
+      this.startPreviewAnimation();
+    }
   }
 
   private resize() {
@@ -117,13 +126,20 @@ class BraunClock {
 
   private setupEvents() {
     window.addEventListener('resize', () => this.resize());
-    window.addEventListener('keydown', (e) => {
-      if (e.key.toLowerCase() === 'l') this.toggleLayerMode();
-      if (e.key.toLowerCase() === 'r') this.randomizeDesign();
-      if (e.key.toLowerCase() === 't') this.toggleTheme();
-    });
+    
+    // プレビューモードではキーボードショートカットを無効化
+    if (!isPreview) {
+      window.addEventListener('keydown', (e) => {
+        if (e.key.toLowerCase() === 'l') this.toggleLayerMode();
+        if (e.key.toLowerCase() === 'r') this.randomizeDesign();
+        if (e.key.toLowerCase() === 't') this.toggleTheme();
+      });
+    }
 
-    document.getElementById('toggle-layer')?.addEventListener('click', () => this.toggleLayerMode());
+    // プレビューモードではレイヤートグルを無効化
+    if (!isPreview) {
+      document.getElementById('toggle-layer')?.addEventListener('click', () => this.toggleLayerMode());
+    }
     
     const knob = document.getElementById('random-knob');
     const knobContainer = document.getElementById('knob-container');
@@ -166,17 +182,23 @@ class BraunClock {
       }
     });
 
-    document.getElementById('theme-toggle')?.addEventListener('click', () => this.toggleTheme());
+    // プレビューモードではテーマトグルを無効化
+    if (!isPreview) {
+      document.getElementById('theme-toggle')?.addEventListener('click', () => this.toggleTheme());
+    }
 
-    const modeBtns = document.querySelectorAll('.text-link[data-mode]');
-    modeBtns.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const target = e.target as HTMLButtonElement;
-        this.secondsMode = target.dataset.mode as SecondsMode;
-        modeBtns.forEach(b => b.classList.remove('active'));
-        target.classList.add('active');
+    // プレビューモードではモードボタンを無効化
+    if (!isPreview) {
+      const modeBtns = document.querySelectorAll('.text-link[data-mode]');
+      modeBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const target = e.target as HTMLButtonElement;
+          this.secondsMode = target.dataset.mode as SecondsMode;
+          modeBtns.forEach(b => b.classList.remove('active'));
+          target.classList.add('active');
+        });
       });
-    });
+    }
 
     const worldTimeContainer = document.querySelector('.world-time') as HTMLElement | null;
     const worldTimeTrack = document.querySelector('.world-time-track') as HTMLElement | null;
@@ -221,12 +243,15 @@ class BraunClock {
       setActive(this.cityIndex, true);
 
       // クリックで選択のみ（スクロール選択なし）
-      this.cityButtons.forEach((btn) => {
-        const idx = Number(btn.dataset.idx || 0);
-        btn.addEventListener('click', () => {
-          setActive(idx, true);
+      // プレビューモードでは都市選択を無効化
+      if (!isPreview) {
+        this.cityButtons.forEach((btn) => {
+          const idx = Number(btn.dataset.idx || 0);
+          btn.addEventListener('click', () => {
+            setActive(idx, true);
+          });
         });
-      });
+      }
     }
   }
 
@@ -348,6 +373,11 @@ class BraunClock {
     this.updateTime();
     this.draw();
     requestAnimationFrame(() => this.loop());
+  }
+  
+  private startPreviewAnimation() {
+    // プレビューモードではレイヤーモードを有効化せず、通常の時計表示のみ
+    // 何も特別な処理は不要（時計は自動的に動作している）
   }
 
   private draw() {

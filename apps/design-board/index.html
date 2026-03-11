@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Easel Pro — Masaru Inaba</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Easel Pro — Masaru Inaba" />
+    <meta property="og:description" content="Easel Pro — an interactive design board by Masaru Inaba." />
+    <meta property="og:image" content="/ogp.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Easel Pro — Masaru Inaba" />
+    <meta name="twitter:description" content="Easel Pro — an interactive design board by Masaru Inaba." />
+    <meta name="twitter:image" content="/ogp.png" />
+    <meta name="description" content="Easel Pro — an interactive design board by Masaru Inaba." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-color: #fcfcfc;
+            --grid-color: rgba(0, 0, 0, 0.12); /* ドットを濃く */
+            --selection: #18A0FB;
+            --ui-bg: rgba(255, 255, 255, 0.9);
+            --ui-border: rgba(0, 0, 0, 0.08);
+            --text-color: #111;
+            --ink-default: #000;
+            --font-main: 'Inter', -apple-system, sans-serif;
+            --shadow: 0 10px 28px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.03);
+            --ui-height: 40px;
+            --icon-size: 15px;
+            --icon-stroke: 1.9;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --grid-color: rgba(255, 255, 255, 0.15);
+            --ui-bg: rgba(30, 30, 30, 0.92);
+            --ui-border: rgba(255, 255, 255, 0.1);
+            --text-color: #eee;
+            --ink-default: #fff;
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
+            background-color: var(--bg-color); font-family: var(--font-main);
+            color: var(--text-color); -webkit-font-smoothing: antialiased;
+        }
+
+        #viewport { width: 100vw; height: 100vh; cursor: default; overflow: hidden; position: relative; touch-action: none; }
+        #viewport.tool-select { cursor: default; }
+        #viewport.tool-pan { cursor: grab; }
+        #viewport.tool-pan.panning { cursor: grabbing; }
+        #viewport.tool-pencil { cursor: crosshair; }
+        #viewport.tool-text { cursor: text; }
+
+        #canvas-root {
+            position: absolute; top: 0; left: 0; width: 20000px; height: 20000px;
+            background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
+            background-size: 32px 32px; transform-origin: 0 0; will-change: transform;
+        }
+
+        #drawing-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000; }
+
+        /* --- Objects --- */
+        .object { position: absolute; cursor: grab; user-select: none; z-index: 10; border-radius: 8px; box-sizing: border-box; }
+        .object.selected { z-index: 100; }
+        .object:active { cursor: grabbing; }
+        /* ハンドツールでもオブジェクト上は「移動」感のカーソルに */
+        #viewport.tool-pan .object { cursor: grab; }
+
+        .card { 
+            background: var(--ui-bg); border-radius: 14px; border: 1px solid var(--ui-border); 
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(32px);
+            display: inline-block; overflow: visible;
+            cursor: pointer; position: relative;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            line-height: 0; max-width: 400px; padding: 0;
+        }
+        /* hover領域を下に拡張して、カード外に出るUIでもhoverが切れないようにする */
+        .card::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -86px;
+            height: 96px;
+            pointer-events: none;
+        }
+        .card:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 14px 34px rgba(0,0,0,0.08);
+        }
+        
+        .capture-container {
+            display: block; line-height: 0; width: 100%; border-radius: 14px; overflow: hidden;
+            background: rgba(0,0,0,0.02);
+        }
+        .capture-image {
+            display: block; width: 100%; height: auto; pointer-events: none; 
+            vertical-align: bottom; object-fit: contain;
+        }
+        .capture-error {
+            width: 420px;
+            max-width: 100%;
+            height: 260px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(0,0,0,0.45);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+        [data-theme="dark"] .capture-error { color: rgba(255,255,255,0.5); }
+
+        .card-info { 
+            position: absolute; bottom: -58px; left: 50%; transform: translateX(-50%);
+            padding: 6px 10px; font-size: 12px; color: var(--text-color); font-weight: 600;
+            background: var(--ui-bg); backdrop-filter: blur(32px);
+            border: 1px solid var(--ui-border); border-radius: 100px;
+            box-shadow: var(--shadow);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex; align-items: center; gap: 6px; white-space: nowrap;
+        }
+        .card:hover .card-info { opacity: 1; pointer-events: auto; }
+        .card.loading .card-info { opacity: 1; pointer-events: none; }
+        /* hoverの“隙間”でhoverが切れてカタカタしないようにブリッジ */
+        .card-info::before {
+            content: "";
+            position: absolute;
+            left: -10px;
+            right: -10px;
+            top: -32px;
+            height: 32px;
+        }
+
+        .ui-group-right { width: 172px; justify-content: flex-start; }
+        .card-favicon { width: 14px; height: 14px; border-radius: 3px; }
+        .card-arrow { opacity: 0.5; }
+        .card-separator { width: 1px; height: 14px; background: var(--ui-border); margin: 0 2px; }
+        .card-delete { 
+            width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+            border-radius: 6px; cursor: pointer; color: #999; transition: all 0.15s;
+            pointer-events: auto;
+        }
+        .card-delete:hover { background: rgba(255,0,0,0.1); color: #ff4444; }
+        .card.loading .card-delete,
+        .card.loading .card-separator { display: none; }
+
+        .spinner {
+            width: 12px; height: 12px; border-radius: 999px;
+            border: 2px solid rgba(0,0,0,0.14);
+            border-top-color: rgba(0,0,0,0.45);
+            animation: spin 0.9s linear infinite;
+        }
+        [data-theme="dark"] .spinner {
+            border-color: rgba(255,255,255,0.16);
+            border-top-color: rgba(255,255,255,0.5);
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .skeleton {
+            width: 420px;
+            max-width: 100%;
+            height: 260px;
+            border-radius: 14px;
+            background: linear-gradient(
+                110deg,
+                rgba(0,0,0,0.06) 0%,
+                rgba(0,0,0,0.03) 35%,
+                rgba(0,0,0,0.06) 70%
+            );
+            background-size: 200% 100%;
+            animation: shimmer 1.15s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+        [data-theme="dark"] .skeleton {
+            background: linear-gradient(
+                110deg,
+                rgba(255,255,255,0.08) 0%,
+                rgba(255,255,255,0.04) 35%,
+                rgba(255,255,255,0.08) 70%
+            );
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .loading-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .loading-badge {
+            width: 16px;
+            height: 16px;
+            border-radius: 999px;
+            background: rgba(0,0,0,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        [data-theme="dark"] .loading-badge { background: rgba(255,255,255,0.08); }
+        .loading-text {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.01em;
+        }
+        .loading-text strong { font-weight: 700; }
+        .dots::after {
+            content: '';
+            display: inline-block;
+            width: 14px;
+            text-align: left;
+            animation: dots 1.0s steps(4, end) infinite;
+        }
+        @keyframes dots {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+            100% { content: ''; }
+        }
+
+        .capture-toast {
+            position: fixed;
+            left: 50%;
+            bottom: 92px;
+            transform: translateX(-50%);
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 999px;
+            background: var(--ui-bg);
+            backdrop-filter: blur(32px);
+            border: 1px solid var(--ui-border);
+            box-shadow: var(--shadow);
+            color: var(--text-color);
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 2200;
+            pointer-events: auto;
+            cursor: pointer;
+            user-select: none;
+            max-width: min(520px, calc(100vw - 48px));
+        }
+        .capture-toast .toast-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .capture-toast .toast-hint {
+            opacity: 0.55;
+            font-weight: 600;
+        }
+
+        /* marquee selection (paint multi-select) */
+        #marquee {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 0;
+            height: 0;
+            display: none;
+            border: 1px solid rgba(24,160,251,0.9);
+            background: rgba(24,160,251,0.08);
+            border-radius: 8px;
+            z-index: 2100;
+            pointer-events: none;
+            box-shadow: 0 6px 18px rgba(24,160,251,0.12);
+        }
+        #marquee-badge {
+            position: absolute;
+            top: -12px;
+            left: -12px;
+            padding: 6px 8px;
+            border-radius: 999px;
+            background: var(--ui-bg);
+            border: 1px solid var(--ui-border);
+            box-shadow: var(--shadow);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-color);
+            display: none;
+            align-items: center;
+            gap: 6px;
+        }
+        #viewport.tool-select.marquee { cursor: crosshair; }
+        [data-theme="dark"] #marquee {
+            border-color: rgba(140,200,255,0.9);
+            background: rgba(140,200,255,0.10);
+            box-shadow: 0 8px 22px rgba(140,200,255,0.10);
+        }
+
+        .text-obj { font-size: 24px; font-weight: 700; padding: 8px 16px; min-width: 40px; color: var(--text-color); }
+        .path-obj path { fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+        .path-obj.selected path { stroke: var(--selection); }
+
+        /* --- Bottom UI --- */
+        .ui-main {
+            position: fixed; bottom: 32px; left: 0; width: 100%;
+            display: flex; justify-content: center; align-items: center;
+            padding: 0 32px; pointer-events: none; box-sizing: border-box; z-index: 2000;
+            transform: scale(1); zoom: 1; /* ズームの影響を完全に固定 */
+        }
+        
+        #property-bar {
+            zoom: 1; /* ズームの影響を完全に固定 */
+        }
+
+        .ui-group {
+            display: flex; align-items: center; gap: 4px; pointer-events: auto;
+            background: var(--ui-bg); backdrop-filter: blur(32px);
+            padding: 4px; border-radius: 14px; box-shadow: var(--shadow);
+            border: 1px solid var(--ui-border); height: var(--ui-height);
+            box-sizing: border-box;
+        }
+
+        .ui-group-left { position: absolute; left: 32px; padding: 4px; }
+        .ui-group-center { position: relative; padding: 4px 6px 4px 16px; }
+        .ui-group-right { position: absolute; right: 32px; padding: 4px; }
+
+        .btn {
+            width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+            border-radius: 10px; cursor: pointer; color: #666; border: none; background: transparent;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn:hover { background: rgba(0,0,0,0.05); color: var(--text-color); }
+        .btn.active { background: #111; color: #fff; }
+        [data-theme="dark"] .btn.active { background: #fff; color: #111; }
+        .btn svg {
+            width: var(--icon-size);
+            height: var(--icon-size);
+            stroke-width: var(--icon-stroke);
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        /* ボタン以外のLucideも同じトンマナに */
+        .lucide {
+            width: var(--icon-size);
+            height: var(--icon-size);
+            stroke-width: var(--icon-stroke);
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .color-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .color-dot.ink-default {
+            background: var(--ink-default);
+            border: 1px solid rgba(0,0,0,0.12);
+        }
+        [data-theme="dark"] .color-dot.ink-default {
+            border: 1px solid rgba(255,255,255,0.16);
+        }
+
+        .add-input {
+            width: 260px; height: 32px; border: none; background: transparent;
+            outline: none; padding: 0; font-size: 14px; font-family: inherit; color: var(--text-color);
+        }
+        .add-input::placeholder { color: #ddd; }
+        [data-theme="dark"] .add-input::placeholder { color: #333; }
+
+        .zoom-badge {
+            font-size: 11px;
+            font-weight: 700;
+            color: #999;
+            border-right: 1px solid var(--ui-border);
+            width: 56px; /* 右下UIの幅がカタカタしないよう固定 */
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-variant-numeric: tabular-nums;
+        }
+
+        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 0.8; } 100% { opacity: 0.4; } }
+    </style>
+</head>
+<body data-theme="light">
+
+<div id="viewport">
+    <div id="canvas-root">
+        <svg id="drawing-overlay"></svg>
+    </div>
+</div>
+
+<div class="ui-main">
+    <div class="ui-group ui-group-left">
+        <button class="btn active" id="tool-select" onclick="setTool('select')"><i data-lucide="mouse-pointer"></i></button>
+        <button class="btn" id="tool-pan" onclick="setTool('pan')"><i data-lucide="hand"></i></button>
+        <button class="btn" id="tool-pencil" onclick="setTool('pencil')"><i data-lucide="pen-tool"></i></button>
+        <button class="btn" id="tool-text" onclick="setTool('text')"><i data-lucide="type"></i></button>
+    </div>
+
+    <div class="ui-group ui-group-center">
+        <input type="text" class="add-input" id="urlInput" placeholder="Add as reference" autocomplete="off" inputmode="url">
+        <button class="btn" id="addBtn" onclick="addCard()"><i data-lucide="arrow-up"></i></button>
+    </div>
+
+    <div class="ui-group ui-group-right">
+        <div class="zoom-badge" id="zoomDisplay">100%</div>
+        <button class="btn" id="theme-toggle" onclick="toggleTheme()"><i data-lucide="moon"></i></button>
+        <button class="btn" onclick="resetView()"><i data-lucide="crosshair"></i></button>
+        <button class="btn" onclick="if(confirm('Clear everything? This cannot be undone.')) { localStorage.clear(); location.reload(); }"><i data-lucide="refresh-cw"></i></button>
+    </div>
+</div>
+
+<div id="captureToast" class="capture-toast" role="status" aria-live="polite">
+    <div class="spinner" aria-hidden="true"></div>
+    <div class="toast-text" id="captureToastText">Capturing…</div>
+    <div class="toast-hint" id="captureToastHint">Click to locate</div>
+</div>
+
+<div id="marquee">
+    <div id="marquee-badge">0 selected</div>
+</div>
+
+<div id="property-bar" style="position: fixed; bottom: 84px; left: 50%; transform: translateX(-50%) scale(1); display: none; gap: 8px; background: var(--ui-bg); backdrop-filter: blur(32px); padding: 8px 12px; border-radius: 100px; box-shadow: var(--shadow); border: 1px solid var(--ui-border); z-index: 2000; align-items: center;">
+    <div style="display:flex; gap:6px;">
+        <div class="color-dot ink-default" id="inkDot" onclick="updateColor(getDefaultInk())"></div>
+        <div class="color-dot" style="background:#FF5252;" onclick="updateColor('#FF5252')"></div>
+        <div class="color-dot" style="background:#4CAF50;" onclick="updateColor('#4CAF50')"></div>
+        <div class="color-dot" style="background:#2196F3;" onclick="updateColor('#2196F3')"></div>
+    </div>
+    <div style="width: 1px; height: 16px; background: var(--ui-border); margin: 0 4px;"></div>
+    <button class="btn" style="width:28px; height:28px;" onclick="deleteSelected()"><i data-lucide="trash-2"></i></button>
+</div>
+
+<script>
+    lucide.createIcons();
+    const viewport = document.getElementById('viewport'), canvas = document.getElementById('canvas-root'), drawingOverlay = document.getElementById('drawing-overlay');
+    const urlInput = document.getElementById('urlInput'), zoomDisplay = document.getElementById('zoomDisplay'), propBar = document.getElementById('property-bar');
+    const captureToast = document.getElementById('captureToast');
+    const captureToastText = document.getElementById('captureToastText');
+    const captureToastHint = document.getElementById('captureToastHint');
+    const marquee = document.getElementById('marquee');
+    const marqueeBadge = document.getElementById('marquee-badge');
+
+    let state = { objects: [], pan: { x: -9500, y: -9500 }, zoom: 1.0, tool: 'select', isPanning: false, isDragging: false, isResizing: false, isDrawing: false, target: null, selected: null, last: { x: 0, y: 0 }, points: [], theme: 'light', paintColor: null };
+    let pendingCaptureId = null;
+    let spaceDown = false;
+    let ignoreObjectId = null;
+    let ignoreObjectUntil = 0;
+    let selectedIds = [];
+    let marqueeActive = false;
+    let marqueeStart = null;
+    let dragGroup = null; // { ids:[], startById: Map }
+
+    // NOTE: This key is stored locally (localStorage). Avoid committing real keys to public repos.
+    const DEFAULT_PAGESPEED_KEY = 'AIzaSyDNUzMq7msC6ZbrIER68wu1qDQlteKeQFE';
+
+    function applyViewportCursor() {
+        viewport.classList.remove('tool-select','tool-pan','tool-pencil','tool-text');
+        const toolClass = (spaceDown && state.tool !== 'text') ? 'tool-pan' : `tool-${state.tool}`;
+        viewport.classList.add(toolClass);
+        if (state.isPanning) viewport.classList.add('panning');
+        else viewport.classList.remove('panning');
+    }
+
+    function showCaptureToast(text, id) {
+        pendingCaptureId = id;
+        captureToastText.textContent = text;
+        captureToastHint.textContent = 'Click to locate';
+        captureToast.style.display = 'flex';
+    }
+
+    function setSelectedIds(ids) {
+        selectedIds = ids || [];
+        // 単一選択のstate.selectedも合わせる（1件だけならそれ）
+        state.selected = (selectedIds.length === 1) ? selectedIds[0] : null;
+        document.querySelectorAll('.object').forEach(o => o.classList.toggle('selected', selectedIds.includes(o.dataset.id)));
+        // カード選択時はプロパティバーを表示しない / 複数選択時は出さない
+        if (selectedIds.length === 1) {
+            const obj = state.objects.find(o => o.id === selectedIds[0]);
+            propBar.style.display = (obj && obj.type !== 'card') ? 'flex' : 'none';
+        } else {
+            propBar.style.display = 'none';
+        }
+    }
+
+    function clearSelection() { setSelectedIds([]); }
+
+    function worldFromClient(clientX, clientY) {
+        // viewport基準のクライアント座標 → world座標
+        return {
+            x: (clientX - state.pan.x) / state.zoom,
+            y: (clientY - state.pan.y) / state.zoom,
+        };
+    }
+
+    function intersectsRect(a, b) {
+        // a,b: {x1,y1,x2,y2}
+        return !(a.x2 < b.x1 || a.x1 > b.x2 || a.y2 < b.y1 || a.y1 > b.y2);
+    }
+
+    function getDefaultInk() {
+        return state.theme === 'dark' ? '#ffffff' : '#000000';
+    }
+    function normalizeHex(c) {
+        return String(c || '').trim().toLowerCase();
+    }
+    function isBlack(c) {
+        const v = normalizeHex(c);
+        return v === '#000' || v === '#000000' || v === 'rgb(0, 0, 0)' || v === 'black' || v === '';
+    }
+    function isWhite(c) {
+        const v = normalizeHex(c);
+        return v === '#fff' || v === '#ffffff' || v === 'rgb(255, 255, 255)' || v === 'white';
+    }
+    function applyInkTheme(prevTheme) {
+        // palette current ink
+        if (!state.paintColor) state.paintColor = getDefaultInk();
+        if (state.theme === 'dark') {
+            if (isBlack(state.paintColor)) state.paintColor = '#ffffff';
+            state.objects.forEach((o) => {
+                if (!o || o.type !== 'path-obj') return;
+                const col = o.color || '';
+                if (isBlack(col)) o.color = '#ffffff';
+            });
+        } else {
+            if (isWhite(state.paintColor)) state.paintColor = '#000000';
+            state.objects.forEach((o) => {
+                if (!o || o.type !== 'path-obj') return;
+                const col = o.color || '';
+                if (isWhite(col) || col === '') o.color = '#000000';
+            });
+        }
+        // update DOM strokes
+        state.objects.forEach((o) => {
+            if (!o || o.type !== 'path-obj') return;
+            const el = document.querySelector(`[data-id="${o.id}"]`);
+            const p = el && el.querySelector && el.querySelector('path');
+            if (p && o.color) p.style.stroke = o.color;
+        });
+        save();
+    }
+    function hideCaptureToast(id) {
+        if (id && pendingCaptureId !== id) return;
+        pendingCaptureId = null;
+        captureToast.style.display = 'none';
+    }
+    function centerOnObjectId(id) {
+        const el = document.querySelector(`[data-id="${id}"]`);
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const dx = window.innerWidth / 2 - (rect.left + rect.width / 2);
+        const dy = window.innerHeight / 2 - (rect.top + rect.height / 2);
+        state.pan.x += dx;
+        state.pan.y += dy;
+        updateXform();
+        save();
+    }
+    function ensureVisibleObjectId(id) {
+        const el = document.querySelector(`[data-id="${id}"]`);
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const m = 64;
+        const inside =
+            rect.right > m &&
+            rect.left < window.innerWidth - m &&
+            rect.bottom > m &&
+            rect.top < window.innerHeight - m;
+        if (!inside) centerOnObjectId(id);
+    }
+
+    function getPageSpeedKey() {
+        try {
+            const cur = (localStorage.getItem('easel_pagespeed_key') || '').trim();
+            if (cur) return cur;
+            if (DEFAULT_PAGESPEED_KEY && DEFAULT_PAGESPEED_KEY.trim()) {
+                localStorage.setItem('easel_pagespeed_key', DEFAULT_PAGESPEED_KEY.trim());
+                return DEFAULT_PAGESPEED_KEY.trim();
+            }
+            return '';
+        } catch (e) { return ''; }
+    }
+    function setPageSpeedKey(key) {
+        try { localStorage.setItem('easel_pagespeed_key', (key || '').trim()); } catch (e) {}
+    }
+    async function fetchPageSpeedScreenshot(url) {
+        const key = getPageSpeedKey();
+        if (!key) return '';
+        const api = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&strategy=desktop&key=${encodeURIComponent(key)}`;
+        try {
+            const res = await fetch(api);
+            const data = await res.json();
+            if (data && data.error) return '';
+            const audits = data && data.lighthouseResult && data.lighthouseResult.audits;
+            const finalShot = audits && audits['final-screenshot'] && audits['final-screenshot'].details && audits['final-screenshot'].details.data;
+            const fullShot = audits && audits['full-page-screenshot'] && audits['full-page-screenshot'].details && audits['full-page-screenshot'].details.screenshot && audits['full-page-screenshot'].details.screenshot.data;
+            const shot = finalShot || fullShot || '';
+            return typeof shot === 'string' ? shot : '';
+        } catch (e) {
+            return '';
+        }
+    }
+    async function recaptureCardById(id) {
+        const obj = state.objects.find(o => o.id === id);
+        if (!obj || obj.type !== 'card' || !obj.originalUrl) return;
+        obj.loading = true;
+        document.querySelector(`[data-id="${id}"]`)?.remove();
+        render(obj);
+        save();
+        const shot = await fetchPageSpeedScreenshot(obj.originalUrl);
+        obj.url = shot;
+        obj.loading = false;
+        document.querySelector(`[data-id="${id}"]`)?.remove();
+        render(obj);
+        save();
+    }
+
+    captureToast.addEventListener('click', async (e) => {
+        if (!pendingCaptureId) return;
+        if (e && (e.metaKey || e.ctrlKey)) {
+            const next = prompt('Paste your Google PageSpeed API key');
+            if (next && next.trim()) setPageSpeedKey(next.trim());
+            return;
+        }
+        // Click toast: locate the new card
+        centerOnObjectId(pendingCaptureId);
+        select(pendingCaptureId);
+    });
+
+    // Manual fallback: paste image to attach to pending capture
+    window.addEventListener('paste', (e) => {
+        const items = (e.clipboardData && e.clipboardData.items) ? Array.from(e.clipboardData.items) : [];
+        const imgItem = items.find(it => it.type && it.type.startsWith('image/'));
+        if (!imgItem) return;
+        const file = imgItem.getAsFile();
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            const dataUrl = String(reader.result || '');
+            if (pendingCaptureId) {
+                const obj = state.objects.find(o => o.id === pendingCaptureId);
+                if (obj && obj.type === 'card') {
+                    obj.url = dataUrl;
+                    obj.loading = false;
+                    document.querySelector(`[data-id="${pendingCaptureId}"]`)?.remove();
+                    render(obj);
+                    select(pendingCaptureId);
+                    save();
+                    hideCaptureToast(pendingCaptureId);
+                    return;
+                }
+            }
+        };
+        reader.readAsDataURL(file);
+    });
+    function normalizeUrl(raw) {
+        const t = (raw || '').trim();
+        if (!t) return '';
+        if (/^https?:\/\//i.test(t)) return t;
+        return `https://${t}`;
+    }
+    async function preloadImage(url, timeoutMs = 12000) {
+        return await new Promise((resolve) => {
+            const img = new Image();
+            const done = (ok) => resolve(!!ok);
+            const t = setTimeout(() => done(false), timeoutMs);
+            img.onload = () => { clearTimeout(t); done(true); };
+            img.onerror = () => { clearTimeout(t); done(false); };
+            img.src = url;
+        });
+    }
+
+    function computePaintIdsInClientRect(x1, y1, x2, y2) {
+        const w1 = worldFromClient(x1, y1);
+        const w2 = worldFromClient(x2, y2);
+        const selRect = { x1: Math.min(w1.x, w2.x), y1: Math.min(w1.y, w2.y), x2: Math.max(w1.x, w2.x), y2: Math.max(w1.y, w2.y) };
+        return state.objects
+            .filter(o => o.type === 'path-obj' && typeof o.w === 'number' && typeof o.h === 'number')
+            .filter(o => intersectsRect({ x1: o.x, y1: o.y, x2: o.x + o.w, y2: o.y + o.h }, selRect))
+            .map(o => o.id);
+    }
+
+    function save() { localStorage.setItem('easel_v41', JSON.stringify({ objects: state.objects, pan: state.pan, zoom: state.zoom, theme: state.theme, paintColor: state.paintColor })); }
+    function load() {
+        const d = localStorage.getItem('easel_v41');
+        if (d) { try { 
+            const p = JSON.parse(d); Object.assign(state, p);
+            document.body.setAttribute('data-theme', state.theme);
+            document.getElementById('theme-toggle').innerHTML = `<i data-lucide="${state.theme==='light'?'moon':'sun'}"></i>`;
+            state.objects.forEach(render); 
+        } catch(e){} }
+        if (!state.paintColor) state.paintColor = getDefaultInk();
+        applyInkTheme(null);
+        updateXform(); lucide.createIcons();
+    }
+
+    function render(obj) {
+        const el = document.createElement('div'); el.className = `object ${obj.type}`; el.dataset.id = obj.id; el.style.left = obj.x + 'px'; el.style.top = obj.y + 'px';
+        if (obj.type === 'card') {
+            if (obj.loading) {
+                const favicon = obj.domain ? `https://www.google.com/s2/favicons?domain=${obj.domain}&sz=32` : '';
+                el.innerHTML = `
+                    <div class="card loading" data-url="${obj.originalUrl || ''}">
+                        <div class="capture-container">
+                            <div class="skeleton"></div>
+                        </div>
+                        <div class="card-info">
+                            <div class="loading-pill">
+                                ${favicon ? `<img src="${favicon}" class="card-favicon" alt="">` : `<div class="loading-badge"><div class="spinner" aria-hidden="true"></div></div>`}
+                                <div class="loading-text"><strong>Capturing</strong><span class="dots"></span></div>
+                            </div>
+                        </div>
+                    </div>`;
+            }
+            else {
+                const favicon = `https://www.google.com/s2/favicons?domain=${obj.domain}&sz=32`;
+                el.innerHTML = `
+                    <div class="card" data-url="${obj.originalUrl || 'https://' + obj.domain}">
+                        <div class="capture-container">
+                            ${obj.url ? `<img src="${obj.url}" class="capture-image">` : `<div class="capture-error">Capture failed<br>${obj.domain || ''}</div>`}
+                        </div>
+                        <div class="card-info">
+                            <img src="${favicon}" class="card-favicon" alt="">
+                            <span>${obj.domain}</span>
+                            <i data-lucide="arrow-up-right" class="card-arrow"></i>
+                            <div class="card-separator"></div>
+                            <div class="card-delete" data-card-id="${obj.id}">
+                                <i data-lucide="trash-2"></i>
+                            </div>
+                        </div>
+                    </div>`;
+                // カード全体をクリック可能に（ドラッグの場合は無視）
+                const cardEl = el.querySelector('.card');
+                let cardMouseDown = null;
+                cardEl.addEventListener('mousedown', (e) => {
+                    cardMouseDown = { x: e.clientX, y: e.clientY };
+                });
+                cardEl.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (cardMouseDown) {
+                        const dx = Math.abs(e.clientX - cardMouseDown.x);
+                        const dy = Math.abs(e.clientY - cardMouseDown.y);
+                        // 5px以下の移動ならクリックとみなす
+                        if (dx < 5 && dy < 5) {
+                            const url = cardEl.getAttribute('data-url');
+                            window.open(url, '_blank');
+                        }
+                        cardMouseDown = null;
+                    }
+                });
+                // 削除ボタンのイベントハンドラー
+                const deleteBtn = el.querySelector('.card-delete');
+                if (deleteBtn) {
+                    deleteBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (confirm('Delete this card?')) {
+                            state.objects = state.objects.filter(o => o.id !== obj.id);
+                            el.remove();
+                            save();
+                        }
+                    });
+                }
+                // Lucideアイコンを再初期化
+                setTimeout(() => lucide.createIcons(), 10);
+            }
+        } else if (obj.type === 'text-obj') {
+            el.contentEditable = "true"; el.innerText = obj.content || '';
+            el.addEventListener('focus', () => { if (el.innerText === 'Type...') el.innerText = ''; });
+            el.addEventListener('blur', () => { 
+                obj.content = el.innerText; 
+                if (!obj.content.trim()) el.innerText = obj.content = 'Type...';
+                save(); 
+            });
+        } else if (obj.type === 'path-obj') {
+            el.innerHTML = `<svg style="width:${obj.w}px; height:${obj.h}px; overflow:visible;"><path d="${obj.d}" style="stroke:${obj.color||'#000'}"></path></svg>`;
+        }
+        el.onmousedown = (e) => {
+            // ペンツールはオブジェクト上でも描画を優先（選択しない・止めない）
+            if (state.tool === 'pencil') return;
+            // 描画直後の“確定”猶予：連続描画のため、直後は掴めないようにする
+            if (ignoreObjectId === obj.id && performance.now() < ignoreObjectUntil) return;
+
+            e.stopPropagation();
+            // 既に複数選択されている場合は、そのまま維持（範囲選択後の一括処理用）
+            if (!selectedIds.includes(obj.id)) select(obj.id);
+            // ハンドツール中でもカード/ペイント上は移動できる（Figma寄り）
+            const movableInPan = (state.tool === 'pan') && (obj.type === 'card' || obj.type === 'path-obj');
+            if (state.tool === 'select' || movableInPan) {
+                state.isDragging = true;
+                state.target = obj;
+                state.last = { x: e.clientX, y: e.clientY };
+                // 複数選択中に選択済みオブジェクトを掴んだらまとめて移動
+                if (selectedIds.length > 1 && selectedIds.includes(obj.id)) {
+                    dragGroup = { ids: [...selectedIds], startById: new Map() };
+                    dragGroup.ids.forEach((id) => {
+                        const o = state.objects.find(x => x.id === id);
+                        if (o) dragGroup.startById.set(id, { x: o.x, y: o.y });
+                    });
+                } else {
+                    dragGroup = null;
+                }
+            }
+        };
+        canvas.appendChild(el);
+        return el;
+    }
+
+    async function addCard() {
+        const raw = urlInput.value.trim(); if (!raw) return;
+        const url = normalizeUrl(raw);
+        let domain = 'site';
+        try { domain = new URL(url).hostname.replace(/^www\./,''); } catch(e) {}
+        const id = Date.now().toString(), vx = (window.innerWidth/2 - state.pan.x)/state.zoom, vy = (window.innerHeight/2 - state.pan.y)/state.zoom;
+        const obj = { id, type: 'card', url: '', originalUrl: url, x: vx - 120, y: vy - 80, loading: true, domain };
+        state.objects.push(obj);
+        render(obj);
+        select(id);
+        save();
+        urlInput.value = '';
+        showCaptureToast(`Capturing… ${obj.domain || 'site'}`, id);
+        // 視界外に作られた場合は自動で寄せる
+        setTimeout(() => ensureVisibleObjectId(id), 0);
+
+        const chosen = await fetchPageSpeedScreenshot(url);
+        obj.url = chosen; // empty means failed
+
+        obj.loading = false;
+        document.querySelector(`[data-id="${id}"]`)?.remove();
+        render(obj);
+        select(id);
+        save();
+        hideCaptureToast(id);
+    }
+
+    function select(id) {
+        if (!id) return clearSelection();
+        setSelectedIds([id]);
+    }
+    function updateColor(c) { 
+        // 以後のペン描画色としても保持
+        if (typeof c === 'string' && c.trim()) state.paintColor = c.trim();
+        const ids = selectedIds.length ? selectedIds : (state.selected ? [state.selected] : []);
+        if (!ids.length) return;
+        ids.forEach((id) => {
+            const o = state.objects.find(x => x.id === id); 
+            if (!o || o.type === 'card') return;
+            o.color = c;
+            const el = document.querySelector(`[data-id="${id}"]`);
+            if (!el) return;
+            if (o.type === 'path-obj') el.querySelector('path')?.style && (el.querySelector('path').style.stroke = c);
+            else if (o.type === 'text-obj') el.style.color = c;
+        });
+        save(); 
+    }
+    function deleteSelected() { 
+        const ids = selectedIds.length ? selectedIds : (state.selected ? [state.selected] : []);
+        if (!ids.length) return;
+        state.objects = state.objects.filter(o => !ids.includes(o.id));
+        ids.forEach(id => document.querySelector(`[data-id="${id}"]`)?.remove());
+        clearSelection();
+        save();
+    }
+    function updateXform() { canvas.style.transform = `translate(${state.pan.x}px, ${state.pan.y}px) scale(${state.zoom})`; zoomDisplay.innerText = Math.round(state.zoom * 100) + '%'; }
+    function setTool(t) { 
+        state.tool = t; 
+        document.querySelectorAll('.btn').forEach(b => { if(b.id?.startsWith('tool-')) b.classList.toggle('active', b.id === `tool-${t}`); }); 
+        applyViewportCursor();
+    }
+    function resetView() { state.zoom = 1.0; state.pan = { x: window.innerWidth/2 - 10000, y: window.innerHeight/2 - 10000 }; updateXform(); save(); }
+    function toggleTheme() { 
+        const prev = state.theme;
+        state.theme = state.theme==='light'?'dark':'light'; 
+        document.body.setAttribute('data-theme', state.theme); 
+        document.getElementById('theme-toggle').innerHTML = `<i data-lucide="${state.theme==='light'?'moon':'sun'}"></i>`;
+        lucide.createIcons();
+        applyInkTheme(prev);
+        save(); 
+    }
+
+    viewport.onmousedown = (e) => {
+        const r = viewport.getBoundingClientRect(), cx = (e.clientX - r.left - state.pan.x)/state.zoom, cy = (e.clientY - r.top - state.pan.y)/state.zoom;
+        const panMode = (state.tool === 'pan') || spaceDown;
+        if (panMode) { 
+            // ハンド or Space長押しでパン
+            state.isPanning = true; 
+            state.last = { x: e.clientX, y: e.clientY }; 
+            applyViewportCursor();
+            return;
+        }
+        if (state.tool === 'select') { 
+            // 選択ツール：空白ドラッグでマーキー（ペイントのみ範囲選択）
+            clearSelection();
+            marqueeActive = true;
+            marqueeStart = { x: e.clientX, y: e.clientY };
+            marquee.style.display = 'block';
+            marqueeBadge.style.display = 'flex';
+            marqueeBadge.textContent = '0 selected';
+            marquee.style.left = e.clientX + 'px';
+            marquee.style.top = e.clientY + 'px';
+            marquee.style.width = '0px';
+            marquee.style.height = '0px';
+            state.last = { x: e.clientX, y: e.clientY };
+            viewport.classList.add('marquee');
+        }
+        else if (state.tool === 'pencil') {
+            state.isDrawing = true;
+            state.points = [{x:cx, y:cy}];
+            state.currentPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            state.currentPath.style.fill = "none";
+            if (!state.paintColor) state.paintColor = getDefaultInk();
+            state.currentPath.style.stroke = state.paintColor;
+            state.currentPath.style.strokeWidth = "3";
+            drawingOverlay.appendChild(state.currentPath);
+        }
+        else if (state.tool === 'text') { const id = Date.now().toString(); const obj = { id, type: 'text-obj', x: cx, y: cy, content: 'Type...' }; state.objects.push(obj); const el = render(obj); select(id); setTimeout(() => el.focus(), 10); setTool('select'); save(); }
+    };
+    window.onmousemove = (e) => {
+        const dx = e.clientX - state.last.x, dy = e.clientY - state.last.y;
+        if (state.isPanning) { state.pan.x += dx; state.pan.y += dy; updateXform(); }
+        else if (state.isDragging && state.target) {
+            if (dragGroup && dragGroup.ids.length > 1) {
+                const ddx = dx / state.zoom;
+                const ddy = dy / state.zoom;
+                dragGroup.ids.forEach((id) => {
+                    const o = state.objects.find(x => x.id === id);
+                    const start = dragGroup.startById.get(id);
+                    if (!o || !start) return;
+                    o.x = start.x + ddx;
+                    o.y = start.y + ddy;
+                    const el = document.querySelector(`[data-id="${id}"]`);
+                    if (el) { el.style.left = o.x + 'px'; el.style.top = o.y + 'px'; }
+                });
+            } else {
+                state.target.x += dx/state.zoom; state.target.y += dy/state.zoom;
+                const el = document.querySelector(`[data-id="${state.target.id}"]`);
+                if (el) { el.style.left = state.target.x + 'px'; el.style.top = state.target.y + 'px'; }
+            }
+        }
+        else if (state.isDrawing) { const r = viewport.getBoundingClientRect(), cx = (e.clientX - r.left - state.pan.x)/state.zoom, cy = (e.clientY - r.top - state.pan.y)/state.zoom; state.points.push({x:cx, y:cy}); state.currentPath.setAttribute("d", state.points.map((p,i)=>`${i?'L':'M'} ${p.x} ${p.y}`).join(' ')); }
+        else if (marqueeActive && marqueeStart) {
+            const x1 = Math.min(marqueeStart.x, e.clientX);
+            const y1 = Math.min(marqueeStart.y, e.clientY);
+            const x2 = Math.max(marqueeStart.x, e.clientX);
+            const y2 = Math.max(marqueeStart.y, e.clientY);
+            marquee.style.left = x1 + 'px';
+            marquee.style.top = y1 + 'px';
+            marquee.style.width = (x2 - x1) + 'px';
+            marquee.style.height = (y2 - y1) + 'px';
+            const ids = computePaintIdsInClientRect(x1, y1, x2, y2);
+            marqueeBadge.style.display = 'flex';
+            marqueeBadge.textContent = `${ids.length} selected`;
+        }
+        state.last = { x: e.clientX, y: e.clientY };
+    };
+    window.onmouseup = () => {
+        if (state.isDrawing) {
+            const d = state.currentPath.getAttribute("d");
+            if (d) {
+                const xs = state.points.map(p => p.x), ys = state.points.map(p => p.y), minX = Math.min(...xs), minY = Math.min(...ys), maxX = Math.max(...xs), maxY = Math.max(...ys);
+                const relD = state.points.map((p,i)=>`${i?'L':'M'} ${p.x-minX} ${p.y-minY}`).join(' ');
+                if (!state.paintColor) state.paintColor = getDefaultInk();
+                const obj = { id: Date.now().toString(), type: 'path-obj', d: relD, x: minX, y: minY, w: maxX-minX, h: maxY-minY, color: state.paintColor };
+                state.objects.push(obj); render(obj);
+                // 連続描画のため、確定直後はこの線を掴めない猶予を入れる
+                ignoreObjectId = obj.id;
+                ignoreObjectUntil = performance.now() + 220;
+            }
+            state.currentPath.remove();
+        }
+        state.isPanning = state.isDragging = state.isDrawing = false;
+        dragGroup = null;
+        if (marqueeActive) {
+            marqueeActive = false;
+            marquee.style.display = 'none';
+            marqueeBadge.style.display = 'none';
+            viewport.classList.remove('marquee');
+            if (marqueeStart) {
+                const x1 = Math.min(marqueeStart.x, state.last.x);
+                const y1 = Math.min(marqueeStart.y, state.last.y);
+                const x2 = Math.max(marqueeStart.x, state.last.x);
+                const y2 = Math.max(marqueeStart.y, state.last.y);
+                // 小さすぎるドラッグは無視（クリック扱い）
+                if (Math.abs(x2 - x1) > 4 && Math.abs(y2 - y1) > 4) {
+                    const ids = computePaintIdsInClientRect(x1, y1, x2, y2);
+                    setSelectedIds(ids);
+                } else {
+                    clearSelection();
+                }
+            }
+            marqueeStart = null;
+        }
+        applyViewportCursor();
+        save();
+    };
+    window.onwheel = (e) => { e.preventDefault(); if (e.ctrlKey || e.metaKey) { const oldZ = state.zoom; state.zoom = Math.min(Math.max(0.1, state.zoom - e.deltaY * 0.01), 3.0); const cx = (e.clientX - state.pan.x)/oldZ, cy = (e.clientY - state.pan.y)/oldZ; state.pan.x = e.clientX - cx*state.zoom; state.pan.y = e.clientY - cy*state.zoom; updateXform(); } else { state.pan.x -= e.deltaX; state.pan.y -= e.deltaY; updateXform(); } save(); };
+    window.onkeydown = (e) => { 
+        if (e.target.tagName==='INPUT' || e.target.contentEditable==='true') return; 
+        // Space長押しで一時的にハンド（Figma）
+        if (e.code === 'Space') {
+            e.preventDefault();
+            if (!spaceDown) {
+                spaceDown = true;
+                applyViewportCursor();
+            }
+            return;
+        }
+        // Command+0 / Ctrl+0 で現在地に戻る
+        if (e.key === '0' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); resetView(); return; }
+        // Escキーでペンツールやテキストツールから選択ツールに戻る
+        if (e.key === 'Escape') { setTool('select'); return; }
+        const k = e.key.toLowerCase(); 
+        if(k==='v')setTool('select'); 
+        if(k==='h')setTool('pan'); 
+        if(k==='p')setTool('pencil'); 
+        if(k==='t')setTool('text'); 
+        if(k==='backspace'||k==='delete')deleteSelected(); 
+    };
+    window.onkeyup = (e) => {
+        if (e.code === 'Space') {
+            e.preventDefault();
+            spaceDown = false;
+            applyViewportCursor();
+        }
+    };
+    urlInput.onkeydown = (e) => { if(e.key==='Enter') addCard(); };
+    load();
+</script>
+</body>
+</html>

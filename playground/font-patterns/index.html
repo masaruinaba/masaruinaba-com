@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Font Patterns — Masaru Inaba</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Font Patterns — Masaru Inaba" />
+    <meta property="og:description" content="Visual exploration of font patterns and typography by Masaru Inaba." />
+    <meta property="og:image" content="/ogp.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Font Patterns — Masaru Inaba" />
+    <meta name="twitter:description" content="Visual exploration of font patterns and typography by Masaru Inaba." />
+    <meta name="twitter:image" content="/ogp.png" />
+    <meta name="description" content="Visual exploration of font patterns and typography by Masaru Inaba." />
+    <!-- Libraries -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b0b0c;
+            --font-color: #ffffff;
+            --ui-bg: rgba(20, 20, 22, 0.85);
+            --ui-border: rgba(255, 255, 255, 0.12);
+            --accent: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--font-color);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        #webgl-container {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            cursor: grab;
+        }
+        #webgl-container:active { cursor: grabbing; }
+
+        /* --- Refined UI --- */
+        .controls-ui {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translate(-50%, 20px);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 2000;
+            background: var(--ui-bg);
+            backdrop-filter: blur(24px);
+            padding: 8px 16px;
+            border-radius: 100px;
+            border: 1px solid var(--ui-border);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .controls-ui.is-visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translate(-50%, 0);
+        }
+
+        .ui-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 12px;
+            border-right: 1px solid var(--ui-border);
+        }
+        .ui-section:last-child { border-right: none; }
+
+        .ui-label {
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.35);
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            font-weight: 500;
+        }
+
+        .ui-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 10px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 6px 14px;
+            border-radius: 100px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .ui-btn:hover { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.2); }
+        .ui-btn.active { background: #ffffff; color: #000000; border-color: #ffffff; }
+
+        .icon-action-btn {
+            width: 32px;
+            height: 32px;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .icon-action-btn:hover { background: rgba(255, 255, 255, 0.15); transform: scale(1.05); border-color: rgba(255, 255, 255, 0.25); }
+        .icon-action-btn.active { background: #ffffff; color: #000000; border-color: #ffffff; }
+        .icon-action-btn svg { width: 14px; height: 14px; }
+
+        /* Custom Pattern Selector Above */
+        .pattern-selector-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .pattern-trigger {
+            font-size: 10px;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 6px 14px;
+            border-radius: 100px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            min-width: 140px;
+            transition: all 0.3s;
+        }
+        .pattern-trigger:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.2); }
+        .pattern-trigger svg { width: 12px; height: 12px; opacity: 0.5; }
+
+        .pattern-menu {
+            position: absolute;
+            bottom: calc(100% + 12px);
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: var(--ui-bg);
+            backdrop-filter: blur(32px);
+            border: 1px solid var(--ui-border);
+            border-radius: 16px;
+            padding: 6px;
+            min-width: 160px;
+            max-height: 400px;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .pattern-menu.is-open {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+        .pattern-menu::-webkit-scrollbar { width: 4px; }
+        .pattern-menu::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+
+        .pattern-option {
+            padding: 8px 14px;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.6);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .pattern-option:hover { background: rgba(255, 255, 255, 0.06); color: #ffffff; }
+        .pattern-option.selected { color: #ffffff; background: rgba(255, 255, 255, 0.1); }
+
+        input[type="range"] {
+            width: 70px;
+            height: 2px;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            border-radius: 2px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 8px;
+            height: 8px;
+            background: #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .panel-toggle {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--ui-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--ui-border);
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 2001;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .panel-toggle.is-hidden { opacity: 0; pointer-events: none; transform: scale(0.8); }
+        .panel-toggle svg { width: 18px; height: 18px; stroke-width: 1.5; }
+        .panel-toggle.active { transform: rotate(90deg); background: #ffffff; color: #000000; }
+
+        /* Recording Indicator */
+        .recording-indicator {
+            position: fixed;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            padding: 8px 24px;
+            border-radius: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            z-index: 3000;
+        }
+        .recording-indicator.is-active { display: flex; }
+        .recording-indicator::before { 
+            content: ""; 
+            width: 6px; 
+            height: 6px; 
+            background: #ff4d4d; 
+            border-radius: 50%; 
+            box-shadow: 0 0 10px #ff4d4d;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    </style>
+</head>
+<body>
+
+    <div id="webgl-container"></div>
+
+    <div id="rec-indicator" class="recording-indicator">RECORDING <span id="rec-timer">10S</span></div>
+
+    <div id="ui-container" class="controls-ui">
+        <div class="ui-section">
+            <span class="ui-label">Base</span>
+            <button id="btn-random" class="ui-btn" onclick="setPattern('random')">Random</button>
+            <button id="btn-sphere" class="ui-btn active" onclick="setPattern('sphere')">Sphere</button>
+        </div>
+        <div class="ui-section">
+            <span class="ui-label">Count</span>
+            <input type="range" id="diceCount" min="10" max="300" value="150" oninput="initScene()">
+        </div>
+        <div class="ui-section">
+            <span class="ui-label">Density</span>
+            <input type="range" id="density" min="30" max="200" value="100" oninput="initScene()">
+        </div>
+        <div class="ui-section">
+            <span class="ui-label">Record</span>
+            <div class="pattern-selector-container">
+                <div class="pattern-trigger" onclick="togglePatternMenu()">
+                    <span id="current-pattern-label">Simple Record</span>
+                    <i data-lucide="chevron-up"></i>
+                </div>
+                <div id="pattern-menu" class="pattern-menu">
+                    <div class="pattern-option selected" data-value="none" onclick="selectPattern('none', 'Simple Record')">Simple Record</div>
+                    <div class="pattern-option" data-value="pulse" onclick="selectPattern('pulse', 'Gentle Pulse')">Gentle Pulse</div>
+                    <div class="pattern-option" data-value="wave" onclick="selectPattern('wave', 'Vertical Wave')">Vertical Wave</div>
+                    <div class="pattern-option" data-value="orbit" onclick="selectPattern('orbit', 'Orbit Drift')">Orbit Drift</div>
+                    <div class="pattern-option" data-value="bounce" onclick="selectPattern('bounce', 'Soft Bounce')">Soft Bounce</div>
+                    <div class="pattern-option" data-value="scatter" onclick="selectPattern('scatter', 'Cosmic Scatter')">Cosmic Scatter</div>
+                    <div class="pattern-option" data-value="vortex" onclick="selectPattern('vortex', 'Spiral Vortex')">Spiral Vortex</div>
+                    <div class="pattern-option" data-value="grid" onclick="selectPattern('grid', 'Grid Snap')">Grid Snap</div>
+                    <div class="pattern-option" data-value="float" onclick="selectPattern('float', 'Floating Breathe')">Floating Breathe</div>
+                    <div class="pattern-option" data-value="heartbeat" onclick="selectPattern('heartbeat', 'Heartbeat')">Heartbeat</div>
+                    <div class="pattern-option" data-value="twist" onclick="selectPattern('twist', 'DNA Twist')">DNA Twist</div>
+                    <div class="pattern-option" data-value="breathe" onclick="selectPattern('breathe', 'Deep Breathe')">Deep Breathe</div>
+                    <div class="pattern-option" data-value="flow" onclick="selectPattern('flow', 'Sine Flow')">Sine Flow</div>
+                    <div class="pattern-option" data-value="jelly" onclick="selectPattern('jelly', 'Jelly Wobble')">Jelly Wobble</div>
+                    <div class="pattern-option" data-value="burst" onclick="selectPattern('burst', 'Star Burst')">Star Burst</div>
+                    <div class="pattern-option" data-value="swing" onclick="selectPattern('swing', 'Pendulum Swing')">Pendulum Swing</div>
+                </div>
+                <div class="icon-action-btn" onclick="handlePreview()" title="Preview">
+                    <i data-lucide="eye"></i>
+                </div>
+                <div class="icon-action-btn" onclick="handleRecord()" title="Record">
+                    <i data-lucide="video"></i>
+                </div>
+            </div>
+        </div>
+        <div class="ui-section">
+            <div class="icon-action-btn" onclick="initScene()" title="Shuffle">
+                <i data-lucide="refresh-cw"></i>
+            </div>
+            <div id="btn-anim" class="icon-action-btn active" onclick="toggleAnimate()" title="Animation">
+                <i data-lucide="square"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-toggle" onclick="togglePanel()" id="toggle-btn">
+        <i data-lucide="plus"></i>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const GOOGLE_FONTS = [
+            'Inter', 'Montserrat', 'Poppins', 'Roboto', 'Lato', 'Open Sans', 'Oswald', 'Raleway', 'Ubuntu', 'Nunito', 
+            'Work Sans', 'Quicksand', 'Kanit', 'Mulish', 'Heebo', 'DM Sans', 'Rubik', 'Outfit', 'Space Grotesk', 'Syne', 
+            'Manrope', 'Lexend', 'Public Sans', 'Chivo', 'Sora', 'Plus Jakarta Sans', 'Urbanist', 'Figtree', 'Archivo', 'Jost',
+            'Playfair Display', 'Lora', 'Merriweather', 'PT Serif', 'Crimson Text', 'Noto Serif', 'Fraunces', 'DM Serif Display', 
+            'Libre Baskerville', 'Cormorant Garamond', 'EB Garamond', 'Bitter', 'BioRhyme', 'Inknut Antiqua', 'Eczar', 'Abril Fatface', 
+            'Arvo', 'Domine', 'Faustina', 'Old Standard TT', 'Prata', 'Yeseva One', 'Young Serif', 'Bricolage Grotesque',
+            'Bebas Neue', 'Righteous', 'Bungee', 'Monoton', 'Press Start 2P', 'Special Elite', 'Lobster', 'Pacifico', 'Satisfy', 
+            'Kaushan Script', 'Permanent Marker', 'Creepster', 'Nosifer', 'Rye', 'Sancreek', 'Shojumaru', 'UnifrakturMaguntia', 
+            'Metal Mania', 'Pinyon Script', 'Cinzel', 'Almendra Display', 'MedievalSharp', 'New Rocker', 'Frijole', 'Faster One', 
+            'Megrim', 'Plaster', 'Glass Antiqua', 'Grenze Gotisch', 'Unbounded', 'Shrikhand', 'Titan One', 'Luckiest Guy', 'Bangers', 
+            'Carter One', 'Ultra', 'Bowlby One SC', 'Alfa Slab One', 'Major Mono Display', 'Kelly Slab', 'Wallpoet', 'Pirata One', 
+            'Silkscreen', 'DotGothic16', 'Zilla Slab Highlight', 'Butcherman', 'Fascinate Inline', 'Rubik Glitch', 'Climate Crisis', 
+            'Rampart One', 'Stalinist One', 'Pixelify Sans', 'Jacquarda Bastarda 9', 'Bungee Shade', 'Londrina Shadow',
+            'Eater', 'Snowburst One', 'Henny Penny', 'Fredericka the Great', 'Kablammo', 'Vampiro One', 'Codystar', 'Diplomata SC', 
+            'Monofett', 'Ewert', 'Butcherman', 'Creepster', 'Shojumaru'
+        ];
+
+        const UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const LOWER = "abcdefghijklmnopqrstuvwxyz";
+        const NUMS  = "0123456789";
+        const SYMS  = "!@#$%^&*?";
+
+        let scene, camera, renderer, diceGroup;
+        let isAnimating = false;
+        let currentPattern = 'sphere';
+        let selectedPatternValue = 'none';
+        let diceList = [];
+        let uiHideTimer;
+        let textureCache = {}; // Cache for memory optimization
+        
+        let mediaRecorder;
+        let recordedChunks = [];
+        let isRecording = false;
+        const RECORD_DURATION = 10;
+        
+        let targetScale = 1.3;
+        let targetPan = new THREE.Vector3(0, 0, 0);
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0b0b0c);
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
+            camera.position.z = 1000;
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.getElementById('webgl-container').appendChild(renderer.domElement);
+
+            diceGroup = new THREE.Group();
+            scene.add(diceGroup);
+
+            initScene();
+            setupInteractions();
+            setupAutoHideUI();
+            animate();
+        }
+
+        function createTextTexture(text, font) {
+            const cacheKey = `${font}_${text}`;
+            if (textureCache[cacheKey]) return textureCache[cacheKey];
+
+            const size = 1024;
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#0b0b0c';
+            ctx.fillRect(0, 0, size, size);
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = `900 ${size * 0.7}px '${font}', sans-serif`;
+            ctx.fillText(text, size / 2, size / 2);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            texture.magFilter = THREE.LinearFilter;
+            texture.minFilter = THREE.LinearMipmapLinearFilter;
+            
+            textureCache[cacheKey] = texture;
+            return texture;
+        }
+
+        function getRandomChar() {
+            const rand = Math.random();
+            if (rand < 0.2) return "";
+            if (rand < 0.85) return (UPPER + LOWER)[Math.floor(Math.random() * (UPPER.length + LOWER.length))];
+            if (rand < 0.95) return NUMS[Math.floor(Math.random() * NUMS.length)];
+            return SYMS[Math.floor(Math.random() * SYMS.length)];
+        }
+
+        async function initScene() {
+            // Clear textures only if needed, but let's clear group first
+            while(diceGroup.children.length > 0) {
+                const child = diceGroup.children[0];
+                if (child.material) {
+                    child.material.forEach(m => {
+                        // We don't dispose textures here because they are cached
+                    });
+                }
+                diceGroup.remove(child);
+            }
+            // Clear cache on Shuffle to avoid infinite growth
+            if (!isRecording) textureCache = {}; 
+            
+            diceList = [];
+            const count = parseInt(document.getElementById('diceCount').value) || 150;
+            const densityVal = parseInt(document.getElementById('density').value) || 100;
+            const spreadBase = densityVal * 7;
+            
+            const selectedFonts = [];
+            for (let i = 0; i < 20; i++) {
+                const isQuirky = Math.random() < 0.45; // Increased quirk bias
+                selectedFonts.push(GOOGLE_FONTS[isQuirky ? 54 + Math.floor(Math.random() * (GOOGLE_FONTS.length - 54)) : Math.floor(Math.random() * 54)]);
+            }
+
+            const fontLink = document.createElement('link');
+            fontLink.rel = 'stylesheet';
+            fontLink.href = `https://fonts.googleapis.com/css2?${selectedFonts.map(f => `family=${f.replace(/ /g, '+')}:wght@900`).join('&')}&display=swap`;
+            document.head.appendChild(fontLink);
+
+            await new Promise(r => setTimeout(r, 400));
+
+            const geometry = new THREE.BoxGeometry(100, 100, 100);
+            for (let i = 0; i < count; i++) {
+                const font = selectedFonts[Math.floor(Math.random() * selectedFonts.length)];
+                const materials = [];
+                for (let j = 0; j < 6; j++) materials.push(new THREE.MeshBasicMaterial({ map: createTextTexture(getRandomChar(), font) }));
+
+                const dice = new THREE.Mesh(geometry, materials);
+                const pos = new THREE.Vector3();
+                if (currentPattern === 'sphere') {
+                    const phi = Math.acos(-1 + (2 * i) / count);
+                    const theta = Math.sqrt(count * Math.PI) * phi;
+                    const radius = spreadBase; 
+                    pos.set(radius * Math.sin(phi) * Math.cos(theta), radius * Math.sin(phi) * Math.sin(theta), radius * Math.cos(phi));
+                } else {
+                    const rSize = densityVal * 25;
+                    pos.set((Math.random() - 0.5) * rSize * 1.2, (Math.random() - 0.5) * rSize * 0.8, (Math.random() - 0.5) * rSize * 0.5);
+                }
+                dice.position.copy(pos);
+                dice.userData.origin = pos.clone();
+                dice.rotation.set(Math.random()*Math.PI*2, Math.random()*Math.PI*2, Math.random()*Math.PI*2);
+                dice.userData.vel = new THREE.Vector3((Math.random()-0.5)*0.012, (Math.random()-0.5)*0.012, (Math.random()-0.5)*0.012);
+                diceGroup.add(dice);
+                diceList.push(dice);
+            }
+        }
+
+        function togglePatternMenu() { document.getElementById('pattern-menu').classList.toggle('is-open'); }
+        function selectPattern(val, label) {
+            selectedPatternValue = val;
+            document.getElementById('current-pattern-label').textContent = label;
+            document.querySelectorAll('.pattern-option').forEach(opt => opt.classList.toggle('selected', opt.dataset.value === val));
+            document.getElementById('pattern-menu').classList.remove('is-open');
+        }
+
+        function setupInteractions() {
+            window.addEventListener('wheel', (e) => { 
+                // Don't scale if scrolling over UI elements
+                if (e.target.closest('.controls-ui') || e.target.closest('.pattern-menu') || e.target.closest('.panel-toggle')) return;
+                targetScale = Math.min(Math.max(0.1, targetScale - e.deltaY * 0.001), 5); 
+            }, { passive: false });
+            const container = document.getElementById('webgl-container');
+            container.addEventListener('mousedown', (e) => { isDragging = true; previousMousePosition = { x: e.clientX, y: e.clientY }; });
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                targetPan.x += (e.clientX - previousMousePosition.x) * (1/targetScale);
+                targetPan.y -= (e.clientY - previousMousePosition.y) * (1/targetScale);
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+            window.addEventListener('mouseup', () => isDragging = false);
+            window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+            window.addEventListener('click', (e) => {
+                if (!e.target.closest('.pattern-selector-container')) document.getElementById('pattern-menu').classList.remove('is-open');
+            });
+        }
+
+        function setupAutoHideUI() {
+            const btn = document.getElementById('toggle-btn');
+            const resetTimer = () => {
+                btn.classList.remove('is-hidden');
+                clearTimeout(uiHideTimer);
+                if (!document.getElementById('ui-container').classList.contains('is-visible')) uiHideTimer = setTimeout(() => btn.classList.add('is-hidden'), 3000);
+            };
+            window.addEventListener('mousemove', resetTimer);
+            window.addEventListener('mousedown', resetTimer);
+            resetTimer();
+        }
+
+        function togglePanel() {
+            const ui = document.getElementById('ui-container');
+            const btn = document.getElementById('toggle-btn');
+            ui.classList.toggle('is-visible');
+            btn.classList.toggle('active');
+            btn.innerHTML = `<i data-lucide="${ui.classList.contains('is-visible') ? 'x' : 'plus'}"></i>`;
+            lucide.createIcons();
+            if (!ui.classList.contains('is-visible')) { setupAutoHideUI(); } else { clearTimeout(uiHideTimer); btn.classList.remove('is-hidden'); }
+        }
+
+        function setPattern(p) { currentPattern = p; document.getElementById('btn-random').classList.toggle('active', p === 'random'); document.getElementById('btn-sphere').classList.toggle('active', p === 'sphere'); initScene(); }
+        function toggleAnimate() { isAnimating = !isAnimating; const btn = document.getElementById('btn-anim'); btn.innerHTML = `<i data-lucide="${isAnimating ? 'play' : 'square'}"></i>`; btn.classList.toggle('active', !isAnimating); lucide.createIcons(); }
+
+        function handlePreview() {
+            if (selectedPatternValue === 'none') {
+                if (!isAnimating) {
+                    isAnimating = true;
+                    setTimeout(() => { if (!isRecording) isAnimating = false; }, 10000);
+                }
+            } else {
+                playRhythmAnimation(selectedPatternValue);
+            }
+        }
+
+        function handleRecord() { startRecording(selectedPatternValue); }
+
+        async function startRecording(pattern) {
+            if (isRecording) return;
+            isRecording = true;
+            recordedChunks = [];
+            const stream = renderer.domElement.captureStream(60);
+            
+            // QuickTime Compatible Check (avc1 is preferred for Apple devices)
+            const formats = [
+                'video/mp4;codecs=avc1',
+                'video/mp4;codecs=h264',
+                'video/mp4',
+                'video/webm;codecs=h264',
+                'video/webm'
+            ];
+
+            let mimeType = 'video/webm';
+            for (const f of formats) {
+                if (MediaRecorder.isTypeSupported(f)) {
+                    mimeType = f;
+                    break;
+                }
+            }
+            
+            mediaRecorder = new MediaRecorder(stream, { 
+                mimeType: mimeType, 
+                videoBitsPerSecond: 16000000 
+            });
+
+            mediaRecorder.ondataavailable = (e) => recordedChunks.push(e.data);
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(recordedChunks, { type: mimeType });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+                a.download = `font-patterns-10s-${pattern}-${Date.now()}.${ext}`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+                isRecording = false;
+                document.getElementById('rec-indicator').classList.remove('is-active');
+            };
+
+            if (pattern !== 'none') playRhythmAnimation(pattern);
+            mediaRecorder.start();
+            document.getElementById('rec-indicator').classList.add('is-active');
+            
+            let timeLeft = RECORD_DURATION;
+            const itv = setInterval(() => { 
+                document.getElementById('rec-timer').textContent = `${--timeLeft}S`;
+                if(timeLeft <= 0) clearInterval(itv);
+            }, 1000);
+            setTimeout(() => mediaRecorder.stop(), RECORD_DURATION * 1000);
+        }
+
+        function playRhythmAnimation(pattern) {
+            diceList.forEach(dice => gsap.killTweensOf([dice.position, dice.rotation]));
+
+            diceList.forEach((dice, i) => {
+                const tl = gsap.timeline();
+                const origin = dice.userData.origin;
+                
+                switch(pattern) {
+                    case 'pulse': 
+                        tl.to(dice.position, { x: origin.x*1.35, y: origin.y*1.35, z: origin.z*1.35, duration: 4.5, ease: "sine.inOut" })
+                          .to(dice.position, { x: origin.x, y: origin.y, z: origin.z, duration: 5.5, ease: "power2.inOut" });
+                        break;
+                    case 'wave': 
+                        const waveDelay = (origin.y + 700) / 1400 * 2;
+                        tl.to(dice.position, { x: origin.x*1.45, z: origin.z*1.45, duration: 3, ease: "expo.out", delay: waveDelay })
+                          .to(dice.position, { x: origin.x, z: origin.z, duration: 7 - waveDelay, ease: "elastic.out(1, 0.7)" });
+                        break;
+                    case 'orbit':
+                        tl.to(dice.position, { x: origin.z, z: -origin.x, duration: 5, ease: "sine.inOut" })
+                          .to(dice.position, { x: origin.x, z: origin.z, duration: 5, ease: "sine.inOut" });
+                        break;
+                    case 'bounce': 
+                        const bounceDelay = (i % 12) * 0.1;
+                        tl.to(dice.position, { y: origin.y + 300, duration: 2, ease: "power3.out", delay: bounceDelay })
+                          .to(dice.position, { y: origin.y, duration: 8 - bounceDelay, ease: "bounce.out" });
+                        break;
+                    case 'scatter': 
+                        const randPos = new THREE.Vector3((Math.random()-0.5)*3500, (Math.random()-0.5)*3500, (Math.random()-0.5)*3500);
+                        tl.to(dice.position, { x: randPos.x, y: randPos.y, z: randPos.z, duration: 4, ease: "power2.out" })
+                          .to(dice.position, { x: origin.x, y: origin.y, z: origin.z, duration: 6, ease: "expo.inOut" });
+                        break;
+                    case 'vortex': 
+                        const angle = (i / diceList.length) * Math.PI * 6;
+                        const dist = (currentPattern === 'sphere' ? 1400 : 2500) + Math.random() * 300;
+                        tl.to(dice.position, { x: Math.cos(angle)*dist, z: Math.sin(angle)*dist, y: origin.y + (Math.random()-0.5)*500, duration: 4.5, ease: "power2.inOut" })
+                          .to(dice.position, { x: origin.x, y: origin.y, z: origin.z, duration: 5.5, ease: "power4.out" });
+                        break;
+                    case 'grid': 
+                        const gridS = 400;
+                        const c = Math.ceil(Math.sqrt(diceList.length));
+                        const gx = ((i % c) - c/2) * gridS;
+                        const gy = (Math.floor(i / c) - c/2) * gridS;
+                        tl.to(dice.position, { x: gx, y: gy, z: 0, duration: 3.5, ease: "expo.inOut" })
+                          .to(dice.position, { x: origin.x, y: origin.y, z: origin.z, duration: 6.5, ease: "power3.inOut", delay: 1 });
+                        break;
+                    case 'float': 
+                        const floatDelay = (i % 5) * 0.3;
+                        tl.to(dice.position, { y: origin.y + 250, duration: 4, ease: "sine.inOut", delay: floatDelay })
+                          .to(dice.position, { y: origin.y - 250, duration: 4, ease: "sine.inOut" })
+                          .to(dice.position, { y: origin.y, duration: 2 - floatDelay, ease: "sine.inOut" });
+                        break;
+                    case 'heartbeat':
+                        tl.to(dice.position, { x: origin.x*1.15, y: origin.y*1.15, z: origin.z*1.15, duration: 0.1, ease: "power2.out" })
+                          .to(dice.position, { x: origin.x, y: origin.y, z: origin.z, duration: 0.1, ease: "power2.in" })
+                          .to(dice.position, { x: origin.x*1.1, y: origin.y*1.1, z: origin.z*1.1, duration: 0.1, ease: "power2.out", delay: 0.05 })
+                          .to(dice.position, { x: origin.x, y: origin.y, z: origin.z, duration: 0.5, ease: "power2.in" });
+                        break;
+                    case 'twist':
+                        const twistAngle = (origin.y / 700) * Math.PI;
+                        tl.to(dice.position, { 
+                            x: origin.x * Math.cos(twistAngle) - origin.z * Math.sin(twistAngle),
+                            z: origin.x * Math.sin(twistAngle) + origin.z * Math.cos(twistAngle),
+                            duration: 5, ease: "power2.inOut" 
+                        }).to(dice.position, { x: origin.x, z: origin.z, duration: 5, ease: "power2.inOut" });
+                        break;
+                    case 'breathe':
+                        tl.to(dice.position, { x: origin.x*0.7, y: origin.y*0.7, z: origin.z*0.7, duration: 5, ease: "sine.inOut" })
+                          .to(dice.position, { x: origin.x, y: origin.y, z: origin.z, duration: 5, ease: "sine.inOut" });
+                        break;
+                    case 'flow':
+                        const flowDelay = (origin.x + 1000) / 2000 * 2;
+                        tl.to(dice.position, { y: origin.y + 200, duration: 2, ease: "sine.inOut", delay: flowDelay })
+                          .to(dice.position, { y: origin.y - 200, duration: 4, ease: "sine.inOut" })
+                          .to(dice.position, { y: origin.y, duration: 4 - flowDelay, ease: "sine.inOut" });
+                        break;
+                    case 'jelly':
+                        tl.to(dice.position, { x: origin.x*1.2, duration: 0.5, ease: "elastic.out(1, 0.3)" })
+                          .to(dice.position, { y: origin.y*1.2, duration: 0.5, ease: "elastic.out(1, 0.3)" })
+                          .to(dice.position, { x: origin.x, y: origin.y, duration: 1, ease: "elastic.out(1, 0.3)" });
+                        break;
+                    case 'burst':
+                        tl.to(dice.position, { x: origin.x*2, y: origin.y*2, z: origin.z*2, duration: 1, ease: "expo.out" })
+                          .to(dice.position, { x: origin.x, y: origin.y, z: origin.z, duration: 8, ease: "power4.inOut", delay: 1 });
+                        break;
+                    case 'swing':
+                        tl.to(dice.position, { x: origin.x + 300, duration: 3, ease: "sine.inOut" })
+                          .to(dice.position, { x: origin.x - 300, duration: 4, ease: "sine.inOut" })
+                          .to(dice.position, { x: origin.x, duration: 3, ease: "sine.inOut" });
+                        break;
+                }
+                gsap.to(dice.rotation, { x: "+=" + Math.PI*2, y: "+=" + Math.PI*2, duration: 10, ease: "none" });
+            });
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (isAnimating && !isRecording) {
+                diceList.forEach(dice => {
+                    dice.rotation.x += dice.userData.vel.x;
+                    dice.rotation.y += dice.userData.vel.y;
+                    dice.rotation.z += dice.userData.vel.z;
+                });
+            }
+            diceGroup.scale.set(targetScale, targetScale, targetScale);
+            diceGroup.position.lerp(targetPan, 0.1);
+            renderer.render(scene, camera);
+        }
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

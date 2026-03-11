@@ -1,493 +1,1005 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portfolio</title>
-  
-  <!-- GSAP -->
-  <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
-  <script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Masaru Inaba</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Masaru Inaba" />
+    <meta property="og:description" content="Masaru Inaba — Web Designer. Works, playground experiments, and lab projects." />
+    <meta property="og:image" content="/ogp.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Masaru Inaba" />
+    <meta name="twitter:description" content="Masaru Inaba — Web Designer. Works, playground experiments, and lab projects." />
+    <meta name="twitter:image" content="/ogp.png" />
+    <meta name="description" content="Masaru Inaba — Web Designer. Works, playground experiments, and lab projects." />
 
-  <style>
-    :root {
-      --bg-color: #1a1a1a;
-      --card-border: rgba(255, 255, 255, 0.1);
-      --card-radius: 4.89px;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      background-color: var(--bg-color);
-      color: #ffffff;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      overflow: hidden;
-      width: 100vw;
-      height: 100vh;
-    }
-
-    .app-container {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-    }
-
-    /* 左側のロゴセクション */
-    .sidebar {
-      position: absolute;
-      left: 198px;
-      top: 0;
-      bottom: 0;
-      display: flex;
-      align-items: center;
-      z-index: 100;
-      pointer-events: none;
-    }
-
-    .logo-maison {
-      width: 200px; /* 横200pxに変更 */
-      height: auto;
-    }
-
-    .logo-maison svg {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-
-    /* 右側のカルーセルセクション */
-    .carousel-container {
-      position: absolute;
-      left: 50%; /* 画面右半分 */
-      top: 0;
-      bottom: 0;
-      width: 50%; /* 画面右半分 */
-      display: flex;
-      align-items: center;
-      justify-content: center; /* 右半分の中で中央配置 */
-      overflow: visible;
-      perspective: 2000px;
-    }
-
-    .carousel-track {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 24px; /* リスト間のマージンを24pxに */
-      padding: 0;
-      will-change: transform;
-      transform-style: preserve-3d;
-    }
-
-    .card {
-      width: 460px; /* 460pxの正方形 */
-      height: 460px; /* 460pxの正方形 */
-      border-radius: 0px;
-      overflow: hidden;
-      position: relative;
-      cursor: pointer;
-      background-color: #000;
-      border: none;
-      box-shadow: none;
-      flex-shrink: 0;
-    }
-
-    .card img, .thumbnail-wrapper {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      pointer-events: none;
-    }
-
-    /* マウスオーバーの拡大はなし */
-
-    /* 数字も無しなので .card-label 関連を削除 */
-    .card-label {
-      display: none;
-    }
-
-    /* サムネイルとしてのiframe */
-    .thumbnail-wrapper {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      background: #000;
-      overflow: hidden;
-    }
-
-    .card-thumbnail-iframe {
-      width: 200%;
-      height: 200%;
-      border: none;
-      pointer-events: none;
-      transform: scale(0.5);
-      transform-origin: 0 0;
-      opacity: 0.8;
-      transition: opacity 0.5s ease;
-    }
-
-    .card:hover .card-thumbnail-iframe {
-      opacity: 1;
-    }
-
-    /* モーダル */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1000;
-      display: none;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(15px);
-    }
-
-    .modal-content {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      background: #000;
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      /* 初期状態は左上に収束 */
-      clip-path: polygon(0 0, 0 0, 0 0, 0 0);
-      will-change: clip-path;
-    }
-
-    .modal-iframe {
-      flex: 1;
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
-    .close-button {
-      position: absolute;
-      top: 40px;
-      right: 40px;
-      width: 60px;
-      height: 60px;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 50%;
-      color: #fff;
-      font-size: 32px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      transition: all 0.3s ease;
-      opacity: 0; /* 最初は隠す */
-    }
-
-    .close-button:hover {
-      background: rgba(255, 255, 255, 0.2);
-      transform: rotate(90deg);
-    }
-  </style>
-</head>
-<body>
-
-  <div class="app-container">
-    <!-- 左側: Maison Logo (正確な比率を保持) -->
-    <div class="sidebar">
-      <div class="logo-maison">
-        <svg width="257" height="60" viewBox="0 0 257 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <g clip-path="url(#clip0_1639_9843)">
-            <path d="M94.9503 58.7114C94.9503 57.2926 94.6962 54.9477 94.1954 52.782C91.3553 56.6279 86.5047 59.8017 79.8081 59.8017C71.2802 59.8017 65.0918 54.7013 65.0918 46.8527C65.0918 39.0041 71.198 34.3218 79.7258 34.3218C84.995 34.3218 89.0907 36.241 91.9383 38.1677C92.0205 37.5852 92.1027 36.9953 92.1027 36.3306C92.1027 30.4012 89.2626 25.719 83.6571 25.719C79.0607 25.719 76.385 28.5567 76.2953 31.6484H66.0111C66.4296 24.6287 72.4537 17.5269 83.403 17.5269C95.7799 17.5269 101.131 26.6375 101.131 35.8228C101.131 39.4148 100.294 42.5064 99.2105 45.0156C101.804 49.0258 103.06 54.7087 103.06 58.7189H94.9503V58.7114ZM89.6812 45.5085C87.2596 43.3354 84.0757 41.9165 80.9815 41.9165C77.5509 41.9165 75.0471 43.8357 75.0471 46.8452C75.0471 50.1011 77.4687 52.0278 80.8992 52.0278C84.5764 52.0278 87.9248 49.1901 89.6812 45.5085Z" fill="#F7F7F7"/>
-            <path d="M121.399 10.5818C120.151 11.7542 118.611 12.3367 116.788 12.3367C114.964 12.3367 113.439 11.7542 112.214 10.5818C110.988 9.40935 110.375 7.93821 110.375 6.16835C110.375 4.3985 110.988 2.92735 112.214 1.75492C113.439 0.582484 114.957 0 116.788 0C118.619 0 120.151 0.582484 121.399 1.75492C122.647 2.92735 123.275 4.3985 123.275 6.16835C123.275 7.93821 122.647 9.40935 121.399 10.5818ZM111.242 58.7114V17.8778H122.49V58.7114H111.242Z" fill="#F7F7F7"/>
-            <path d="M58.0279 58.7113H47.8035L48.5808 16.0555L34.4027 58.7113H22.7059L16.5847 47.4126L10.5383 58.7113H0L11.3903 37.7344L8.60254 32.6265C4.80576 25.6591 2.94475 20.6258 2.94475 15.8315C2.94475 7.617 8.75202 1.73242 17.5863 1.73242C25.8749 1.73242 31.0693 7.77382 31.0693 14.8159C31.0693 20.1553 28.6702 25.1139 25.262 31.3793L21.8539 37.6522L28.2815 49.5708L44.0068 2.97207H58.0279V58.7113ZM12.631 15.5925C12.631 19.0725 14.4098 23.7174 16.6595 27.8994C19.4473 22.7914 21.4652 18.3033 21.4652 15.2789C21.4652 12.4113 19.9181 10.2456 17.2051 10.2456C14.492 10.2456 12.631 12.2545 12.631 15.5851V15.5925Z" fill="#F7F7F7"/>
-            <path d="M147.664 59.5698C142.14 59.5698 137.843 58.3974 134.771 56.0525C131.699 53.7077 130.055 50.3248 129.846 45.9039H140.391C140.653 47.8306 141.326 49.2718 142.424 50.2352C143.516 51.1985 145.235 51.6764 147.581 51.6764C151.849 51.6764 153.987 50.1904 153.987 47.2257C153.987 45.874 153.359 44.836 152.111 44.1042C150.863 43.3798 148.725 42.8048 145.705 42.3866C140.182 41.5577 136.288 40.1985 134.024 38.3241C131.759 36.4497 130.623 33.5597 130.623 29.6616C130.623 25.7634 132.2 22.4701 135.347 20.2522C138.501 18.0417 142.312 16.9365 146.797 16.9365C157.111 16.9365 162.739 21.1483 163.673 29.5869H153.284C152.656 26.3085 150.519 24.6656 146.879 24.6656C145.055 24.6656 143.635 25.054 142.619 25.8381C141.602 26.6222 141.094 27.6378 141.094 28.8849C141.094 30.132 141.655 31.1476 142.776 31.7749C143.897 32.4022 145.967 32.9175 148.987 33.3357C154.51 34.1198 158.531 35.4192 161.057 37.2413C163.583 39.0634 164.846 42.0281 164.846 46.1429C164.846 50.5115 163.352 53.8496 160.354 56.1347C157.357 58.4273 153.127 59.5698 147.656 59.5698H147.664Z" fill="#F7F7F7"/>
-            <path d="M191.707 59.5702C185.511 59.5702 180.376 57.6584 176.318 53.835C172.252 50.0115 170.227 44.9708 170.227 38.7277V38.1004C170.227 31.8051 172.259 26.7047 176.318 22.799C180.384 18.8934 185.541 16.9443 191.789 16.9443C198.037 16.9443 203.187 18.8561 207.223 22.6796C211.259 26.503 213.277 31.5662 213.277 37.8615V38.4888C213.277 44.8363 211.244 49.9368 207.185 53.7902C203.12 57.6435 197.962 59.5702 191.714 59.5702H191.707ZM184.397 47.6591C186.139 49.8696 188.605 50.9748 191.782 50.9748C194.958 50.9748 197.417 49.8845 199.166 47.6965C200.907 45.5084 201.782 42.4691 201.782 38.5634V38.0183C201.782 34.1127 200.907 31.0584 199.166 28.8479C197.417 26.6375 194.958 25.5322 191.782 25.5322C188.605 25.5322 186.206 26.6151 184.435 28.7732C182.663 30.9314 181.781 33.9633 181.781 37.8689V38.4962C181.781 42.4019 182.656 45.4562 184.397 47.6666V47.6591Z" fill="#F7F7F7"/>
-            <path d="M218.636 58.7114V17.8778H229.967V24.3598C231.058 22.1718 232.74 20.3944 235.004 19.0129C237.269 17.6314 240.019 16.9443 243.248 16.9443C247.471 16.9443 250.812 18.2587 253.286 20.8873C255.76 23.5159 257 27.4589 257 32.7162V58.7114H245.67V34.3516C245.67 31.5438 245.094 29.4752 243.951 28.1459C242.807 26.8167 240.984 26.1521 238.48 26.1521C235.976 26.1521 233.868 26.9212 232.306 28.4521C230.744 29.9905 229.959 32.2159 229.959 35.1283V58.7039H218.629L218.636 58.7114Z" fill="#F7F7F7"/>
-          </g>
-          <defs>
-            <clipPath id="clip0_1639_9843">
-              <rect width="257" height="60" fill="white"/>
-            </clipPath>
-          </defs>
-        </svg>
-      </div>
-    </div>
-
-    <!-- 右側: カルーセル -->
-    <div class="carousel-container" id="carousel-container">
-      <div class="carousel-track" id="carousel-track">
-        <!-- JSで生成 -->
-      </div>
-    </div>
-  </div>
-
-  <!-- モーダル -->
-  <div class="modal-overlay" id="modal-overlay">
-    <div class="modal-content" id="modal-content">
-      <button class="close-button" id="close-modal">&times;</button>
-      <iframe src="" class="modal-iframe" id="modal-iframe"></iframe>
-    </div>
-  </div>
-
-  <script>
-    const track = document.getElementById('carousel-track');
-    const container = document.getElementById('carousel-container');
-    const modalOverlay = document.getElementById('modal-overlay');
-    const modalContent = document.getElementById('modal-content');
-    const modalIframe = document.getElementById('modal-iframe');
-    const closeModal = document.getElementById('close-modal');
-
-    // データ定義（v000から始まるHTMLファイル + apps配下）
-    const projectData = [
-      { url: 'v0001-mosaic-reveal.html', id: 'V0001' },
-      { url: 'v0002-eye-following.html', id: 'V0002' },
-      { url: 'v0003-scroll-text-sequence.html', id: 'V0003' },
-      { url: 'v0004-letter-morphing.html', id: 'V0004' },
-      { url: 'apps/layered-clock/index.html', id: 'LayeredClock' },
-      { url: 'apps/creative-weather/index.html', id: 'CreativeWeather' },
-    ];
-    // 2回繰り返して無限スクロール用に拡張
-    const fullList = [...projectData, ...projectData];
-
-    let lastClickedCard = null;
-
-    // カード生成 (すべてiframeサムネイル)
-    fullList.forEach((item, index) => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.setAttribute('data-url', item.url);
-      
-      card.innerHTML = `
-        <div class="thumbnail-wrapper">
-          <iframe src="${item.url}?preview=true" class="card-thumbnail-iframe"></iframe>
-        </div>
-      `;
-      
-      card.addEventListener('click', () => {
-        lastClickedCard = card;
-        openModal(item.url, card);
-      });
-      track.appendChild(card);
-    });
-
-    // --- 無限ドラムロール & スムーズアニメーション ---
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
     
-    // 無限ループのためにクローンを作成 (上と下に十分な数を配置)
-    const originalCards = Array.from(track.children);
-    // 前後にクローンを追加して3倍の長さに
-    originalCards.forEach(card => {
-      const clone = card.cloneNode(true);
-      clone.addEventListener('click', () => {
-        lastClickedCard = clone;
-        openModal(card.getAttribute('data-url'), clone);
-      });
-      track.appendChild(clone);
-    });
-    originalCards.slice().reverse().forEach(card => {
-      const clone = card.cloneNode(true);
-      clone.addEventListener('click', () => {
-        lastClickedCard = clone;
-        openModal(card.getAttribute('data-url'), clone);
-      });
-      track.prepend(clone);
-    });
+    <!-- GSAP -->
+    <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
 
-    let scrollPos = 0;
-    let targetPos = 0;
-    const friction = 0.08;
-    const snapStrength = 0.04; // ピン（スナップ）の強さ
-    const cardHeight = 460;
-    const gap = 24;
-    const cardHeightWithGap = cardHeight + gap;
-    const totalOriginalHeight = cardHeightWithGap * fullList.length;
-
-    // 初期位置設定（中央のセットの先頭がコンテナ中央に来るように）
-    const containerCenter = container.offsetHeight / 2;
-    scrollPos = targetPos = -totalOriginalHeight - (cardHeight / 2) + containerCenter;
-
-    window.addEventListener('wheel', (e) => {
-      if (modalOverlay.style.display === 'block') return;
-      targetPos -= e.deltaY * 0.8;
-    }, { passive: true });
-
-    function update() {
-      const diff = targetPos - scrollPos;
-      scrollPos += diff * friction;
-
-      // 慣性が弱まったら、最も近いカードに軽くピン（スナップ）する
-      if (Math.abs(diff) < 30) {
-        const idealPos = containerCenter - cardHeight / 2;
-        const closestIndex = Math.round((idealPos - scrollPos) / cardHeightWithGap);
-        const snapTarget = idealPos - (closestIndex * cardHeightWithGap);
-        targetPos += (snapTarget - targetPos) * snapStrength;
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
       }
 
-      // 無限ループのジャンプ判定を安定させる
-      const minLimit = -totalOriginalHeight * 1.5;
-      const maxLimit = -totalOriginalHeight * 0.5;
-
-      if (scrollPos < minLimit) {
-        scrollPos += totalOriginalHeight;
-        targetPos += totalOriginalHeight;
-      } else if (scrollPos > maxLimit) {
-        scrollPos -= totalOriginalHeight;
-        targetPos -= totalOriginalHeight;
+      html, body {
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
       }
 
-      gsap.set(track, { y: scrollPos });
+      body {
+        background: #f7f7f7;
+        font-family: "IBM Plex Mono", monospace;
+        color: #222222;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        display: flex;
+        flex-direction: column;
+      }
 
-      // カードごとの3D演出
-      const allCards = track.querySelectorAll('.card');
-      const centerY = container.offsetHeight / 2;
+      .container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 0;
+        overflow: hidden;
+        width: 100%;
+      }
 
-      allCards.forEach(card => {
-        const rect = card.getBoundingClientRect();
-        const cardCenterY = rect.top + rect.height / 2;
-        const dist = (cardCenterY - centerY) / (container.offsetHeight * 0.8);
-        const absDist = Math.abs(dist);
+      .header {
+        margin-bottom: 24px;
+        flex-shrink: 0;
+        padding: 40px 16px 0 16px;
+      }
 
-        const scale = 1.0 - absDist * 0.3; 
-        const rotateX = dist * -25;
-        const opacity = 1.0 - absDist * 0.7;
-        const translateZ = (1.0 - absDist) * 150;
+      .header h1 {
+        font-size: 24px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: #222222;
+        font-family: "Bricolage Grotesque", sans-serif;
+      }
 
-        gsap.set(card, {
-          scale: Math.max(0.6, scale),
-          rotationX: rotateX,
-          opacity: Math.max(0.1, opacity),
-          z: translateZ,
-          transformOrigin: "center center"
-        });
-      });
+      .table-wrapper {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-bottom: 40px;
+        width: 100%;
+      }
 
-      requestAnimationFrame(update);
-    }
-    update();
+      .works-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #f7f7f7;
+        table-layout: fixed;
+      }
 
-    // --- モーダル制御 (カードから四隅へ広がるフラッグ・アニメーション) ---
-    function openModal(url, cardElement) {
-      if (!url) return;
+      .works-table thead {
+        background: transparent;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: #f7f7f7;
+      }
+
+      .works-table th {
+        text-align: left;
+        padding: 10px 12px;
+        font-size: 9px;
+        font-weight: 500;
+        color: #222222;
+        letter-spacing: 0.01em;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      }
+
+      .works-table th:nth-child(1) { width: 32px; }
+      .works-table th:nth-child(2) { width: 64px; }
+      .works-table th:nth-child(3) { width: 110px; }
+      .works-table th:nth-child(4) { width: auto; }
+      .works-table th:nth-child(5) { width: 28%; }
+      .works-table th:nth-child(6) { width: 32px; }
+
+      .works-table tbody td {
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      .works-table tbody tr {
+        background: transparent;
+        cursor: pointer;
+        position: relative;
+      }
+
+      .works-table tbody tr {
+        position: relative;
+        background: transparent;
+      }
       
-      const rect = cardElement.getBoundingClientRect();
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-
-      // カードの四隅をパーセントに変換
-      const initialCorners = {
-        tlx: (rect.left / vw) * 100, tly: (rect.top / vh) * 100,
-        trx: (rect.right / vw) * 100, try: (rect.top / vh) * 100,
-        brx: (rect.right / vw) * 100, bry: (rect.bottom / vh) * 100,
-        blx: (rect.left / vw) * 100, bly: (rect.bottom / vh) * 100
-      };
-
-      const corners = { ...initialCorners };
-
-      modalIframe.src = url;
-      modalOverlay.style.display = 'block';
-
-      const updateClipPath = () => {
-        gsap.set(modalContent, {
-          clipPath: `polygon(${corners.tlx}% ${corners.tly}%, ${corners.trx}% ${corners.try}%, ${corners.brx}% ${corners.bry}%, ${corners.blx}% ${corners.bly}%)`
-        });
-      };
-
-      // 初期状態をセット
-      updateClipPath();
-
-      const tl = gsap.timeline({
-        onUpdate: updateClipPath
-      });
-
-      // カードの形から、四隅へ順番に「ビタ付き」していくアニメーション
-      tl.to(corners, { 
-          tlx: 0, tly: 0, 
-          trx: 100, try: 0, 
-          duration: 0.5, 
-          ease: "expo.inOut" 
-        })
-        .to(corners, { 
-          brx: 100, bry: 100, 
-          duration: 0.6, 
-          ease: "expo.inOut" 
-        }, "-=0.35")
-        .to(corners, { 
-          blx: 0, bly: 100, 
-          duration: 0.5, 
-          ease: "expo.inOut" 
-        }, "-=0.35")
-        .to(closeModal, { opacity: 1, duration: 0.3, ease: "power2.out" });
-    }
-
-    function hideModal(targetCardElement) {
-      if (!targetCardElement) {
-        gsap.to(modalContent, { opacity: 0, duration: 0.3, onComplete: () => {
-          modalOverlay.style.display = 'none';
-          modalIframe.src = '';
-        }});
-        return;
+      .row-bg {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--hover-color, #222222);
+        z-index: 0;
+        pointer-events: none;
+        transform: scaleX(0);
+        transform-origin: left center;
+      }
+      
+      .works-table tbody td:first-child {
+        position: relative;
+        overflow: visible;
+      }
+      
+      .works-table tbody tr {
+        overflow: hidden;
       }
 
-      const rect = targetCardElement.getBoundingClientRect();
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
+      .works-table tbody td {
+        padding: 16px 12px;
+        font-size: 13px;
+        color: #222222;
+        vertical-align: middle;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+        position: relative;
+        z-index: 2;
+      }
 
-      const targetCorners = {
-        tlx: (rect.left / vw) * 100, tly: (rect.top / vh) * 100,
-        trx: (rect.right / vw) * 100, try: (rect.top / vh) * 100,
-        brx: (rect.right / vw) * 100, bry: (rect.bottom / vh) * 100,
-        blx: (rect.left / vw) * 100, bly: (rect.bottom / vh) * 100
-      };
+      
 
-      const corners = {
-        tlx: 0, tly: 0,
-        trx: 100, try: 0,
-        brx: 100, bry: 100,
-        blx: 0, bly: 100
-      };
+      .works-table tbody td:first-child {
+        padding-left: 22px;
+      }
 
-      const updateClipPath = () => {
-        gsap.set(modalContent, {
-          clipPath: `polygon(${corners.tlx}% ${corners.tly}%, ${corners.trx}% ${corners.try}%, ${corners.brx}% ${corners.bry}%, ${corners.blx}% ${corners.bly}%)`
-        });
-      };
+      .works-table tbody td:last-child {
+        padding-right: 12px;
+        text-align: right;
+      }
 
-      const tl = gsap.timeline({
-        onUpdate: updateClipPath,
-        onComplete: () => {
-          modalOverlay.style.display = 'none';
-          modalIframe.src = '';
-          gsap.set(closeModal, { opacity: 0 });
+      .thumbnail {
+        width: 8px;
+        height: 8px;
+        object-fit: cover;
+        background: #e0e0e0;
+        display: block;
+        position: relative;
+        z-index: 2;
+      }
+
+      .arrow-icon {
+        font-size: 14px;
+        color: #222222;
+        font-weight: 400;
+        opacity: 0;
+        display: inline-block;
+        transform: translateX(-4px);
+      }
+
+      .year {
+        font-weight: 400;
+        font-size: 10px;
+        color: #999999;
+        font-family: "IBM Plex Mono", monospace;
+      }
+
+      .type {
+        font-weight: 400;
+        text-transform: capitalize;
+        font-size: 10px;
+        color: #999999;
+        font-family: "IBM Plex Mono", monospace;
+      }
+
+      .title {
+        font-weight: 400;
+        font-size: 13px;
+        font-family: "Bricolage Grotesque", sans-serif;
+      }
+
+      .filename {
+        font-weight: 400;
+        font-size: 10px;
+        color: #999999;
+        font-family: "IBM Plex Mono", monospace;
+      }
+
+      /* Cursor-following image */
+      .cursor-preview {
+        position: fixed;
+        pointer-events: none;
+        z-index: 1000;
+        opacity: 0;
+        width: 320px;
+        aspect-ratio: 4/3;
+        overflow: hidden;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        transform: translate(-50%, -50%);
+      }
+
+      .cursor-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      #cursorPreviewFrame {
+        width: 1280px;
+        height: 960px;
+        border: none;
+        transform: scale(0.25);
+        transform-origin: top left;
+        pointer-events: none;
+        display: none;
+      }
+
+      /* Section spacing */
+      .works-section,
+      .playground-section,
+      .studio-section {
+        margin-bottom: 60px;
+      }
+
+      .section-label {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 24px;
+        padding: 40px 16px 0 16px;
+        font-family: 'Bricolage Grotesque', sans-serif;
+        color: #222222;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 0;
         }
+        
+        .header {
+          padding: 32px 16px 0 16px;
+        }
+
+        .header h1 {
+          font-size: 20px;
+        }
+
+        .works-table th,
+        .works-table td {
+          padding: 8px 6px;
+        }
+
+        .thumbnail {
+          width: 8px;
+          height: 8px;
+        }
+      }
+      .footer-links {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        display: flex;
+        gap: 16px;
+        z-index: 100;
+      }
+
+      .footer-links a {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 9px;
+        color: #999999;
+        text-decoration: none;
+        letter-spacing: 0.02em;
+        transition: color 0.2s ease;
+      }
+
+      .footer-links a:hover {
+        color: #222222;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Cursor preview -->
+    <div class="cursor-preview" id="cursorPreview">
+      <img id="cursorPreviewImg" src="" alt="">
+      <iframe id="cursorPreviewFrame" src="" scrolling="no" tabindex="-1" sandbox="allow-same-origin allow-scripts"></iframe>
+    </div>
+    <div class="container">
+      <div class="table-wrapper">
+        <!-- Works section -->
+        <div class="works-section">
+          <h2 class="section-label">Works</h2>
+          <table class="works-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Year</th>
+                <th>Type</th>
+                <th>Title</th>
+                <th>URL</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="clientWorksTableBody">
+              <!-- Client works dynamically added -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Playground section -->
+        <div class="playground-section">
+          <h2 class="section-label">Playground</h2>
+          <table class="works-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Year</th>
+              <th>Type</th>
+              <th>Title</th>
+              <th>File</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="worksTableBody">
+            <!-- Works are dynamically added via JavaScript -->
+          </tbody>
+        </table>
+        </div>
+
+        <div class="studio-section">
+          <h2 class="section-label">Lab.</h2>
+          <table class="works-table studio-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Year</th>
+                <th>Type</th>
+                <th>Title</th>
+                <th>File</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="studioTableBody">
+              <!-- Studio works are dynamically added via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /**
+       * Check if color is light (for text color adjustment)
+       */
+      function isLightColor(color) {
+        // Handle rgb() format
+        if (color.startsWith('rgb')) {
+          const matches = color.match(/\d+/g);
+          if (matches && matches.length >= 3) {
+            const r = parseInt(matches[0]);
+            const g = parseInt(matches[1]);
+            const b = parseInt(matches[2]);
+            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+            return brightness > 180;
+          }
+        }
+        
+        // Handle hex format
+        const hex = color.replace('#', '');
+        if (hex.length === 3) {
+          // Expand shorthand hex
+          const r = parseInt(hex[0] + hex[0], 16);
+          const g = parseInt(hex[1] + hex[1], 16);
+          const b = parseInt(hex[2] + hex[2], 16);
+          const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+          return brightness > 180;
+        }
+        
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        return brightness > 180;
+      }
+
+      /**
+       * Adjust color if it's too light
+       */
+      function adjustColorForHover(color) {
+        if (isLightColor(color)) {
+          // If color is light, use a darker version or complementary color
+          const hex = color.replace('#', '');
+          const r = parseInt(hex.substr(0, 2), 16);
+          const g = parseInt(hex.substr(2, 2), 16);
+          const b = parseInt(hex.substr(4, 2), 16);
+          
+          // Darken by 40%
+          const newR = Math.max(0, Math.floor(r * 0.6));
+          const newG = Math.max(0, Math.floor(g * 0.6));
+          const newB = Math.max(0, Math.floor(b * 0.6));
+          
+          return `rgb(${newR}, ${newG}, ${newB})`;
+        }
+        return color;
+      }
+
+      /**
+       * Capture thumbnail from HTML file using iframe
+       */
+      async function captureThumbnail(file) {
+        return new Promise((resolve) => {
+          const iframe = document.createElement('iframe');
+          iframe.style.width = '800px';
+          iframe.style.height = '600px';
+          iframe.style.position = 'absolute';
+          iframe.style.left = '-9999px';
+          iframe.style.top = '0';
+          iframe.style.border = 'none';
+          
+          iframe.onload = () => {
+            setTimeout(() => {
+              try {
+                const canvas = document.createElement('canvas');
+                canvas.width = 50;
+                canvas.height = 38;
+                const ctx = canvas.getContext('2d');
+                
+                // Try to capture from iframe (may fail due to CORS)
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                const body = iframeDoc.body;
+                
+                // Use html2canvas if available, otherwise fallback to color
+                // For now, use a placeholder approach
+                ctx.fillStyle = '#e0e0e0';
+                ctx.fillRect(0, 0, 50, 38);
+                
+                document.body.removeChild(iframe);
+                resolve(canvas.toDataURL());
+              } catch (e) {
+                document.body.removeChild(iframe);
+                // Fallback to color-based thumbnail
+                resolve(null);
+              }
+            }, 1000);
+          };
+          
+          iframe.src = file;
+          document.body.appendChild(iframe);
+        });
+      }
+
+      /**
+       * Client works list
+       */
+      const clientWorks = [
+        {
+          year: '2025',
+          type: 'Design',
+          title: 'Studio Design Award 2025',
+          url: 'https://designaward2025.studio.design/',
+          image: '/works/studio-design-award.webp',
+          color: '#2a1a0e'
+        },
+        {
+          year: '2025',
+          type: 'Design',
+          title: 'Studio',
+          url: 'https://studio.design/ja',
+          image: '/works/studio.webp',
+          color: '#f0f0f0'
+        },
+        {
+          year: '2025',
+          type: 'Design',
+          title: '互色-互縁 goshiki-goen',
+          url: 'https://goshiki-goen.jp/',
+          image: '/works/goshiki-goen.webp',
+          color: '#1a1a18'
+        },
+        {
+          year: '2024',
+          type: 'Design',
+          title: 'UNIPOTA',
+          url: 'https://unipota.jp/',
+          image: '/works/unipota.webp',
+          color: '#EA76A9'
+        },
+        {
+          year: '2023',
+          type: 'Design',
+          title: 'écrit architects',
+          url: 'https://ecrit.jp/',
+          image: '/works/ecrit.webp',
+          color: '#DBD5CA'
+        },
+        {
+          year: '2023',
+          type: 'Design',
+          title: 'MIKATA',
+          url: 'https://mi-kata.jp/',
+          image: '/works/mikata.webp',
+          color: '#1a29cc'
+        },
+        {
+          year: '2022',
+          type: 'Design',
+          title: '萬珍軒',
+          url: 'https://manchinken.com/',
+          image: '/works/manchinken.webp',
+          color: '#FFC200'
+        },
+        {
+          year: '2020',
+          type: 'Design',
+          title: "L'as International",
+          url: 'https://lasinternational.co.jp/',
+          image: '/works/las-international.webp',
+          color: '#0086CE'
+        }
+      ];
+
+      /**
+       * Cursor-following image preview
+       */
+      const cursorPreview = document.getElementById('cursorPreview');
+      const cursorPreviewImg = document.getElementById('cursorPreviewImg');
+      let cursorTween = null;
+
+      document.addEventListener('mousemove', (e) => {
+        gsap.to(cursorPreview, {
+          x: e.clientX + 24,
+          y: e.clientY - 60,
+          duration: 0.35,
+          ease: 'power2.out'
+        });
       });
 
-      tl.to(closeModal, { opacity: 0, duration: 0.2 })
-        .to(corners, { 
-          tlx: targetCorners.tlx, tly: targetCorners.tly,
-          trx: targetCorners.trx, try: targetCorners.try,
-          duration: 0.5, ease: "expo.inOut" 
-        })
-        .to(corners, { 
-          brx: targetCorners.brx, bry: targetCorners.bry,
-          blx: targetCorners.blx, bly: targetCorners.bly,
-          duration: 0.5, ease: "expo.inOut" 
-        }, "-=0.35");
-    }
+      const cursorPreviewFrame = document.getElementById('cursorPreviewFrame');
 
-    closeModal.addEventListener('click', () => hideModal(lastClickedCard));
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') hideModal(lastClickedCard);
-    });
+      function showCursorPreview(src, type = 'image') {
+        if (type === 'iframe') {
+          cursorPreviewImg.style.display = 'none';
+          cursorPreviewFrame.style.display = 'block';
+          if (cursorPreviewFrame.src !== src) {
+            cursorPreviewFrame.src = src;
+          }
+        } else {
+          cursorPreviewFrame.style.display = 'none';
+          cursorPreviewImg.style.display = 'block';
+          cursorPreviewImg.src = src;
+        }
+        gsap.to(cursorPreview, {
+          opacity: 1,
+          duration: 0.25,
+          ease: 'power2.out'
+        });
+      }
 
-  </script>
-</body>
+      function hideCursorPreview() {
+        gsap.to(cursorPreview, {
+          opacity: 0,
+          duration: 0.2,
+          ease: 'power2.in'
+        });
+      }
+
+      /**
+      /**
+       * Render client works
+       */
+      function renderClientWorks() {
+        const tbody = document.getElementById('clientWorksTableBody');
+        clientWorks.forEach(work => {
+          // Pass full URL as file so createWorkRow opens it correctly
+          // Display shows clean domain
+          const displayWork = {
+            ...work,
+            file: work.url,
+            displayFile: work.url.replace('https://', '').replace(/\/$/, '')
+          };
+          const row = createWorkRow(displayWork);
+
+          row.addEventListener('mouseenter', () => showCursorPreview(work.image));
+          row.addEventListener('mouseleave', hideCursorPreview);
+
+          tbody.appendChild(row);
+        });
+      }
+
+      /**
+       * Works list with color information
+       */
+      const works = [
+        {
+          year: '2025',
+          type: 'Animation',
+          title: 'Mosaic Reveal Animation',
+          file: 'playground/mosaic-reveal/',
+          color: '#F7F7F7'
+        },
+        {
+          year: '2025',
+          type: 'Animation',
+          title: 'Interactive Eye-Following Card',
+          file: 'playground/eye-following/',
+          color: '#0062AD'
+        },
+        {
+          year: '2025',
+          type: 'Animation',
+          title: 'Scroll-driven Pinned Text Sequence',
+          file: 'playground/scroll-text/',
+          color: '#FF4800'
+        },
+        {
+          year: '2025',
+          type: 'Animation',
+          title: 'A Letter of Letters',
+          file: 'playground/letter-morphing/',
+          color: '#0b0b0c'
+        },
+        {
+          year: '2025',
+          type: 'Animation',
+          title: 'Hover Text Path',
+          file: 'playground/hover-text-path/',
+          color: '#20453B'
+        },
+        {
+          year: '2025',
+          type: 'Visual',
+          title: 'Font Patterns',
+          file: 'playground/font-patterns/',
+          color: '#0b0b0c'
+        },
+        {
+          year: '2025',
+          type: 'App',
+          title: 'Creative Weather',
+          file: 'apps/creative-weather/',
+          color: '#2c3e50'
+        },
+        {
+          year: '2025',
+          type: 'App',
+          title: 'Layered Clock',
+          file: 'apps/layered-clock/',
+          color: '#1a1a1a'
+        },
+        {
+          year: '2025',
+          type: 'App',
+          title: 'Easel Pro',
+          file: 'apps/design-board/',
+          color: '#fcfcfc'
+        }
+      ];
+
+      /**
+       * Studio works list (試作品)
+       */
+      const studioWorks = [
+        {
+          year: '2025',
+          type: 'Visual',
+          title: 'Typography Explorer',
+          file: 'apps/typography/',
+          color: '#ffffff',
+          thumbnail: null
+        },
+        {
+          year: '2025',
+          type: 'Experiment',
+          title: '3D Explore',
+          file: 'playground/3d-explore/',
+          color: '#ffffff',
+          thumbnail: null
+        }
+      ];
+
+      /**
+       * Create work row
+       */
+      function createWorkRow(work) {
+        const row = document.createElement('tr');
+        row.className = 'work-row';
+        
+        const adjustedColor = adjustColorForHover(work.color);
+        row.style.setProperty('--hover-color', adjustedColor);
+        
+        // Determine text color based on background
+        const textColor = isLightColor(adjustedColor) ? '#222222' : '#ffffff';
+        const secondaryTextColor = isLightColor(adjustedColor) ? '#666666' : 'rgba(255, 255, 255, 0.8)';
+        
+        // Create row background element
+        const rowBg = document.createElement('div');
+        rowBg.className = 'row-bg';
+        rowBg.style.backgroundColor = adjustedColor;
+        
+        // Thumbnail
+        const thumbnailCell = document.createElement('td');
+        thumbnailCell.style.position = 'relative';
+        
+        const thumbnail = document.createElement('img');
+        thumbnail.src = work.thumbnail || `thumbnails/${work.file.replace('.html', '.png')}`;
+        thumbnail.alt = work.title;
+        thumbnail.className = 'thumbnail';
+        
+        thumbnail.onerror = () => {
+          // Fallback to color-based thumbnail using adjusted hover color
+          const canvas = document.createElement('canvas');
+          canvas.width = 8;
+          canvas.height = 8;
+          const ctx = canvas.getContext('2d');
+          
+          // Use adjusted hover color (same as hover background)
+          ctx.fillStyle = adjustedColor;
+          ctx.fillRect(0, 0, 8, 8);
+          
+          thumbnail.src = canvas.toDataURL();
+        };
+        
+        // Set thumbnail color immediately if no image
+        if (!work.thumbnail) {
+          const canvas = document.createElement('canvas');
+          canvas.width = 8;
+          canvas.height = 8;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = adjustedColor;
+          ctx.fillRect(0, 0, 8, 8);
+          thumbnail.src = canvas.toDataURL();
+        }
+        
+        // Place rowBg in first cell and make it cover entire row
+        thumbnailCell.appendChild(rowBg);
+        thumbnailCell.appendChild(thumbnail);
+        
+        // Year
+        const yearCell = document.createElement('td');
+        yearCell.className = 'year';
+        yearCell.style.fontSize = '10px';
+        yearCell.style.fontWeight = '400';
+        yearCell.style.color = '#999999';
+        yearCell.style.fontFamily = '"IBM Plex Mono", monospace';
+        yearCell.textContent = work.year;
+        yearCell.setAttribute('data-text-color', secondaryTextColor);
+        
+        // Type
+        const typeCell = document.createElement('td');
+        typeCell.className = 'type';
+        typeCell.style.fontSize = '10px';
+        typeCell.style.fontWeight = '400';
+        typeCell.style.color = '#999999';
+        typeCell.style.textTransform = 'capitalize';
+        typeCell.style.fontFamily = '"IBM Plex Mono", monospace';
+        typeCell.textContent = work.type;
+        typeCell.setAttribute('data-text-color', secondaryTextColor);
+        
+        // Title
+        const titleCell = document.createElement('td');
+        titleCell.className = 'title';
+        titleCell.style.fontSize = '13px';
+        titleCell.style.fontWeight = '400';
+        titleCell.style.fontFamily = '"Bricolage Grotesque", sans-serif';
+        titleCell.textContent = work.title;
+        titleCell.setAttribute('data-text-color', textColor);
+        
+        // Filename
+        const filenameCell = document.createElement('td');
+        filenameCell.className = 'filename';
+        filenameCell.style.fontSize = '10px';
+        filenameCell.style.fontWeight = '400';
+        filenameCell.style.color = '#999999';
+        filenameCell.style.fontFamily = '"IBM Plex Mono", monospace';
+        filenameCell.textContent = work.displayFile || work.file.replace(/\/index\.html$/, '').replace(/\/$/, '');
+        filenameCell.setAttribute('data-text-color', secondaryTextColor);
+        
+        // Arrow
+        const arrowCell = document.createElement('td');
+        const arrowSpan = document.createElement('span');
+        arrowSpan.className = 'arrow-icon';
+        arrowSpan.textContent = '→';
+        arrowSpan.setAttribute('data-text-color', textColor);
+        arrowCell.appendChild(arrowSpan);
+        
+        row.appendChild(thumbnailCell);
+        row.appendChild(yearCell);
+        row.appendChild(typeCell);
+        row.appendChild(titleCell);
+        row.appendChild(filenameCell);
+        row.appendChild(arrowCell);
+        
+        // Position rowBg to cover entire row
+        // Calculate offset to cover entire row from first cell
+        const updateRowBgPosition = () => {
+          const tableRect = row.closest('table').getBoundingClientRect();
+          const cellRect = thumbnailCell.getBoundingClientRect();
+          const offsetLeft = cellRect.left - tableRect.left;
+          rowBg.style.left = `${-offsetLeft}px`;
+          rowBg.style.width = `${tableRect.width}px`;
+        };
+        
+        // Initial position update
+        setTimeout(updateRowBgPosition, 0);
+        
+        // GSAP hover animation
+        const cells = [yearCell, typeCell, titleCell, filenameCell, arrowSpan];
+        let hoverTimeline = null;
+        
+        // Store original colors
+        const originalColors = {
+          year: yearCell.style.color || '#999999',
+          type: typeCell.style.color || '#999999',
+          title: titleCell.style.color || '#222222',
+          filename: filenameCell.style.color || '#999999',
+          arrow: arrowSpan.style.color || '#222222'
+        };
+        
+        row.addEventListener('mouseenter', () => {
+          // Kill any existing animations
+          if (hoverTimeline) {
+            hoverTimeline.kill();
+          }
+          
+          updateRowBgPosition();
+          
+          hoverTimeline = gsap.timeline();
+          
+          // Background animation with scaleX - smoother easing
+          hoverTimeline.to(rowBg, {
+            scaleX: 1,
+            transformOrigin: 'left center',
+            duration: 0.7,
+            ease: 'power3.out'
+          }, 0);
+          
+          // Text color animations with stagger
+          cells.forEach((cell, index) => {
+            const color = cell.getAttribute('data-text-color');
+            hoverTimeline.to(cell, {
+              color: color,
+              duration: 0.35,
+              ease: 'power2.out'
+            }, 0.05 + index * 0.02);
+          });
+          
+          // Arrow animation with bounce
+          hoverTimeline.to(arrowSpan, {
+            opacity: 1,
+            x: 0,
+            duration: 0.5,
+            ease: 'back.out(1.2)'
+          }, 0.15);
+        });
+        
+        row.addEventListener('mouseleave', () => {
+          
+          // Kill any existing animations
+          if (hoverTimeline) {
+            hoverTimeline.kill();
+            hoverTimeline = null;
+          }
+          
+          hoverTimeline = gsap.timeline({
+            onComplete: () => {
+              // Ensure everything is reset
+              gsap.set(rowBg, { scaleX: 0 });
+              yearCell.style.color = originalColors.year;
+              typeCell.style.color = originalColors.type;
+              titleCell.style.color = originalColors.title;
+              filenameCell.style.color = originalColors.filename;
+              arrowSpan.style.opacity = '0';
+              arrowSpan.style.transform = 'translateX(-4px)';
+              arrowSpan.style.color = originalColors.arrow;
+              hoverTimeline = null;
+            }
+          });
+          
+          // Background animation - reset to 0 - smoother easing
+          hoverTimeline.to(rowBg, {
+            scaleX: 0,
+            transformOrigin: 'left center',
+            duration: 0.5,
+            ease: 'power3.in'
+          }, 0);
+          
+          // Text color animations - reset to original colors
+          hoverTimeline.to(yearCell, {
+            color: originalColors.year,
+            duration: 0.25,
+            ease: 'power2.in'
+          }, 0);
+          
+          hoverTimeline.to(typeCell, {
+            color: originalColors.type,
+            duration: 0.25,
+            ease: 'power2.in'
+          }, 0);
+          
+          hoverTimeline.to(titleCell, {
+            color: originalColors.title,
+            duration: 0.25,
+            ease: 'power2.in'
+          }, 0);
+          
+          hoverTimeline.to(filenameCell, {
+            color: originalColors.filename,
+            duration: 0.25,
+            ease: 'power2.in'
+          }, 0);
+          
+          // Arrow animation - reset
+          hoverTimeline.to(arrowSpan, {
+            opacity: 0,
+            x: -4,
+            color: originalColors.arrow,
+            duration: 0.3,
+            ease: 'power2.in'
+          }, 0);
+        });
+        
+        // Make entire row clickable
+        row.addEventListener('click', () => {
+          window.open(work.file, '_blank');
+        });
+        
+        return row;
+      }
+
+      /**
+       * Render works list
+       */
+      function renderWorks() {
+        const tbody = document.getElementById('worksTableBody');
+
+        works.forEach(work => {
+          const row = createWorkRow(work);
+          row.addEventListener('mouseenter', () => showCursorPreview(work.file, 'iframe'));
+          row.addEventListener('mouseleave', hideCursorPreview);
+          tbody.appendChild(row);
+        });
+      }
+
+      /**
+       * Render Studio works list
+       */
+      function renderStudioWorks() {
+        const tbody = document.getElementById('studioTableBody');
+
+        studioWorks.forEach(work => {
+          const row = createWorkRow(work);
+          row.addEventListener('mouseenter', () => showCursorPreview(work.file, 'iframe'));
+          row.addEventListener('mouseleave', hideCursorPreview);
+          tbody.appendChild(row);
+        });
+      }
+
+      // DOM Ready
+      document.addEventListener('DOMContentLoaded', () => {
+        renderClientWorks();
+        renderWorks();
+        renderStudioWorks();
+      });
+    </script>
+    <nav class="footer-links">
+      <a href="https://x.com/im_inaba" target="_blank" rel="noopener">@im_inaba</a>
+      <a href="https://x.com/masaruinaba" target="_blank" rel="noopener">@masaruinaba</a>
+    </nav>
+  </body>
 </html>
+
+
+
+
+
+
+
+

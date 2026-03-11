@@ -3,7 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Interactive Eye-Following Card</title>
+    <title>Eye-Following Card — Masaru Inaba</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Eye-Following Card — Masaru Inaba" />
+    <meta property="og:description" content="An interactive card with eye-following parallax effect by Masaru Inaba." />
+    <meta property="og:image" content="/ogp.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Eye-Following Card — Masaru Inaba" />
+    <meta name="twitter:description" content="An interactive card with eye-following parallax effect by Masaru Inaba." />
+    <meta name="twitter:image" content="/ogp.png" />
+    <meta name="description" content="An interactive card with eye-following parallax effect by Masaru Inaba." />
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -148,21 +157,27 @@
         mouseX = window.innerWidth / 2;
         mouseY = window.innerHeight / 2;
         
-        // プレビューモード: 自動で目の動きをシミュレート
+        // プレビューモード: 目をクルクル動かす
         if (isPreview) {
           let previewAngle = 0;
           const centerX = window.innerWidth / 2;
           const centerY = window.innerHeight / 2;
-          const radius = Math.min(window.innerWidth, window.innerHeight) * 0.2;
+          // より大きな半径で動きを大きく
+          const radius = Math.min(window.innerWidth, window.innerHeight) * 0.3;
           
-          setInterval(() => {
-            previewAngle += 0.03;
+          const animatePreview = () => {
+            // クルクル回転（0.02ラジアンずつ、より速く）
+            previewAngle += 0.02;
             mouseX = centerX + Math.cos(previewAngle) * radius;
             mouseY = centerY + Math.sin(previewAngle) * radius;
             
             updatePupilPosition(eyeLeft, pupilLeft);
             updatePupilPosition(eyeRight, pupilRight);
-          }, 50);
+            
+            requestAnimationFrame(animatePreview);
+          };
+          
+          animatePreview();
         }
       });
     </script>
