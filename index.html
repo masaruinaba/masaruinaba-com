@@ -287,8 +287,31 @@
 
         /* dot | Title | expand-btn */
         .works-table th:nth-child(1) { width: 24px; }
-        .works-table th:nth-child(4) { width: auto; }
+        .works-table th:nth-child(4) { width: auto; font-size: 0; }
         .works-table th:nth-child(6) { width: 40px; text-align: center; }
+
+        /* 固定フッター要素を非表示にしてモバイルフッターへ移す */
+        .app-icon-link,
+        .footer-links { display: none !important; }
+
+        /* モバイルフッター */
+        .mobile-footer {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 32px 16px 48px 16px;
+        }
+        .mobile-footer-links {
+          display: flex;
+          gap: 16px;
+        }
+        .mobile-footer-links a {
+          font-family: "IBM Plex Mono", monospace;
+          font-size: 9px;
+          color: #999999;
+          text-decoration: none;
+          letter-spacing: 0.02em;
+        }
 
         /* Arrow非表示、expand icon表示 */
         .arrow-icon { display: none !important; }
@@ -371,6 +394,7 @@
       @media (min-width: 769px) {
         .work-detail-row { display: none !important; }
         .expand-icon { display: none !important; }
+        .mobile-footer { display: none; }
       }
       .app-icon-link {
         position: fixed;
@@ -470,6 +494,32 @@
               <!-- Studio works are dynamically added via JavaScript -->
             </tbody>
           </table>
+        </div>
+
+        <!-- モバイルフッター -->
+        <div class="mobile-footer">
+          <a class="app-icon-link" style="position:static;display:block;" href="https://kids-math-iwua.vercel.app/index.html" target="_blank" rel="noopener">
+            <svg width="24" height="24" viewBox="0 0 281 281" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g clip-path="url(#mfIconClip0)">
+                <rect width="280.549" height="280.549" rx="64.494" fill="white"/>
+                <rect width="280.549" height="287.197" transform="translate(0 -3.32422)" fill="#FF6B00"/>
+                <g clip-path="url(#mfIconClip2)">
+                  <path d="M36.7344 141.174C36.7344 169.705 59.8632 192.834 88.3941 192.834C116.925 192.834 140.054 169.705 140.054 141.174C140.054 112.643 116.925 89.5145 88.3941 89.5145C59.8632 89.5145 36.7344 112.643 36.7344 141.174Z" fill="#FFF9EE"/>
+                  <path d="M82.3984 165.944C82.3984 176.573 91.0151 185.19 101.644 185.19C112.273 185.19 120.89 176.573 120.89 165.944C120.89 155.315 112.273 146.698 101.644 146.698C91.0151 146.698 82.3984 155.315 82.3984 165.944Z" fill="black"/>
+                  <path d="M141.828 140.921C141.828 112.39 164.957 89.2612 193.488 89.2612C222.019 89.2612 245.148 112.39 245.148 140.921C245.148 169.452 222.019 192.581 193.488 192.581C164.957 192.581 141.828 169.452 141.828 140.921Z" fill="#FFF9EE"/>
+                  <path d="M202.391 129.69C202.391 119.061 211.007 110.444 221.636 110.444C232.266 110.444 240.882 119.061 240.882 129.69C240.882 140.319 232.266 148.936 221.636 148.936C211.007 148.936 202.391 140.319 202.391 129.69Z" fill="black"/>
+                </g>
+              </g>
+              <defs>
+                <clipPath id="mfIconClip0"><rect width="280.549" height="280.549" rx="64.494" fill="white"/></clipPath>
+                <clipPath id="mfIconClip2"><rect width="213.73" height="218.794" fill="white" transform="translate(34.0625 31.5459)"/></clipPath>
+              </defs>
+            </svg>
+          </a>
+          <nav class="mobile-footer-links">
+            <a href="https://x.com/im_inaba" target="_blank" rel="noopener">@im_inaba</a>
+            <a href="https://x.com/masaruinaba" target="_blank" rel="noopener">@masaruinaba</a>
+          </nav>
         </div>
       </div>
     </div>
@@ -706,8 +756,10 @@
           const detailRow = createDetailRow(displayWork);
           row._detailRow = detailRow;
 
-          row.addEventListener('mouseenter', () => showCursorPreview(work.image));
-          row.addEventListener('mouseleave', hideCursorPreview);
+          if (window.matchMedia('(hover: hover)').matches) {
+            row.addEventListener('mouseenter', () => showCursorPreview(work.image));
+            row.addEventListener('mouseleave', hideCursorPreview);
+          }
 
           tbody.appendChild(row);
           tbody.appendChild(detailRow);
@@ -1006,10 +1058,11 @@
         // Initial position update
         setTimeout(updateRowBgPosition, 0);
         
-        // GSAP hover animation
+        // GSAP hover animation（ホバー対応デバイスのみ）
+        const canHover = window.matchMedia('(hover: hover)').matches;
         const cells = [yearCell, typeCell, titleCell, filenameCell, arrowSpan];
         let hoverTimeline = null;
-        
+
         // Store original colors
         const originalColors = {
           year: yearCell.style.color || '#999999',
@@ -1018,8 +1071,8 @@
           filename: filenameCell.style.color || '#999999',
           arrow: arrowSpan.style.color || '#222222'
         };
-        
-        row.addEventListener('mouseenter', () => {
+
+        if (canHover) row.addEventListener('mouseenter', () => {
           // Kill any existing animations
           if (hoverTimeline) {
             hoverTimeline.kill();
@@ -1055,8 +1108,8 @@
             ease: 'back.out(1.2)'
           }, 0.15);
         });
-        
-        row.addEventListener('mouseleave', () => {
+
+        if (canHover) row.addEventListener('mouseleave', () => {
           
           // Kill any existing animations
           if (hoverTimeline) {
@@ -1150,8 +1203,10 @@
           const detailRow = createDetailRow(work);
           row._detailRow = detailRow;
 
-          row.addEventListener('mouseenter', () => showCursorPreview(work.file, 'iframe'));
-          row.addEventListener('mouseleave', hideCursorPreview);
+          if (window.matchMedia('(hover: hover)').matches) {
+            row.addEventListener('mouseenter', () => showCursorPreview(work.file, 'iframe'));
+            row.addEventListener('mouseleave', hideCursorPreview);
+          }
 
           tbody.appendChild(row);
           tbody.appendChild(detailRow);
@@ -1169,8 +1224,10 @@
           const detailRow = createDetailRow(work);
           row._detailRow = detailRow;
 
-          row.addEventListener('mouseenter', () => showCursorPreview(work.file, 'iframe'));
-          row.addEventListener('mouseleave', hideCursorPreview);
+          if (window.matchMedia('(hover: hover)').matches) {
+            row.addEventListener('mouseenter', () => showCursorPreview(work.file, 'iframe'));
+            row.addEventListener('mouseleave', hideCursorPreview);
+          }
 
           tbody.appendChild(row);
           tbody.appendChild(detailRow);
