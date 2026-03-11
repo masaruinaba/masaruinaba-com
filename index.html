@@ -719,13 +719,20 @@
       });
 
       const cursorPreviewFrame = document.getElementById('cursorPreviewFrame');
+      let _previewVisible = false;
 
       function showCursorPreview(src, type = 'image') {
+        _previewVisible = true;
+        // 進行中の hide アニメをキャンセル
+        gsap.killTweensOf(cursorPreview);
+
         if (type === 'iframe') {
           cursorPreviewImg.style.display = 'none';
           cursorPreviewFrame.style.display = 'block';
-          if (cursorPreviewFrame.src !== src) {
+          // data-src で管理することで空文字リセット後も正しく比較できる
+          if (cursorPreviewFrame.dataset.src !== src) {
             cursorPreviewFrame.src = src;
+            cursorPreviewFrame.dataset.src = src;
           }
         } else {
           cursorPreviewFrame.style.display = 'none';
@@ -740,14 +747,18 @@
       }
 
       function hideCursorPreview() {
+        _previewVisible = false;
         gsap.to(cursorPreview, {
           opacity: 0,
           duration: 0.2,
           ease: 'power2.in',
           onComplete: () => {
-            // iframe を完全に非表示・アンロードしてスクロールイベントの横取りを防ぐ
-            cursorPreviewFrame.style.display = 'none';
-            cursorPreviewFrame.src = '';
+            // 再ホバーされていなければ iframe をアンロード
+            if (!_previewVisible) {
+              cursorPreviewFrame.style.display = 'none';
+              cursorPreviewFrame.src = '';
+              delete cursorPreviewFrame.dataset.src;
+            }
           }
         });
       }
