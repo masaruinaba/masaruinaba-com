@@ -290,9 +290,9 @@
         .works-table th:nth-child(4) { width: auto; font-size: 0; }
         .works-table th:nth-child(6) { width: 40px; text-align: center; }
 
-        /* 固定フッター要素を非表示にしてモバイルフッターへ移す */
-        .app-icon-link,
-        .footer-links { display: none !important; }
+        /* body直下の固定フッター要素を非表示（モバイルフッターに移すため） */
+        body > .app-icon-link,
+        body > .footer-links { display: none !important; }
 
         /* モバイルフッター */
         .mobile-footer {
@@ -300,6 +300,13 @@
           align-items: center;
           justify-content: space-between;
           padding: 32px 16px 48px 16px;
+        }
+        .mobile-footer .app-icon-link {
+          position: static;
+          display: block;
+          width: 24px;
+          height: 24px;
+          flex-shrink: 0;
         }
         .mobile-footer-links {
           display: flex;
@@ -497,7 +504,7 @@
 
         <!-- モバイルフッター -->
         <div class="mobile-footer">
-          <a class="app-icon-link" style="position:static;display:block;" href="https://kids-math-iwua.vercel.app/index.html" target="_blank" rel="noopener">
+          <a class="app-icon-link" href="https://kids-math-iwua.vercel.app/index.html" target="_blank" rel="noopener">
             <svg width="24" height="24" viewBox="0 0 281 281" fill="none" xmlns="http://www.w3.org/2000/svg">
               <g clip-path="url(#mfIconClip0)">
                 <rect width="280.549" height="280.549" rx="64.494" fill="white"/>
