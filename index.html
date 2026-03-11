@@ -316,19 +316,18 @@
         /* Arrow非表示、expand icon表示 */
         .arrow-icon { display: none !important; }
         .expand-icon {
-          display: flex !important;
+          display: none !important;
           align-items: center;
           justify-content: center;
           width: 24px;
           height: 24px;
-          font-size: 20px;
+          font-size: 18px;
           color: #999;
           line-height: 1;
-          transition: transform 0.25s ease, color 0.2s ease;
           margin-left: auto;
         }
         .work-row.is-expanded .expand-icon {
-          transform: rotate(45deg);
+          display: flex !important;
           color: #222;
         }
 
@@ -874,18 +873,16 @@
         const content = document.createElement('div');
         content.className = 'work-detail-content';
 
-        // Preview: client works → webp image, others → color block
-        const preview = document.createElement('div');
-        preview.className = 'work-detail-preview';
+        // Preview: client works のみ表示
         if (work.image) {
+          const preview = document.createElement('div');
+          preview.className = 'work-detail-preview';
           const img = document.createElement('img');
           img.src = work.image;
           img.alt = work.title;
           preview.appendChild(img);
-        } else {
-          preview.style.background = adjustColorForHover(work.color);
+          content.appendChild(preview);
         }
-        content.appendChild(preview);
 
         // Meta list: Year / Type / URL or File
         const metaList = document.createElement('div');
@@ -1035,7 +1032,7 @@
 
         const expandIcon = document.createElement('span');
         expandIcon.className = 'expand-icon';
-        expandIcon.textContent = '+';
+        expandIcon.textContent = '−';
         arrowCell.appendChild(expandIcon);
         
         row.appendChild(thumbnailCell);
