@@ -70,6 +70,17 @@
       white-space: pre-wrap; /* 改行反映 */
     }
 
+    @media (max-width: 768px) {
+      .stage { padding: 24px; }
+      .title {
+        font-size: clamp(36px, 10vw, 72px);
+        letter-spacing: -0.5px;
+      }
+      .body { font-size: 11px; line-height: 24px; }
+      #hover-object-layer { top: 24px; left: 24px; width: 50px; height: 50px; }
+      #fixed-ghost-container { right: 24px; bottom: 80px; }
+    }
+
     .body{
       margin: 0;
       font-weight: 400;
@@ -755,6 +766,20 @@ function setupHover(){
       el.classList.remove('is-active');
       hideVector();
     });
+
+    // タッチ対応：タップでホバーエフェクト発動
+    el.addEventListener('touchstart', (e) => {
+      if(document.body.classList.contains('hover-locked')) return;
+      e.preventDefault();
+      el.classList.add('is-active');
+      seed = (seed + 37 + (Math.random()*100000|0)) | 0;
+      redrawMark(el, seed);
+      showRandomVector(el);
+      setTimeout(() => {
+        el.classList.remove('is-active');
+        hideVector();
+      }, 1500);
+    }, { passive: false });
 
     window.addEventListener('resize', () => {
       if(el.classList.contains('is-active')) {
