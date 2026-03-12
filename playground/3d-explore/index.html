@@ -199,6 +199,26 @@
     }
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
+    /* Mobile */
+    @media (max-width: 768px) {
+      .controls-ui {
+        bottom: 20px;
+        padding: 6px 10px;
+        gap: 8px;
+        max-width: calc(100vw - 32px);
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        flex-wrap: nowrap;
+        scrollbar-width: none;
+      }
+      .controls-ui::-webkit-scrollbar { display: none; }
+      .ui-section { padding: 0 8px; gap: 8px; flex-shrink: 0; }
+      .selector-trigger { min-width: 120px; font-size: 10px; }
+      .icon-action-btn { width: 36px; height: 36px; }
+      /* モバイルでRecordボタンを非表示 */
+      .icon-action-btn[onclick="startRecording()"] { display: none; }
+    }
+
     #info {
       position: fixed;
       top: 24px;
@@ -303,9 +323,10 @@
       camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
       camera.position.set(0, 0, 10);
 
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768;
+      renderer = new THREE.WebGLRenderer({ antialias: !isMobile, alpha: true, preserveDrawingBuffer: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.2;
       document.body.appendChild(renderer.domElement);
