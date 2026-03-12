@@ -40,6 +40,17 @@
         cursor: none;
       }
 
+      @media (hover: none) {
+        body { cursor: auto; }
+      }
+
+      /* Mobile: 目のサイズをレスポンシブに */
+      @media (max-width: 480px) {
+        .eye-container { gap: 48px; }
+        .eye { width: 80px; height: 80px; }
+        .pupil { width: 34px; height: 34px; }
+      }
+
       /* 目のコンテナ */
       .eye-container {
         position: relative;
@@ -150,6 +161,22 @@
       
       if (!isPreview) {
         document.addEventListener('mousemove', handleMouseMove);
+
+        // タッチ対応：指の位置で瞳を動かす
+        document.addEventListener('touchmove', (e) => {
+          e.preventDefault();
+          mouseX = e.touches[0].clientX;
+          mouseY = e.touches[0].clientY;
+          updatePupilPosition(eyeLeft, pupilLeft);
+          updatePupilPosition(eyeRight, pupilRight);
+        }, { passive: false });
+
+        document.addEventListener('touchstart', (e) => {
+          mouseX = e.touches[0].clientX;
+          mouseY = e.touches[0].clientY;
+          updatePupilPosition(eyeLeft, pupilLeft);
+          updatePupilPosition(eyeRight, pupilRight);
+        }, { passive: true });
       }
 
       // 初期位置を設定
