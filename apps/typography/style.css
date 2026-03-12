@@ -1130,13 +1130,35 @@ body {
   .header {
     padding: 0 16px;
   }
-  
+
+  /* モバイルでナビをヘッダー下に固定表示（ページ切替できるよう） */
   .header-nav {
-    display: none;
+    display: flex;
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    right: 0;
+    background: rgba(10, 10, 11, 0.96);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 8px 16px;
+    border-radius: 0;
+    z-index: 99;
+    overflow-x: auto;
+    scrollbar-width: none;
+    gap: 4px;
   }
-  
+  .header-nav::-webkit-scrollbar { display: none; }
+  [data-theme="light"] .header-nav {
+    background: rgba(250, 250, 250, 0.96);
+  }
+
   .hero {
-    padding: calc(var(--header-height) + 40px) 16px 32px;
+    padding: calc(var(--header-height) + 56px + 40px) 16px 32px;
+  }
+
+  .controls-bar {
+    top: calc(var(--header-height) + 48px);
   }
   
   .hero-title {

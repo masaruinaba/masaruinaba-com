@@ -387,6 +387,17 @@
         }
 
         @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 0.8; } 100% { opacity: 0.4; } }
+
+        @media (max-width: 768px) {
+            .ui-main { bottom: 20px; padding: 0 12px; }
+            .ui-group-left { left: 12px; }
+            .ui-group-right { right: 12px; }
+            .add-input { width: 120px; font-size: 13px; }
+            .zoom-badge { width: 42px; font-size: 10px; }
+        }
+        @media (max-width: 480px) {
+            .add-input { width: 80px; }
+        }
     </style>
 </head>
 <body data-theme="light">
@@ -1031,6 +1042,54 @@
     };
     urlInput.onkeydown = (e) => { if(e.key==='Enter') addCard(); };
     load();
+
+    // タッチ対応：1本指パン・2本指ピンチズーム
+    let _touchLast = { x: 0, y: 0 };
+    let _touchDist = null;
+    viewport.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (e.touches.length === 1) {
+            _touchLast = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            _touchDist = null;
+            state.isPanning = true;
+            applyViewportCursor();
+        } else if (e.touches.length === 2) {
+            state.isPanning = false;
+            _touchDist = Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY);
+            _touchLast = { x: (e.touches[0].clientX + e.touches[1].clientX) / 2, y: (e.touches[0].clientY + e.touches[1].clientY) / 2 };
+        }
+    }, { passive: false });
+    viewport.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        if (e.touches.length === 1 && state.isPanning) {
+            const dx = e.touches[0].clientX - _touchLast.x;
+            const dy = e.touches[0].clientY - _touchLast.y;
+            state.pan.x += dx; state.pan.y += dy;
+            updateXform();
+            _touchLast = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        } else if (e.touches.length === 2 && _touchDist !== null) {
+            const dist = Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY);
+            const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+            const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+            const scale = dist / _touchDist;
+            const oldZ = state.zoom;
+            state.zoom = Math.min(Math.max(0.1, state.zoom * scale), 3.0);
+            const cx = (midX - state.pan.x) / oldZ, cy = (midY - state.pan.y) / oldZ;
+            state.pan.x = midX - cx * state.zoom + (midX - _touchLast.x);
+            state.pan.y = midY - cy * state.zoom + (midY - _touchLast.y);
+            updateXform();
+            _touchDist = dist;
+            _touchLast = { x: midX, y: midY };
+        }
+    }, { passive: false });
+    viewport.addEventListener('touchend', (e) => {
+        if (e.touches.length === 0) {
+            state.isPanning = false;
+            _touchDist = null;
+            applyViewportCursor();
+            save();
+        }
+    }, { passive: true });
 </script>
 </body>
 </html>

@@ -313,3 +313,14 @@ canvas {
 .layer-label.is-visible{
   opacity: 0.45; /* さりげなく */
 }
+
+@media (max-width: 480px) {
+  .theme-button { top: 20px; right: 20px; }
+  .layer-button { left: 20px; bottom: 20px; }
+  .world-time { right: 16px; }
+  .selected-city-left { left: 20px; font-size: 10px; }
+  .layer-label { left: 20px; }
+  .app-footer { bottom: 16px; padding: 0 16px; }
+  .footer-section.knob-section { right: 20px; }
+  .canvas-wrapper { max-width: 100%; padding: 0 8px; }
+}

@@ -173,3 +173,9 @@ html, body {
 .city-name.active {
   color: rgba(255, 255, 255, 0.7);
 }
+
+@media (max-width: 480px) {
+  .card { width: 300px; height: 300px; }
+  .city-footer { padding: 24px 20px; }
+  .card-values { top: 20px; right: 20px; }
+}
