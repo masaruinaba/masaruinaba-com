@@ -259,6 +259,51 @@
             animation: blink 1s infinite;
         }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .controls-ui {
+                bottom: 20px;
+                padding: 6px 10px;
+                gap: 8px;
+                max-width: calc(100vw - 32px);
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                flex-wrap: nowrap;
+                scrollbar-width: none;
+            }
+            .controls-ui::-webkit-scrollbar { display: none; }
+            .ui-section {
+                padding: 0 8px;
+                gap: 8px;
+                flex-shrink: 0;
+            }
+            .ui-btn {
+                padding: 8px 12px;
+                font-size: 10px;
+            }
+            .icon-action-btn {
+                width: 36px;
+                height: 36px;
+            }
+            .panel-toggle {
+                bottom: 20px;
+                right: 16px;
+                width: 40px;
+                height: 40px;
+            }
+            .pattern-trigger {
+                min-width: 120px;
+                font-size: 10px;
+            }
+            /* Hide Record section on mobile (no canvas recording support) */
+            .ui-section:has(.pattern-selector-container) {
+                display: none;
+            }
+            input[type="range"] {
+                width: 60px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -331,6 +376,8 @@
     <script>
         lucide.createIcons();
 
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768;
+
         const GOOGLE_FONTS = [
             'Inter', 'Montserrat', 'Poppins', 'Roboto', 'Lato', 'Open Sans', 'Oswald', 'Raleway', 'Ubuntu', 'Nunito', 
             'Work Sans', 'Quicksand', 'Kanit', 'Mulish', 'Heebo', 'DM Sans', 'Rubik', 'Outfit', 'Space Grotesk', 'Syne', 
@@ -378,9 +425,9 @@
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
             camera.position.z = 1000;
 
-            renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+            renderer = new THREE.WebGLRenderer({ antialias: !isMobile, preserveDrawingBuffer: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
             document.getElementById('webgl-container').appendChild(renderer.domElement);
 
             diceGroup = new THREE.Group();
@@ -396,7 +443,7 @@
             const cacheKey = `${font}_${text}`;
             if (textureCache[cacheKey]) return textureCache[cacheKey];
 
-            const size = 1024;
+            const size = isMobile ? 256 : 1024;
             const canvas = document.createElement('canvas');
             canvas.width = size;
             canvas.height = size;
@@ -441,12 +488,13 @@
             if (!isRecording) textureCache = {}; 
             
             diceList = [];
-            const count = parseInt(document.getElementById('diceCount').value) || 150;
+            const count = parseInt(document.getElementById('diceCount').value) || (isMobile ? 40 : 150);
             const densityVal = parseInt(document.getElementById('density').value) || 100;
             const spreadBase = densityVal * 7;
-            
+
+            const fontPoolSize = isMobile ? 6 : 20;
             const selectedFonts = [];
-            for (let i = 0; i < 20; i++) {
+            for (let i = 0; i < fontPoolSize; i++) {
                 const isQuirky = Math.random() < 0.45; // Increased quirk bias
                 selectedFonts.push(GOOGLE_FONTS[isQuirky ? 54 + Math.floor(Math.random() * (GOOGLE_FONTS.length - 54)) : Math.floor(Math.random() * 54)]);
             }
@@ -511,6 +559,37 @@
             window.addEventListener('click', (e) => {
                 if (!e.target.closest('.pattern-selector-container')) document.getElementById('pattern-menu').classList.remove('is-open');
             });
+
+            // Touch support
+            let lastTouchDist = null;
+            container.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    isDragging = true;
+                    previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                } else if (e.touches.length === 2) {
+                    isDragging = false;
+                    lastTouchDist = Math.hypot(
+                        e.touches[1].clientX - e.touches[0].clientX,
+                        e.touches[1].clientY - e.touches[0].clientY
+                    );
+                }
+            }, { passive: true });
+            window.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 1 && isDragging) {
+                    targetPan.x += (e.touches[0].clientX - previousMousePosition.x) * (1 / targetScale);
+                    targetPan.y -= (e.touches[0].clientY - previousMousePosition.y) * (1 / targetScale);
+                    previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                } else if (e.touches.length === 2 && lastTouchDist !== null) {
+                    const dist = Math.hypot(
+                        e.touches[1].clientX - e.touches[0].clientX,
+                        e.touches[1].clientY - e.touches[0].clientY
+                    );
+                    const delta = dist - lastTouchDist;
+                    targetScale = Math.min(Math.max(0.1, targetScale + delta * 0.005), 5);
+                    lastTouchDist = dist;
+                }
+            }, { passive: true });
+            window.addEventListener('touchend', () => { isDragging = false; lastTouchDist = null; }, { passive: true });
         }
 
         function setupAutoHideUI() {
@@ -522,6 +601,7 @@
             };
             window.addEventListener('mousemove', resetTimer);
             window.addEventListener('mousedown', resetTimer);
+            window.addEventListener('touchstart', resetTimer, { passive: true });
             resetTimer();
         }
 
@@ -711,6 +791,11 @@
             diceGroup.scale.set(targetScale, targetScale, targetScale);
             diceGroup.position.lerp(targetPan, 0.1);
             renderer.render(scene, camera);
+        }
+        if (isMobile) {
+            document.getElementById('diceCount').value = 40;
+            document.getElementById('diceCount').max = 80;
+            document.getElementById('density').value = 80;
         }
         window.addEventListener('load', init);
     </script>
