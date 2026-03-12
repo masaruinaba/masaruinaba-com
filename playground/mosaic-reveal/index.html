@@ -39,6 +39,10 @@
         justify-content: center;
       }
 
+      @media (hover: none) {
+        body { cursor: auto; }
+      }
+
       .cursor {
         position: fixed;
         width: 8px;
@@ -50,9 +54,13 @@
         transform: translate(-50%, -50%);
       }
 
+      @media (hover: none) {
+        .cursor { display: none; }
+      }
+
       .title {
         font-family: "Inter", sans-serif;
-        font-size: 100px;
+        font-size: clamp(40px, 12vw, 100px);
         font-weight: 500;
         color: #222222;
         letter-spacing: -0.02em;
@@ -365,9 +373,22 @@
         }
       };
       
+      // タッチ対応：指の動きでモザイクカードを生成
+      const handleTouchMove = (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        handleMouseMoveEvent({ clientX: touch.clientX, clientY: touch.clientY });
+      };
+      const handleTouchEnd = () => {
+        isMoving = false;
+        moveTimeout = setTimeout(() => { fadeOutAllCards(); }, 500);
+      };
+
       // マウス移動イベントリスナー
       if (!isPreview) {
         document.addEventListener("mousemove", handleMouseMoveEvent);
+        document.addEventListener("touchmove", handleTouchMove, { passive: false });
+        document.addEventListener("touchend", handleTouchEnd, { passive: true });
       } else {
         // プレビューモード: 自動アニメーション
         let previewInterval = null;
