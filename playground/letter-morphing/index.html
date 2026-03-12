@@ -49,6 +49,12 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
+    @media (max-width: 768px) {
+      .controls-ui { bottom: 20px; gap: 12px; }
+      .reset-button { padding: 8px 14px; }
+      .scale-control input[type="range"] { width: 60px; }
+    }
+
     .reset-button {
       padding: 6px 14px;
       background: rgba(255, 255, 255, 0.1);
@@ -116,10 +122,9 @@
     // プレビューモードの検出
     const urlParams = new URLSearchParams(window.location.search);
     const isPreview = urlParams.get('preview') === 'true';
-    
-    // 全切除：タイトル文字などは一切なし
-    
-    const TOTAL_NODES = 2500;
+
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768;
+    const TOTAL_NODES = isMobile ? 800 : 2500;
     const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     
     let scene, camera, renderer, controls, raycaster, mouse;
@@ -191,8 +196,9 @@
       camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
       camera.position.z = 1200;
 
-      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer = new THREE.WebGLRenderer({ antialias: !isMobile });
       renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
       renderer.setClearColor(0x0b0b0c, 1);
       document.getElementById('webgl-container').appendChild(renderer.domElement);
 
