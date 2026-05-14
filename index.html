@@ -78,7 +78,8 @@
 
       .works-table {
         width: 100%;
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 0;
         background: #f7f7f7;
         table-layout: fixed;
       }
@@ -119,6 +120,10 @@
         position: relative;
       }
 
+      .works-table tbody tr.work-row {
+        height: 48px;
+      }
+
       .works-table tbody tr {
         position: relative;
         background: transparent;
@@ -129,12 +134,13 @@
         left: 0;
         top: 0;
         width: 100%;
-        height: 100%;
+        bottom: 1px;
         background: var(--hover-color, #222222);
         z-index: 0;
         pointer-events: none;
         transform: scaleX(0);
         transform-origin: left center;
+        will-change: transform;
       }
       
       .works-table tbody td:first-child {
@@ -149,9 +155,10 @@
       .works-table tbody td {
         padding: 16px 12px;
         font-size: 13px;
+        line-height: 16px;
         color: #222222;
         vertical-align: middle;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+        box-shadow: inset 0 -1px rgba(0, 0, 0, 0.04);
         position: relative;
         z-index: 2;
       }
@@ -204,6 +211,7 @@
       .title {
         font-weight: 400;
         font-size: 13px;
+        line-height: 16px;
         font-family: "Bricolage Grotesque", sans-serif;
       }
 
@@ -582,6 +590,65 @@
           return `rgb(${newR}, ${newG}, ${newB})`;
         }
         return color;
+      }
+
+      const titleShuffleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?/\\[]{}*&^%$#@';
+
+      function randomShuffleChar(originalChar) {
+        if (/\s/.test(originalChar)) return originalChar;
+        return titleShuffleChars.charAt(Math.floor(Math.random() * titleShuffleChars.length));
+      }
+
+      function shuffleArray(items) {
+        const shuffled = [...items];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+      }
+
+      function animateTitleShuffle(element) {
+        const originalText = element.dataset.originalTitle || element.textContent;
+        const characters = Array.from(originalText);
+        const revealOrder = shuffleArray(characters.map((_, index) => index));
+        const revealStepByIndex = new Map(revealOrder.map((index, step) => [index, step]));
+        const token = Symbol('title-shuffle');
+        const randomFrames = Math.max(8, Math.floor(characters.length * 0.8));
+        let frame = 0;
+
+        element.dataset.originalTitle = originalText;
+        element._shuffleToken = token;
+        clearTimeout(element._shuffleTimer);
+
+        const tick = () => {
+          if (element._shuffleToken !== token) return;
+
+          const revealCount = Math.max(0, frame - randomFrames);
+          element.textContent = characters.map((char, index) => {
+            if (revealStepByIndex.get(index) < revealCount) return char;
+            return randomShuffleChar(char);
+          }).join('');
+
+          frame++;
+
+          if (revealCount <= characters.length) {
+            element._shuffleTimer = setTimeout(tick, 1000 / 28);
+          } else {
+            element.textContent = originalText;
+            element._shuffleToken = null;
+          }
+        };
+
+        tick();
+      }
+
+      function resetTitleShuffle(element) {
+        clearTimeout(element._shuffleTimer);
+        element._shuffleToken = null;
+        if (element.dataset.originalTitle) {
+          element.textContent = element.dataset.originalTitle;
+        }
       }
 
       /**
@@ -1031,6 +1098,7 @@
         titleCell.style.fontWeight = '400';
         titleCell.style.fontFamily = '"Bricolage Grotesque", sans-serif';
         titleCell.textContent = work.title;
+        titleCell.dataset.originalTitle = work.title;
         titleCell.setAttribute('data-text-color', textColor);
         
         // Filename
@@ -1095,6 +1163,8 @@
           if (hoverTimeline) {
             hoverTimeline.kill();
           }
+
+          animateTitleShuffle(titleCell);
           
           updateRowBgPosition();
           
@@ -1128,6 +1198,7 @@
         });
 
         if (canHover) row.addEventListener('mouseleave', () => {
+          resetTitleShuffle(titleCell);
           
           // Kill any existing animations
           if (hoverTimeline) {
@@ -1267,6 +1338,12 @@
         renderWorks();
         renderStudioWorks();
 
+        document.querySelectorAll('.footer-links a, .mobile-footer-links a').forEach((link) => {
+          link.dataset.originalTitle = link.textContent;
+          link.addEventListener('mouseenter', () => animateTitleShuffle(link));
+          link.addEventListener('mouseleave', () => resetTitleShuffle(link));
+        });
+
         // スクロール時・カーソルがウィンドウ外に出た時にプレビューを隠す
         document.querySelector('.table-wrapper').addEventListener('scroll', hideCursorPreview);
         document.addEventListener('mouseleave', hideCursorPreview);
@@ -1349,11 +1426,4 @@
     </nav>
   </body>
 </html>
-
-
-
-
-
-
-
 
