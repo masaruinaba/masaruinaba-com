@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Liquid Hover Prototype</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      body {
+        background: #f7f7f7;
+        color: #222222;
+        font-family: "IBM Plex Mono", monospace;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      #gl {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        pointer-events: none;
+      }
+
+      .container {
+        position: relative;
+        z-index: 30;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .table-wrapper {
+        flex: 1;
+        width: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+        padding-bottom: 160px;
+      }
+
+      .section-label {
+        padding: 40px 16px 0;
+        margin-bottom: 24px;
+        color: #222222;
+        font-family: "Bricolage Grotesque", sans-serif;
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+
+      .works-table {
+        width: 100%;
+        table-layout: fixed;
+        border-spacing: 0;
+        border-collapse: separate;
+        background: transparent;
+      }
+
+      .works-table thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: #f7f7f7;
+      }
+
+      .works-table th {
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        color: #222222;
+        font-size: 9px;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        text-align: left;
+      }
+
+      .works-table th:nth-child(1) { width: 32px; }
+      .works-table th:nth-child(2) { width: 64px; }
+      .works-table th:nth-child(3) { width: 110px; }
+      .works-table th:nth-child(4) { width: auto; }
+      .works-table th:nth-child(5) { width: 28%; }
+      .works-table th:nth-child(6) { width: 32px; }
+
+      .works-table tbody tr {
+        position: relative;
+        height: 48px;
+        cursor: pointer;
+      }
+
+      .works-table tbody td {
+        position: relative;
+        z-index: 2;
+        padding: 16px 12px;
+        overflow: hidden;
+        color: #222222;
+        font-size: 13px;
+        line-height: 16px;
+        vertical-align: middle;
+        white-space: nowrap;
+        box-shadow: inset 0 -1px rgba(0, 0, 0, 0.04);
+        transition: color 180ms ease, transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .works-table tbody td:first-child {
+        padding-left: 22px;
+        overflow: visible;
+      }
+
+      .works-table tbody td:last-child {
+        padding-right: 12px;
+        text-align: right;
+      }
+
+      .work-row::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 1px;
+        background: rgba(0, 0, 0, 0.1);
+        transform: scaleX(0);
+        transform-origin: left center;
+        transition: transform 650ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .work-row:hover::before {
+        transform: scaleX(1);
+      }
+
+      .work-row:hover .title {
+        transform: translateX(6px);
+      }
+
+      .thumbnail {
+        display: block;
+        width: 8px;
+        height: 8px;
+        object-fit: cover;
+        background: #e0e0e0;
+      }
+
+      .year,
+      .type,
+      .filename {
+        color: #999999;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 10px;
+        font-weight: 400;
+      }
+
+      .type {
+        text-transform: capitalize;
+      }
+
+      .title {
+        color: #222222;
+        font-family: "Bricolage Grotesque", sans-serif;
+        font-size: 13px;
+        font-weight: 400;
+      }
+
+      .arrow-icon {
+        display: inline-block;
+        color: #222222;
+        font-size: 14px;
+        font-weight: 400;
+        opacity: 0;
+        transform: translateX(-4px);
+        transition: opacity 260ms ease, transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .work-row:hover .arrow-icon {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      .prototype-note {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        z-index: 40;
+        color: #999999;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 9px;
+        letter-spacing: 0.02em;
+        pointer-events: none;
+      }
+
+      @media (max-width: 768px) {
+        .section-label {
+          padding: 32px 16px 0;
+          margin-bottom: 12px;
+          font-size: 16px;
+        }
+
+        .works-table th,
+        .works-table td {
+          padding: 10px 8px;
+        }
+
+        .works-table th:nth-child(2),
+        .works-table td:nth-child(2),
+        .works-table th:nth-child(3),
+        .works-table td:nth-child(3),
+        .works-table th:nth-child(5),
+        .works-table td:nth-child(5) {
+          width: 0 !important;
+          padding: 0 !important;
+          overflow: hidden;
+          border: none;
+          font-size: 0;
+          white-space: nowrap;
+        }
+
+        .works-table th:nth-child(1) { width: 24px; }
+        .works-table th:nth-child(4) { width: auto; font-size: 0; }
+        .works-table th:nth-child(6) { width: 40px; text-align: center; }
+        .works-table td:nth-child(4) { padding-left: 16px; }
+        .title { font-size: 14px; }
+        .arrow-icon { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="gl"></div>
+    <div class="container">
+      <div class="table-wrapper" id="scrollArea">
+        <section class="works-section">
+          <h2 class="section-label">Works</h2>
+          <table class="works-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Year</th>
+                <th>Type</th>
+                <th>Title</th>
+                <th>URL</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="worksBody"></tbody>
+          </table>
+        </section>
+      </div>
+    </div>
+    <p class="prototype-note">prototype / fullscreen image hover</p>
+
+    <script type="module">
+      import { LiquidHover } from '/src/prototype/liquid-hover.ts'
+      import { clientWorks as works } from '/src/data/portfolio.ts'
+
+      let liquid = null
+
+      function colorDot(color) {
+        const canvas = document.createElement('canvas')
+        canvas.width = 8
+        canvas.height = 8
+        const ctx = canvas.getContext('2d')
+        ctx.fillStyle = color
+        ctx.fillRect(0, 0, 8, 8)
+        return canvas.toDataURL()
+      }
+
+      function createRow(work) {
+        const row = document.createElement('tr')
+        row.className = 'work-row'
+
+        const thumbCell = document.createElement('td')
+        const thumb = document.createElement('img')
+        thumb.className = 'thumbnail'
+        thumb.src = colorDot(work.color)
+        thumb.alt = work.title
+        thumbCell.appendChild(thumb)
+
+        const year = document.createElement('td')
+        year.className = 'year'
+        year.textContent = work.year
+
+        const type = document.createElement('td')
+        type.className = 'type'
+        type.textContent = work.type
+
+        const title = document.createElement('td')
+        title.className = 'title'
+        title.textContent = work.title
+
+        const filename = document.createElement('td')
+        filename.className = 'filename'
+        filename.textContent = work.url.replace('https://', '').replace(/\/$/, '')
+
+        const arrowCell = document.createElement('td')
+        const arrow = document.createElement('span')
+        arrow.className = 'arrow-icon'
+        arrow.textContent = '→'
+        arrowCell.appendChild(arrow)
+
+        row.append(thumbCell, year, type, title, filename, arrowCell)
+
+        row.addEventListener('mouseenter', () => liquid?.show(work.image, row.getBoundingClientRect()))
+        row.addEventListener('mousemove', () => liquid?.setMask(row.getBoundingClientRect()))
+        row.addEventListener('mouseleave', () => liquid?.hide())
+        row.addEventListener('click', () => window.open(work.url, '_blank'))
+
+        return row
+      }
+
+      const body = document.getElementById('worksBody')
+      works.forEach((work) => body.appendChild(createRow(work)))
+
+      if (window.matchMedia('(hover: hover)').matches) {
+        try {
+          liquid = new LiquidHover(document.getElementById('gl'))
+          window.liquid = liquid
+        } catch (error) {
+          console.warn('LiquidHover failed to initialize', error)
+        }
+      }
+
+      document.getElementById('scrollArea').addEventListener('scroll', () => liquid?.hide())
+      document.addEventListener('mouseleave', () => liquid?.hide())
+    </script>
+  </body>
+</html>

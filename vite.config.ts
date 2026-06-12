@@ -6,6 +6,10 @@ export default defineConfig({
     rollupOptions: {
       input: {
         index: resolve(__dirname, "index.html"),
+        // Prototype
+        "liquid-hover": resolve(__dirname, "prototype/index.html"),
+        // Versions
+        "versions/liquid-hover": resolve(__dirname, "versions/liquid-hover/index.html"),
         // Playground
         "mosaic-reveal": resolve(__dirname, "playground/mosaic-reveal/index.html"),
         "eye-following": resolve(__dirname, "playground/eye-following/index.html"),

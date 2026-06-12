@@ -439,6 +439,56 @@
       .footer-links a:hover {
         color: #222222;
       }
+
+      .versions-nav {
+        position: fixed;
+        left: 50%;
+        bottom: 24px;
+        z-index: 110;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        font-family: "IBM Plex Mono", monospace;
+      }
+
+      .versions-nav a,
+      .versions-nav button {
+        font-family: inherit;
+        font-size: 9px;
+        color: #999999;
+        text-decoration: none;
+        letter-spacing: 0.02em;
+      }
+
+      .versions-nav button {
+        padding: 0;
+        background: transparent;
+        border: 0;
+        cursor: default;
+      }
+
+      .version-list {
+        display: flex;
+        gap: 12px;
+        opacity: 0;
+        transform: translateY(6px);
+        pointer-events: none;
+        transition: opacity 0.22s ease, transform 0.22s ease;
+      }
+
+      .versions-nav:hover .version-list,
+      .versions-nav:focus-within .version-list {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+
+      .versions-nav a:hover,
+      .versions-nav button:hover {
+        color: #222222;
+      }
     </style>
   </head>
   <body>
@@ -1362,15 +1412,18 @@
         renderWorks();
         renderStudioWorks();
 
-        document.querySelectorAll('.footer-links a, .mobile-footer-links a').forEach((link) => {
+        document.querySelectorAll('.footer-links a, .mobile-footer-links a, .versions-nav a, .versions-nav button').forEach((link) => {
           link.dataset.originalTitle = link.textContent;
           link.addEventListener('mouseenter', () => animateTitleShuffle(link));
           link.addEventListener('mouseleave', () => resetTitleShuffle(link));
         });
 
         // スクロール時・カーソルがウィンドウ外に出た時にプレビューを隠す
-        document.querySelector('.table-wrapper').addEventListener('scroll', hideCursorPreview);
-        document.addEventListener('mouseleave', hideCursorPreview);
+        const hideAllPreviews = () => {
+          hideCursorPreview();
+        };
+        document.querySelector('.table-wrapper').addEventListener('scroll', hideAllPreviews);
+        document.addEventListener('mouseleave', hideAllPreviews);
 
         // App icon eye-following
         const SVG_SIZE = 281;
@@ -1444,6 +1497,12 @@
         </defs>
       </svg>
     </a>
+    <nav class="versions-nav" aria-label="Portfolio versions">
+      <div class="version-list">
+        <a href="/versions/liquid-hover/">v01</a>
+      </div>
+      <button type="button">versions</button>
+    </nav>
     <nav class="footer-links">
       <a href="https://x.com/im_inaba" target="_blank" rel="noopener">@im_inaba</a>
       <a href="https://x.com/masaruinaba" target="_blank" rel="noopener">@masaruinaba</a>

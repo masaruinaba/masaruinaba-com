@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Liquid Hover - Portfolio Version</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      body {
+        background: #f7f7f7;
+        color: #222222;
+        font-family: "IBM Plex Mono", monospace;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        display: flex;
+        flex-direction: column;
+      }
+
+      #gl {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        pointer-events: none;
+      }
+
+      .container {
+        z-index: 30;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        flex: 1;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .table-wrapper {
+        flex: 1;
+        width: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+        padding-bottom: 200px;
+      }
+
+      .portfolio-section {
+        margin-bottom: 60px;
+      }
+
+      .section-label {
+        padding: 40px 16px 0;
+        margin-bottom: 24px;
+        color: #222222;
+        font-family: "Bricolage Grotesque", sans-serif;
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: 0;
+      }
+
+      .works-table {
+        width: 100%;
+        table-layout: fixed;
+        border-spacing: 0;
+        border-collapse: separate;
+        background: transparent;
+      }
+
+      .works-table thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: transparent;
+      }
+
+      .works-table th {
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        color: #222222;
+        font-size: 9px;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        text-align: left;
+      }
+
+      .works-table th:nth-child(1) { width: 32px; }
+      .works-table th:nth-child(2) { width: 64px; }
+      .works-table th:nth-child(3) { width: 110px; }
+      .works-table th:nth-child(4) { width: auto; }
+      .works-table th:nth-child(5) { width: 28%; }
+      .works-table th:nth-child(6) { width: 32px; }
+
+      .work-row {
+        position: relative;
+        height: 48px;
+        cursor: pointer;
+        overflow: hidden;
+      }
+
+      .works-table tbody td {
+        position: relative;
+        z-index: 4;
+        padding: 16px 12px;
+        overflow: hidden;
+        color: #222222;
+        font-size: 13px;
+        line-height: 16px;
+        vertical-align: middle;
+        white-space: nowrap;
+        box-shadow: inset 0 -1px rgba(0, 0, 0, 0.04);
+        transition: padding 420ms cubic-bezier(0.16, 1, 0.3, 1), color 180ms ease, text-shadow 180ms ease, transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .works-table tbody td:first-child {
+        padding-left: 22px;
+        overflow: visible;
+      }
+
+      .works-table tbody td:last-child {
+        padding-right: 12px;
+        text-align: right;
+      }
+
+      .work-row:hover .title,
+      .work-row.is-active .title {
+        transform: translateX(6px);
+      }
+
+      .work-row:hover td,
+      .work-row.is-active td {
+        padding-top: 92px;
+        padding-bottom: 92px;
+      }
+
+      .work-row:hover td:first-child,
+      .work-row.is-active td:first-child {
+        padding-left: 22px;
+      }
+
+      .work-row:hover td:last-child,
+      .work-row.is-active td:last-child {
+        padding-right: 12px;
+      }
+
+      .work-row[data-has-image="true"][data-tone="light"]:hover td,
+      .work-row[data-has-image="true"][data-tone="light"]:hover .year,
+      .work-row[data-has-image="true"][data-tone="light"]:hover .type,
+      .work-row[data-has-image="true"][data-tone="light"]:hover .title,
+      .work-row[data-has-image="true"][data-tone="light"]:hover .filename,
+      .work-row[data-has-image="true"][data-tone="light"]:hover .arrow-icon,
+      .work-row[data-has-image="true"][data-tone="light"].is-active td,
+      .work-row[data-has-image="true"][data-tone="light"].is-active .year,
+      .work-row[data-has-image="true"][data-tone="light"].is-active .type,
+      .work-row[data-has-image="true"][data-tone="light"].is-active .title,
+      .work-row[data-has-image="true"][data-tone="light"].is-active .filename,
+      .work-row[data-has-image="true"][data-tone="light"].is-active .arrow-icon {
+        color: #f7f7f7;
+        text-shadow: 0 1px 14px rgba(0, 0, 0, 0.36);
+      }
+
+      .work-row[data-has-image="true"][data-tone="dark"]:hover td,
+      .work-row[data-has-image="true"][data-tone="dark"]:hover .year,
+      .work-row[data-has-image="true"][data-tone="dark"]:hover .type,
+      .work-row[data-has-image="true"][data-tone="dark"]:hover .title,
+      .work-row[data-has-image="true"][data-tone="dark"]:hover .filename,
+      .work-row[data-has-image="true"][data-tone="dark"]:hover .arrow-icon,
+      .work-row[data-has-image="true"][data-tone="dark"].is-active td,
+      .work-row[data-has-image="true"][data-tone="dark"].is-active .year,
+      .work-row[data-has-image="true"][data-tone="dark"].is-active .type,
+      .work-row[data-has-image="true"][data-tone="dark"].is-active .title,
+      .work-row[data-has-image="true"][data-tone="dark"].is-active .filename,
+      .work-row[data-has-image="true"][data-tone="dark"].is-active .arrow-icon {
+        color: #171717;
+        text-shadow: 0 1px 12px rgba(255, 255, 255, 0.42);
+      }
+
+      .thumbnail {
+        display: block;
+        width: 8px;
+        height: 8px;
+        object-fit: cover;
+        background: #e0e0e0;
+        position: relative;
+        z-index: 2;
+      }
+
+      .works-table tbody td.year,
+      .works-table tbody td.type,
+      .works-table tbody td.filename {
+        color: #999999;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 10px;
+        font-weight: 400;
+      }
+
+      .type {
+        text-transform: capitalize;
+      }
+
+      .title {
+        color: #222222;
+        font-family: "Bricolage Grotesque", sans-serif;
+        font-size: 13px;
+        line-height: 16px;
+        font-weight: 400;
+      }
+
+      .arrow-icon {
+        display: inline-block;
+        color: #222222;
+        font-size: 14px;
+        font-weight: 400;
+        opacity: 0;
+        transform: translateX(-4px);
+        transition: opacity 260ms ease, transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .work-row:hover .arrow-icon,
+      .work-row.is-active .arrow-icon {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      .app-icon-link {
+        position: fixed;
+        bottom: 24px;
+        left: 24px;
+        width: 24px;
+        height: 24px;
+        display: block;
+        z-index: 100;
+      }
+
+      .footer-links {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        display: flex;
+        gap: 16px;
+        z-index: 100;
+      }
+
+      .footer-links a {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 9px;
+        color: #999999;
+        text-decoration: none;
+        letter-spacing: 0.02em;
+        transition: color 0.2s ease;
+      }
+
+      .footer-links a:hover {
+        color: #222222;
+      }
+
+      .versions-nav {
+        position: fixed;
+        left: 50%;
+        bottom: 24px;
+        z-index: 60;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        font-family: "IBM Plex Mono", monospace;
+      }
+
+      .versions-nav a,
+      .versions-nav button {
+        font-family: inherit;
+        font-size: 9px;
+        color: #999999;
+        text-decoration: none;
+        letter-spacing: 0.02em;
+        transition: color 0.2s ease;
+      }
+
+      .versions-nav button {
+        padding: 0;
+        background: transparent;
+        border: 0;
+        cursor: default;
+      }
+
+      .version-list {
+        display: flex;
+        gap: 12px;
+        opacity: 0;
+        transform: translateY(6px);
+        pointer-events: none;
+        transition: opacity 0.22s ease, transform 0.22s ease;
+      }
+
+      .versions-nav:hover .version-list,
+      .versions-nav:focus-within .version-list {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+
+      .versions-nav a:hover,
+      .versions-nav button:hover,
+      .versions-nav a.is-current {
+        color: #222222;
+      }
+
+      @media (max-width: 768px) {
+        .section-label {
+          padding: 32px 16px 0;
+          margin-bottom: 12px;
+          font-size: 16px;
+        }
+
+        .work-row {
+          height: 48px;
+        }
+
+        .works-table th,
+        .works-table td {
+          padding: 10px 8px;
+        }
+
+        .works-table td:nth-child(1) {
+          padding-right: 0;
+        }
+
+        .works-table td:nth-child(4) {
+          padding-left: 16px;
+        }
+
+        .works-table tbody td {
+          padding-top: 10px;
+          padding-bottom: 10px;
+        }
+
+        .works-table th:nth-child(2),
+        .works-table td:nth-child(2),
+        .works-table th:nth-child(3),
+        .works-table td:nth-child(3),
+        .works-table th:nth-child(5),
+        .works-table td:nth-child(5) {
+          width: 0 !important;
+          padding: 0 !important;
+          overflow: hidden;
+          border: none;
+          font-size: 0;
+          white-space: nowrap;
+        }
+
+        .works-table th:nth-child(1) { width: 24px; }
+        .works-table th:nth-child(4) { width: auto; font-size: 0; }
+        .works-table th:nth-child(6) { width: 40px; text-align: center; }
+        .title { font-size: 14px; }
+        .arrow-icon { display: none; }
+        .app-icon-link,
+        .footer-links { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="gl"></div>
+    <div class="container">
+      <div class="table-wrapper" id="scrollArea">
+        <section class="portfolio-section">
+          <h2 class="section-label">Works</h2>
+          <table class="works-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Year</th>
+                <th>Type</th>
+                <th>Title</th>
+                <th>URL</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="clientWorksBody"></tbody>
+          </table>
+        </section>
+
+        <section class="portfolio-section">
+          <h2 class="section-label">Playground</h2>
+          <table class="works-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Year</th>
+                <th>Type</th>
+                <th>Title</th>
+                <th>File</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="worksBody"></tbody>
+          </table>
+        </section>
+
+        <section class="portfolio-section">
+          <h2 class="section-label">Lab.</h2>
+          <table class="works-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Year</th>
+                <th>Type</th>
+                <th>Title</th>
+                <th>File</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="studioBody"></tbody>
+          </table>
+        </section>
+      </div>
+    </div>
+
+    <nav class="versions-nav" aria-label="Portfolio versions">
+      <div class="version-list">
+        <a href="/">Top</a>
+        <a class="is-current" href="/versions/liquid-hover/">v01</a>
+      </div>
+      <button type="button">versions</button>
+    </nav>
+    <a class="app-icon-link" href="https://kids-math-iwua.vercel.app/index.html" target="_blank" rel="noopener">
+      <svg width="24" height="24" viewBox="0 0 281 281" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g clip-path="url(#appIconClip0)">
+          <rect width="280.549" height="280.549" rx="64.494" fill="white"/>
+          <g opacity="0.5">
+            <g clip-path="url(#appIconClip1)">
+              <rect width="280.549" height="280.549" fill="#F8F9FA"/>
+              <path d="M0 193.5H281.856" stroke="#007AFF" stroke-width="0.27525"/>
+              <path d="M0 140.928H281.856" stroke="#007AFF" stroke-width="0.27525"/>
+              <path d="M0 88.355H281.856" stroke="#007AFF" stroke-width="0.27525"/>
+              <path d="M193.5 281.856V0" stroke="#007AFF" stroke-width="0.27525"/>
+              <path d="M140.93 281.856V0" stroke="#007AFF" stroke-width="0.27525"/>
+              <path d="M88.3555 281.856V0" stroke="#007AFF" stroke-width="0.27525"/>
+              <path d="M281.856 281.856L0 0" stroke="#007AFF" stroke-width="0.27525"/>
+              <path d="M0 281.856L281.856 0" stroke="#007AFF" stroke-width="0.27525"/>
+              <rect x="18.3555" y="18.3564" width="243.836" height="243.836" stroke="#007AFF" stroke-width="0.27525"/>
+              <circle cx="139.998" cy="140" r="52.5727" stroke="#007AFF" stroke-width="0.27525"/>
+              <circle cx="139.999" cy="140" r="74.0422" stroke="#007AFF" stroke-width="0.27525"/>
+              <circle cx="140.928" cy="140.928" r="122.486" stroke="#007AFF" stroke-width="0.27525"/>
+            </g>
+            <rect x="0.137625" y="0.137625" width="280.274" height="280.274" stroke="#FF3B30" stroke-width="0.27525"/>
+          </g>
+          <rect width="280.549" height="287.197" transform="translate(0 -3.32422)" fill="#FF6B00"/>
+          <g clip-path="url(#appIconClip2)">
+            <path d="M36.7344 141.174C36.7344 169.705 59.8632 192.834 88.3941 192.834C116.925 192.834 140.054 169.705 140.054 141.174C140.054 112.643 116.925 89.5145 88.3941 89.5145C59.8632 89.5145 36.7344 112.643 36.7344 141.174Z" fill="#FFF9EE"/>
+            <path id="appIconPupilL" d="M82.3984 165.944C82.3984 176.573 91.0151 185.19 101.644 185.19C112.273 185.19 120.89 176.573 120.89 165.944C120.89 155.315 112.273 146.698 101.644 146.698C91.0151 146.698 82.3984 155.315 82.3984 165.944Z" fill="black"/>
+            <path d="M141.828 140.921C141.828 112.39 164.957 89.2612 193.488 89.2612C222.019 89.2612 245.148 112.39 245.148 140.921C245.148 169.452 222.019 192.581 193.488 192.581C164.957 192.581 141.828 169.452 141.828 140.921Z" fill="#FFF9EE"/>
+            <path id="appIconPupilR" d="M202.391 129.69C202.391 119.061 211.007 110.444 221.636 110.444C232.266 110.444 240.882 119.061 240.882 129.69C240.882 140.319 232.266 148.936 221.636 148.936C211.007 148.936 202.391 140.319 202.391 129.69Z" fill="black"/>
+          </g>
+        </g>
+        <defs>
+          <clipPath id="appIconClip0"><rect width="280.549" height="280.549" rx="64.494" fill="white"/></clipPath>
+          <clipPath id="appIconClip1"><rect width="280.549" height="280.549" fill="white"/></clipPath>
+          <clipPath id="appIconClip2"><rect width="213.73" height="218.794" fill="white" transform="translate(34.0625 31.5459)"/></clipPath>
+        </defs>
+      </svg>
+    </a>
+    <nav class="footer-links">
+      <a href="https://x.com/im_inaba" target="_blank" rel="noopener">@im_inaba</a>
+      <a href="https://x.com/masaruinaba" target="_blank" rel="noopener">@masaruinaba</a>
+    </nav>
+
+    <script type="module">
+      import { LiquidHover } from '/src/prototype/liquid-hover.ts'
+      import { clientWorks, works, studioWorks } from '/src/data/portfolio.ts'
+
+      let liquid = null
+
+      const shuffleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?/\\\\[]{}*&^%$#@'
+
+      function randomShuffleChar(char) {
+        if (/\s/.test(char)) return char
+        return shuffleChars.charAt(Math.floor(Math.random() * shuffleChars.length))
+      }
+
+      function shuffleArray(items) {
+        const shuffled = [...items]
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1))
+          ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+        }
+        return shuffled
+      }
+
+      function animateTextShuffle(element) {
+        const originalText = element.dataset.originalTitle || element.textContent
+        const characters = Array.from(originalText)
+        const revealOrder = shuffleArray(characters.map((_, index) => index))
+        const revealStepByIndex = new Map(revealOrder.map((index, step) => [index, step]))
+        const token = Symbol('text-shuffle')
+        const randomFrames = Math.max(8, Math.floor(characters.length * 0.8))
+        let frame = 0
+
+        element.dataset.originalTitle = originalText
+        element._shuffleToken = token
+        clearTimeout(element._shuffleTimer)
+
+        const tick = () => {
+          if (element._shuffleToken !== token) return
+
+          const revealCount = Math.max(0, frame - randomFrames)
+          element.textContent = characters.map((char, index) => {
+            if (revealStepByIndex.get(index) < revealCount) return char
+            return randomShuffleChar(char)
+          }).join('')
+
+          frame++
+
+          if (revealCount <= characters.length) {
+            element._shuffleTimer = setTimeout(tick, 1000 / 28)
+          } else {
+            element.textContent = originalText
+            element._shuffleToken = null
+          }
+        }
+
+        tick()
+      }
+
+      function resetTextShuffle(element) {
+        clearTimeout(element._shuffleTimer)
+        element._shuffleToken = null
+        if (element.dataset.originalTitle) element.textContent = element.dataset.originalTitle
+      }
+
+      function colorDot(color) {
+        const canvas = document.createElement('canvas')
+        canvas.width = 8
+        canvas.height = 8
+        const ctx = canvas.getContext('2d')
+        ctx.fillStyle = color
+        ctx.fillRect(0, 0, 8, 8)
+        return canvas.toDataURL()
+      }
+
+      function isLightColor(color) {
+        if (color.startsWith('rgb')) {
+          const matches = color.match(/\d+/g)
+          if (matches && matches.length >= 3) {
+            const r = parseInt(matches[0])
+            const g = parseInt(matches[1])
+            const b = parseInt(matches[2])
+            return (r * 299 + g * 587 + b * 114) / 1000 > 180
+          }
+        }
+
+        const hex = color.replace('#', '')
+        const full = hex.length === 3 ? hex.split('').map((c) => c + c).join('') : hex
+        const r = parseInt(full.slice(0, 2), 16)
+        const g = parseInt(full.slice(2, 4), 16)
+        const b = parseInt(full.slice(4, 6), 16)
+        return (r * 299 + g * 587 + b * 114) / 1000 > 180
+      }
+
+      function adjustColorForHover(color) {
+        if (!isLightColor(color)) return color
+
+        const hex = color.replace('#', '')
+        const full = hex.length === 3 ? hex.split('').map((c) => c + c).join('') : hex
+        const r = parseInt(full.slice(0, 2), 16)
+        const g = parseInt(full.slice(2, 4), 16)
+        const b = parseInt(full.slice(4, 6), 16)
+        return `rgb(${Math.max(0, Math.floor(r * 0.6))}, ${Math.max(0, Math.floor(g * 0.6))}, ${Math.max(0, Math.floor(b * 0.6))})`
+      }
+
+      function itemHref(work) {
+        return work.url || work.file || '#'
+      }
+
+      function itemLabel(work) {
+        const href = itemHref(work)
+        return work.displayFile || href.replace('https://', '').replace(/\/$/, '')
+      }
+
+      function createRow(work) {
+        const row = document.createElement('tr')
+        const href = itemHref(work)
+        const hasImage = Boolean(work.image)
+        const adjustedColor = adjustColorForHover(work.color)
+        row.className = 'work-row'
+        row.dataset.hasImage = String(hasImage)
+        row.dataset.tone = hasImage && isLightColor(adjustedColor) ? 'dark' : 'light'
+
+        const thumbCell = document.createElement('td')
+        const thumb = document.createElement('img')
+        thumb.className = 'thumbnail'
+        thumb.src = colorDot(adjustedColor)
+        thumb.alt = work.title
+        thumbCell.appendChild(thumb)
+
+        const year = document.createElement('td')
+        year.className = 'year'
+        year.textContent = work.year
+
+        const type = document.createElement('td')
+        type.className = 'type'
+        type.textContent = work.type
+
+        const title = document.createElement('td')
+        title.className = 'title'
+        title.textContent = work.title
+
+        const filename = document.createElement('td')
+        filename.className = 'filename'
+        filename.textContent = itemLabel(work)
+
+        const arrowCell = document.createElement('td')
+        const arrow = document.createElement('span')
+        arrow.className = 'arrow-icon'
+        arrow.textContent = '→'
+        arrowCell.appendChild(arrow)
+
+        row.append(thumbCell, year, type, title, filename, arrowCell)
+
+        row.addEventListener('mouseenter', () => {
+          const scrollArea = document.getElementById('scrollArea')
+          const beforeHeight = row.getBoundingClientRect().height
+          row.classList.add('is-active')
+          animateTextShuffle(title)
+          requestAnimationFrame(() => {
+            const afterHeight = row.getBoundingClientRect().height
+            const delta = Math.max(0, afterHeight - beforeHeight) * 0.5
+            if (scrollArea && delta > 0) scrollArea.scrollTop += delta
+          })
+          if (hasImage) {
+            const updateMask = () => liquid?.setMask(row.getBoundingClientRect())
+            liquid?.show(work.image, row.getBoundingClientRect())
+            requestAnimationFrame(updateMask)
+            window.setTimeout(updateMask, 120)
+            window.setTimeout(updateMask, 320)
+          } else {
+            liquid?.hide()
+          }
+        })
+        row.addEventListener('mousemove', () => {
+          if (hasImage) liquid?.setMask(row.getBoundingClientRect())
+        })
+        row.addEventListener('mouseleave', () => {
+          row.classList.remove('is-active')
+          resetTextShuffle(title)
+          if (hasImage) liquid?.hide()
+        })
+        row.addEventListener('click', () => {
+          if (href.startsWith('http')) {
+            window.open(href, '_blank')
+          } else {
+            window.location.href = href
+          }
+        })
+
+        return row
+      }
+
+      function renderRows(id, items) {
+        const body = document.getElementById(id)
+        items.forEach((work) => body.appendChild(createRow(work)))
+      }
+
+      renderRows('clientWorksBody', clientWorks)
+      renderRows('worksBody', works)
+      renderRows('studioBody', studioWorks)
+
+      if (window.matchMedia('(hover: hover)').matches) {
+        try {
+          liquid = new LiquidHover(document.getElementById('gl'))
+          window.liquid = liquid
+        } catch (error) {
+          console.warn('LiquidHover failed to initialize', error)
+        }
+      }
+
+      document.querySelectorAll('.footer-links a, .versions-nav a, .versions-nav button').forEach((item) => {
+        item.addEventListener('mouseenter', () => animateTextShuffle(item))
+        item.addEventListener('mouseleave', () => resetTextShuffle(item))
+      })
+
+      const svgSize = 281
+      const leftEye = { cx: 88.394, cy: 141.174, px: 101.644, py: 165.944 }
+      const rightEye = { cx: 193.488, cy: 140.921, px: 221.636, py: 129.69 }
+      const maxMove = 52.57 - 19.25
+
+      function movePupil(el, eye, svgX, svgY) {
+        if (!el) return
+        const dx = svgX - eye.cx
+        const dy = svgY - eye.cy
+        const dist = Math.sqrt(dx * dx + dy * dy) || 0.001
+        const factor = Math.min(maxMove, dist) / dist
+        const tx = (eye.cx + dx * factor) - eye.px
+        const ty = (eye.cy + dy * factor) - eye.py
+        el.setAttribute('transform', `translate(${tx}, ${ty})`)
+      }
+
+      document.addEventListener('mousemove', (event) => {
+        const link = document.querySelector('body > .app-icon-link')
+        const pupilL = document.getElementById('appIconPupilL')
+        const pupilR = document.getElementById('appIconPupilR')
+        if (!link || !pupilL || !pupilR) return
+        const rect = link.getBoundingClientRect()
+        const svgX = ((event.clientX - rect.left) / rect.width) * svgSize
+        const svgY = ((event.clientY - rect.top) / rect.height) * svgSize
+        movePupil(pupilL, leftEye, svgX, svgY)
+        movePupil(pupilR, rightEye, svgX, svgY)
+      })
+
+      document.getElementById('scrollArea').addEventListener('scroll', () => liquid?.hide())
+      document.addEventListener('mouseleave', () => liquid?.hide())
+    </script>
+  </body>
+</html>
