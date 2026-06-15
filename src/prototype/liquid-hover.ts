@@ -181,7 +181,7 @@ export class LiquidHover {
       uFade: { value: 1 },
       uReveal: { value: 0 },
       uTime: { value: 0 },
-      uFlowScale: { value: 0.05 },
+      uFlowScale: { value: 0.055 },
       uSeed: { value: 0 },
       uMaskCenter: { value: [0.5, 0.5] },
       uMaskSize: { value: [1, 0.08] },

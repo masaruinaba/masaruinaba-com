@@ -38,6 +38,29 @@
         pointer-events: none;
       }
 
+      .cursor-preview {
+        position: fixed;
+        pointer-events: none;
+        z-index: 1000;
+        opacity: 0;
+        width: 320px;
+        aspect-ratio: 4 / 3;
+        overflow: hidden;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        transform: translate(-50%, -50%);
+        transition: opacity 0.22s ease;
+      }
+
+      #cursorPreviewFrame {
+        width: 1280px;
+        height: 960px;
+        border: none;
+        transform: scale(0.25);
+        transform-origin: top left;
+        pointer-events: none;
+        display: block;
+      }
+
       .container {
         z-index: 30;
         display: flex;
@@ -109,6 +132,21 @@
         overflow: hidden;
       }
 
+      .row-bg {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        bottom: 1px;
+        background: var(--hover-color, #222222);
+        z-index: 0;
+        pointer-events: none;
+        transform: scaleX(0);
+        transform-origin: left center;
+        transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        will-change: transform;
+      }
+
       .works-table tbody td {
         position: relative;
         z-index: 4;
@@ -138,19 +176,24 @@
         transform: translateX(6px);
       }
 
-      .work-row:hover td,
-      .work-row.is-active td {
+      .work-row.normal-row:hover .row-bg,
+      .work-row.normal-row.is-active .row-bg {
+        transform: scaleX(1);
+      }
+
+      .work-row:not(.normal-row):hover td,
+      .work-row:not(.normal-row).is-active td {
         padding-top: 92px;
         padding-bottom: 92px;
       }
 
-      .work-row:hover td:first-child,
-      .work-row.is-active td:first-child {
+      .work-row:not(.normal-row):hover td:first-child,
+      .work-row:not(.normal-row).is-active td:first-child {
         padding-left: 22px;
       }
 
-      .work-row:hover td:last-child,
-      .work-row.is-active td:last-child {
+      .work-row:not(.normal-row):hover td:last-child,
+      .work-row:not(.normal-row).is-active td:last-child {
         padding-right: 12px;
       }
 
@@ -366,12 +409,16 @@
         .title { font-size: 14px; }
         .arrow-icon { display: none; }
         .app-icon-link,
-        .footer-links { display: none; }
+        .footer-links,
+        .versions-nav { display: none; }
       }
     </style>
   </head>
   <body>
     <div id="gl"></div>
+    <div class="cursor-preview" id="cursorPreview">
+      <iframe id="cursorPreviewFrame" src="" scrolling="no" tabindex="-1" sandbox="allow-same-origin allow-scripts"></iframe>
+    </div>
     <div class="container">
       <div class="table-wrapper" id="scrollArea">
         <section class="portfolio-section">
@@ -580,12 +627,43 @@
       }
 
       function itemHref(work) {
-        return work.url || work.file || '#'
+        const href = work.url || work.file || '#'
+        if (href === '#' || href.startsWith('http') || href.startsWith('/')) return href
+        return `/${href}`
       }
 
       function itemLabel(work) {
-        const href = itemHref(work)
+        const href = work.url || work.file || '#'
         return work.displayFile || href.replace('https://', '').replace(/\/$/, '')
+      }
+
+      const cursorPreview = document.getElementById('cursorPreview')
+      const cursorPreviewFrame = document.getElementById('cursorPreviewFrame')
+      let previewVisible = false
+
+      document.addEventListener('mousemove', (event) => {
+        cursorPreview.style.left = `${event.clientX + 24}px`
+        cursorPreview.style.top = `${event.clientY - 60}px`
+      })
+
+      function showCursorPreview(src) {
+        previewVisible = true
+        if (cursorPreviewFrame.dataset.src !== src) {
+          cursorPreviewFrame.src = src
+          cursorPreviewFrame.dataset.src = src
+        }
+        cursorPreview.style.opacity = '1'
+      }
+
+      function hideCursorPreview() {
+        previewVisible = false
+        cursorPreview.style.opacity = '0'
+        window.setTimeout(() => {
+          if (!previewVisible) {
+            cursorPreviewFrame.src = ''
+            delete cursorPreviewFrame.dataset.src
+          }
+        }, 240)
       }
 
       function createRow(work) {
@@ -593,42 +671,85 @@
         const href = itemHref(work)
         const hasImage = Boolean(work.image)
         const adjustedColor = adjustColorForHover(work.color)
+        const textColor = isLightColor(adjustedColor) ? '#222222' : '#ffffff'
+        const secondaryTextColor = isLightColor(adjustedColor) ? '#666666' : 'rgba(255, 255, 255, 0.8)'
         row.className = 'work-row'
+        if (!hasImage) row.classList.add('normal-row')
         row.dataset.hasImage = String(hasImage)
         row.dataset.tone = hasImage && isLightColor(adjustedColor) ? 'dark' : 'light'
 
         const thumbCell = document.createElement('td')
+        const rowBg = document.createElement('div')
+        rowBg.className = 'row-bg'
+        rowBg.style.backgroundColor = adjustedColor
         const thumb = document.createElement('img')
         thumb.className = 'thumbnail'
         thumb.src = colorDot(adjustedColor)
         thumb.alt = work.title
+        thumbCell.appendChild(rowBg)
         thumbCell.appendChild(thumb)
 
         const year = document.createElement('td')
         year.className = 'year'
         year.textContent = work.year
+        year.dataset.originalColor = '#999999'
 
         const type = document.createElement('td')
         type.className = 'type'
         type.textContent = work.type
+        type.dataset.originalColor = '#999999'
 
         const title = document.createElement('td')
         title.className = 'title'
         title.textContent = work.title
+        title.dataset.originalColor = '#222222'
 
         const filename = document.createElement('td')
         filename.className = 'filename'
         filename.textContent = itemLabel(work)
+        filename.dataset.originalColor = '#999999'
 
         const arrowCell = document.createElement('td')
         const arrow = document.createElement('span')
         arrow.className = 'arrow-icon'
         arrow.textContent = '→'
+        arrow.dataset.originalColor = '#222222'
         arrowCell.appendChild(arrow)
 
         row.append(thumbCell, year, type, title, filename, arrowCell)
 
+        const normalCells = [year, type, title, filename, arrow]
+
+        function updateRowBgPosition() {
+          const table = row.closest('table')
+          if (!table) return
+          const tableRect = table.getBoundingClientRect()
+          const cellRect = thumbCell.getBoundingClientRect()
+          rowBg.style.left = `${tableRect.left - cellRect.left}px`
+          rowBg.style.width = `${tableRect.width}px`
+        }
+
+        window.setTimeout(updateRowBgPosition, 0)
+
+        function setNormalHover(active) {
+          normalCells.forEach((cell, index) => {
+            const nextColor = active ? (index === 2 || index === 4 ? textColor : secondaryTextColor) : cell.dataset.originalColor
+            cell.style.color = nextColor
+          })
+          arrow.style.opacity = active ? '1' : '0'
+          arrow.style.transform = active ? 'translateX(0)' : 'translateX(-4px)'
+        }
+
         row.addEventListener('mouseenter', () => {
+          if (!hasImage) {
+            row.classList.add('is-active')
+            animateTextShuffle(title)
+            updateRowBgPosition()
+            setNormalHover(true)
+            if (window.matchMedia('(hover: hover)').matches) showCursorPreview(href)
+            return
+          }
+
           const scrollArea = document.getElementById('scrollArea')
           const beforeHeight = row.getBoundingClientRect().height
           row.classList.add('is-active')
@@ -652,6 +773,14 @@
           if (hasImage) liquid?.setMask(row.getBoundingClientRect())
         })
         row.addEventListener('mouseleave', () => {
+          if (!hasImage) {
+            row.classList.remove('is-active')
+            resetTextShuffle(title)
+            setNormalHover(false)
+            hideCursorPreview()
+            return
+          }
+
           row.classList.remove('is-active')
           resetTextShuffle(title)
           if (hasImage) liquid?.hide()

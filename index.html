@@ -329,6 +329,10 @@
           letter-spacing: 0.02em;
         }
 
+        .versions-nav {
+          display: none;
+        }
+
         /* Arrow非表示、expand icon表示 */
         .arrow-icon { display: none !important; }
         .expand-icon {
@@ -488,6 +492,12 @@
       .versions-nav a:hover,
       .versions-nav button:hover {
         color: #222222;
+      }
+
+      @media (max-width: 768px) {
+        .versions-nav {
+          display: none !important;
+        }
       }
     </style>
   </head>
