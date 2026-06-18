@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Drag Reveal - Portfolio Version</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+      @font-face {
+        font-family: "Geist";
+        src: url("/fonts/geist/Geist-Variable.woff2") format("woff2");
+        font-weight: 100 900;
+        font-display: swap;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        width: 100%;
+        min-height: 100%;
+        background: #f7f7f7;
+        color: #222222;
+        font-family: "IBM Plex Mono", monospace;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      body {
+        overflow: hidden;
+      }
+
+      a,
+      button {
+        font: inherit;
+      }
+
+      .field {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .drag-item {
+        --x: 50vw;
+        --y: 50vh;
+        --color: #222222;
+        --drag-x: 0px;
+        --drag-y: 0px;
+        --length: 0px;
+        --target-length: 240px;
+        --progress: 0;
+        --angle: 0deg;
+        --text-color: #f7f7f7;
+        --reveal-font: "Geist";
+        --meta-x: 12px;
+        --meta-y: 14px;
+        position: absolute;
+        left: var(--x);
+        top: var(--y);
+        z-index: 5;
+        display: block;
+        width: 32px;
+        height: 32px;
+        color: #222222;
+        text-decoration: none;
+        touch-action: none;
+        user-select: none;
+        cursor: default;
+        -webkit-user-drag: none;
+        transform: translate(-50%, -50%);
+      }
+
+      .drag-item.is-dragging {
+        z-index: 20;
+        cursor: default;
+      }
+
+      .drag-item.is-spent {
+        z-index: 4;
+      }
+
+      .dot {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        z-index: 1;
+        width: 8px;
+        height: 8px;
+        background: var(--color);
+        transform: translate(-50%, -50%);
+        transition: opacity 120ms ease, transform 180ms cubic-bezier(0.2, 1.7, 0.35, 1);
+      }
+
+      .drag-item:not(.is-dragging):not(.is-spent):hover .dot {
+        transform: translate(-50%, -50%) scale(1.75);
+      }
+
+      .drag-item.is-dragging .dot,
+      .drag-item.is-spent .dot {
+        opacity: 0;
+      }
+
+      .reveal {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        z-index: 2;
+        width: var(--length);
+        height: 56px;
+        overflow: hidden;
+        background: var(--color);
+        opacity: 0;
+        transform: translate(0, -50%) rotate(var(--angle));
+        transform-origin: 0 50%;
+        pointer-events: none;
+        box-shadow: none;
+        transition: opacity 120ms ease, box-shadow 120ms ease;
+      }
+
+      .drag-item.is-spent .reveal {
+        pointer-events: auto;
+      }
+
+      .drag-item.is-dragging .reveal {
+        opacity: 1;
+        transition: opacity 120ms ease;
+      }
+
+      .drag-item.is-spent .reveal {
+        opacity: 1;
+      }
+
+      .resize-handle {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 3;
+        width: 24px;
+        height: 100%;
+        pointer-events: none;
+      }
+
+      .drag-item.is-complete .resize-handle {
+        pointer-events: auto;
+      }
+
+      .reveal-text {
+        display: flex;
+        align-items: center;
+        position: relative;
+        z-index: 2;
+        width: max-content;
+        height: 100%;
+        padding: 8px 32px;
+        color: var(--text-color);
+        font-family: var(--reveal-font), sans-serif;
+        font-size: clamp(15px, 2.05vw, 26px);
+        font-weight: 600;
+        font-synthesis: none;
+        font-variation-settings: "wght" 600;
+        line-height: 1;
+        letter-spacing: calc(-0.08em + var(--progress) * 0.18em);
+        white-space: nowrap;
+        transform: translateY(1px);
+        transition: none;
+      }
+
+      .reveal-char {
+        display: inline-block;
+        opacity: var(--char-opacity, 0);
+        transform: translateY(calc((1 - var(--char-opacity, 0)) * 0.16em));
+        transition: opacity 120ms ease, transform 120ms ease;
+      }
+
+      .meta {
+        position: absolute;
+        left: calc(50% + var(--meta-x));
+        top: calc(50% + var(--meta-y));
+        display: grid;
+        gap: 3px;
+        color: #999999;
+        font-size: 9px;
+        line-height: 1.2;
+        opacity: 0;
+        pointer-events: none;
+        white-space: nowrap;
+        transition: opacity 180ms ease;
+      }
+
+      .drag-item:not(.is-spent):not(.is-dragging):hover .meta {
+        opacity: 1;
+      }
+
+      .drag-item.is-dragging .meta {
+        opacity: 0;
+      }
+
+      .versions-nav {
+        position: fixed;
+        left: 50%;
+        bottom: 24px;
+        z-index: 50;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        transform: translateX(-50%);
+        font-family: "IBM Plex Mono", monospace;
+      }
+
+      .reload-link {
+        position: fixed;
+        left: 50%;
+        top: 24px;
+        z-index: 50;
+        transform: translateX(-50%);
+        color: #999999;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 9px;
+        letter-spacing: 0.02em;
+        text-decoration: none;
+      }
+
+      .version-list {
+        display: flex;
+        gap: 12px;
+        opacity: 0;
+        transform: translateY(6px);
+        pointer-events: none;
+        transition: opacity 0.22s ease, transform 0.22s ease;
+      }
+
+      .versions-nav:hover .version-list,
+      .versions-nav:focus-within .version-list {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+
+      .versions-nav a,
+      .versions-nav button,
+      .reload-link,
+      .footer-links a {
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: #999999;
+        font-size: 9px;
+        letter-spacing: 0.02em;
+        text-decoration: none;
+      }
+
+      .versions-nav button {
+        cursor: default;
+      }
+
+      .versions-nav a:hover,
+      .versions-nav a.is-current,
+      .versions-nav button:hover,
+      .reload-link:hover,
+      .footer-links a:hover {
+        color: #222222;
+      }
+
+      .app-icon-link {
+        position: fixed;
+        left: 24px;
+        bottom: 24px;
+        z-index: 50;
+        display: block;
+        width: 24px;
+        height: 24px;
+      }
+
+      .footer-links {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+        z-index: 50;
+        display: flex;
+        gap: 16px;
+      }
+
+      @media (max-width: 768px) {
+        .reveal {
+          height: 50px;
+        }
+
+        .reveal-text {
+          padding: 8px 28px;
+          font-size: clamp(14px, 5.1vw, 21px);
+        }
+
+        .footer-links,
+        .app-icon-link,
+        .reload-link,
+        .versions-nav {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="field" id="field" aria-label="Works drag field"></main>
+
+    <a class="reload-link" href="/versions/drag-reveal/">Reload</a>
+
+    <nav class="versions-nav" aria-label="Portfolio versions">
+      <div class="version-list">
+        <a href="/">Top</a>
+        <a href="/versions/liquid-hover/">v01</a>
+        <a class="is-current" href="/versions/drag-reveal/">v02</a>
+      </div>
+      <button type="button">versions</button>
+    </nav>
+
+    <a class="app-icon-link" href="https://kids-math-iwua.vercel.app/index.html" target="_blank" rel="noopener">
+      <svg width="24" height="24" viewBox="0 0 281 281" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g clip-path="url(#appIconClip0)">
+          <rect width="280.549" height="280.549" rx="64.494" fill="white"/>
+          <g opacity="0.5">
+            <g clip-path="url(#appIconClip1)">
+              <rect width="280.549" height="280.549" fill="#F8F9FA"/>
+              <path d="M0 193.5H281.856" stroke="#007AFF" stroke-width="0.27525"/>
+              <path d="M0 140.928H281.856" stroke="#007AFF" stroke-width="0.27525"/>
+              <path d="M0 88.355H281.856" stroke="#007AFF" stroke-width="0.27525"/>
+              <path d="M193.5 281.856V0" stroke="#007AFF" stroke-width="0.27525"/>
+              <path d="M140.93 281.856V0" stroke="#007AFF" stroke-width="0.27525"/>
+              <path d="M88.3555 281.856V0" stroke="#007AFF" stroke-width="0.27525"/>
+              <path d="M281.856 281.856L0 0" stroke="#007AFF" stroke-width="0.27525"/>
+              <path d="M0 281.856L281.856 0" stroke="#007AFF" stroke-width="0.27525"/>
+              <rect x="18.3555" y="18.3564" width="243.836" height="243.836" stroke="#007AFF" stroke-width="0.27525"/>
+              <circle cx="139.998" cy="140" r="52.5727" stroke="#007AFF" stroke-width="0.27525"/>
+              <circle cx="139.999" cy="140" r="74.0422" stroke="#007AFF" stroke-width="0.27525"/>
+              <circle cx="140.928" cy="140.928" r="122.486" stroke="#007AFF" stroke-width="0.27525"/>
+            </g>
+            <rect x="0.137625" y="0.137625" width="280.274" height="280.274" stroke="#FF3B30" stroke-width="0.27525"/>
+          </g>
+          <rect width="280.549" height="287.197" transform="translate(0 -3.32422)" fill="#FF6B00"/>
+          <g clip-path="url(#appIconClip2)">
+            <path d="M36.7344 141.174C36.7344 169.705 59.8632 192.834 88.3941 192.834C116.925 192.834 140.054 169.705 140.054 141.174C140.054 112.643 116.925 89.5145 88.3941 89.5145C59.8632 89.5145 36.7344 112.643 36.7344 141.174Z" fill="#FFF9EE"/>
+            <path id="appIconPupilL" d="M82.3984 165.944C82.3984 176.573 91.0151 185.19 101.644 185.19C112.273 185.19 120.89 176.573 120.89 165.944C120.89 155.315 112.273 146.698 101.644 146.698C91.0151 146.698 82.3984 155.315 82.3984 165.944Z" fill="black"/>
+            <path d="M141.828 140.921C141.828 112.39 164.957 89.2612 193.488 89.2612C222.019 89.2612 245.148 112.39 245.148 140.921C245.148 169.452 222.019 192.581 193.488 192.581C164.957 192.581 141.828 169.452 141.828 140.921Z" fill="#FFF9EE"/>
+            <path id="appIconPupilR" d="M202.391 129.69C202.391 119.061 211.007 110.444 221.636 110.444C232.266 110.444 240.882 119.061 240.882 129.69C240.882 140.319 232.266 148.936 221.636 148.936C211.007 148.936 202.391 140.319 202.391 129.69Z" fill="black"/>
+          </g>
+        </g>
+        <defs>
+          <clipPath id="appIconClip0"><rect width="280.549" height="280.549" rx="64.494" fill="white"/></clipPath>
+          <clipPath id="appIconClip1"><rect width="280.549" height="280.549" fill="white"/></clipPath>
+          <clipPath id="appIconClip2"><rect width="213.73" height="218.794" fill="white" transform="translate(34.0625 31.5459)"/></clipPath>
+        </defs>
+      </svg>
+    </a>
+
+    <nav class="footer-links">
+      <a href="https://x.com/im_inaba" target="_blank" rel="noopener">@im_inaba</a>
+      <a href="https://x.com/masaruinaba" target="_blank" rel="noopener">@masaruinaba</a>
+    </nav>
+
+    <script type="module">
+      import { clientWorks, works, studioWorks } from '/src/data/portfolio.ts'
+
+      const items = [
+        ...clientWorks.map((work) => ({ ...work, group: 'Works' })),
+        ...works.map((work) => ({ ...work, group: 'Playground' })),
+        ...studioWorks.map((work) => ({ ...work, group: 'Lab.' })),
+      ]
+
+      const field = document.getElementById('field')
+      const positions = []
+      const remeasureTargets = []
+
+      if (document.fonts) {
+        document.fonts.load('500 40px "Geist"')
+        document.fonts.load('700 40px "Geist"')
+      }
+
+      let audioContext = null
+
+      function ensureAudio() {
+        if (!audioContext) audioContext = new AudioContext()
+        if (audioContext.state === 'suspended') audioContext.resume()
+        return audioContext
+      }
+
+      function playTone(frequency, duration = 0.08, volume = 0.035, type = 'triangle') {
+        const context = ensureAudio()
+        const oscillator = context.createOscillator()
+        const gain = context.createGain()
+        oscillator.type = type
+        oscillator.frequency.setValueAtTime(frequency, context.currentTime)
+        gain.gain.setValueAtTime(0.0001, context.currentTime)
+        gain.gain.exponentialRampToValueAtTime(volume, context.currentTime + 0.012)
+        gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + duration)
+        oscillator.connect(gain)
+        gain.connect(context.destination)
+        oscillator.start()
+        oscillator.stop(context.currentTime + duration + 0.02)
+      }
+
+      function startStretchSound() {}
+      function updateStretchSound() {}
+      function stopStretchSound() {}
+
+      function itemHref(work) {
+        const href = work.url || work.file || '#'
+        if (href === '#') return href
+        if (href.startsWith('http')) return href
+        if (href.startsWith('/')) return `${window.location.origin}${href}`
+        return `${window.location.origin}/${href}`
+      }
+
+      function itemLabel(work) {
+        const href = work.url || work.file || '#'
+        return work.displayFile || href.replace('https://', '').replace(/\/$/, '')
+      }
+
+      function itemTitle(work) {
+        return work.titleEn || work.title
+      }
+
+      function clamp(value, min, max) {
+        return Math.min(max, Math.max(min, value))
+      }
+
+      function randomBetween(min, max) {
+        return min + Math.random() * (max - min)
+      }
+
+      function distance(a, b) {
+        return Math.hypot(a.x - b.x, a.y - b.y)
+      }
+
+      function pickPosition() {
+        const marginX = window.innerWidth < 760 ? 28 : 56
+        const marginTop = window.innerWidth < 760 ? 118 : 132
+        const marginBottom = 86
+        const minDistance = window.innerWidth < 760 ? 54 : 72
+        let candidate = null
+
+        for (let i = 0; i < 80; i++) {
+          candidate = {
+            x: randomBetween(marginX, window.innerWidth - marginX),
+            y: randomBetween(marginTop, window.innerHeight - marginBottom),
+          }
+
+          if (positions.every((position) => distance(position, candidate) > minDistance)) break
+        }
+
+        positions.push(candidate)
+        return candidate
+      }
+
+      function openHref(href) {
+        if (href === '#') return
+        if (href.startsWith('http')) {
+          window.open(href, '_blank')
+          return
+        }
+
+        window.open(`${window.location.origin}/${href.replace(/^\/+/, '')}`, '_blank')
+      }
+
+      function isLightColor(color) {
+        if (!color || !color.startsWith('#')) return false
+        const hex = color.replace('#', '')
+        const full = hex.length === 3 ? hex.split('').map((char) => char + char).join('') : hex
+        const r = parseInt(full.slice(0, 2), 16)
+        const g = parseInt(full.slice(2, 4), 16)
+        const b = parseInt(full.slice(4, 6), 16)
+        return (r * 299 + g * 587 + b * 114) / 1000 > 180
+      }
+
+      function escapeHtml(text) {
+        return text
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;')
+      }
+
+      function createItem(work, index) {
+        const href = itemHref(work)
+        const color = work.color || '#222222'
+        const title = itemTitle(work)
+        const titleChars = Array.from(title)
+        const escapedTitle = titleChars
+          .map((char) => `<span class="reveal-char">${char === ' ' ? '&nbsp;' : escapeHtml(char)}</span>`)
+          .join('')
+        const position = pickPosition()
+        const element = document.createElement('a')
+        element.className = 'drag-item'
+        element.href = href
+        element.target = '_blank'
+        element.rel = 'noopener'
+        element.draggable = false
+        element.setAttribute('aria-label', `${title}を開く`)
+        element.style.setProperty('--x', `${position.x}px`)
+        element.style.setProperty('--y', `${position.y}px`)
+        element.style.setProperty('--color', color)
+        element.style.setProperty('--text-color', isLightColor(color) ? '#222222' : '#f7f7f7')
+        element.style.setProperty('--meta-x', `${randomBetween(-86, 48).toFixed(1)}px`)
+        element.style.setProperty('--meta-y', `${randomBetween(14, 62).toFixed(1)}px`)
+        element.innerHTML = `
+          <span class="reveal"><span class="reveal-text">${escapedTitle}</span><span class="resize-handle" aria-hidden="true"></span></span>
+          <span class="dot"></span>
+          <span class="meta">
+            <span>${work.year} / ${work.type}</span>
+            <span>${work.group}</span>
+            <span>${itemLabel(work)}</span>
+          </span>
+        `
+
+        let pointerId = null
+        let startX = 0
+        let startY = 0
+        let baseX = position.x
+        let baseY = position.y
+        let baseLength = 0
+        let baseAngle = 0
+        let baseProgress = 0
+        let editMode = 'draw'
+        let hasDragged = false
+        let suppressNextClick = false
+        let targetLength = 240
+        let hasMeasuredTarget = false
+        let lastAngle = 0
+        const chars = Array.from(element.querySelectorAll('.reveal-char'))
+
+        function measureTargetLength(force = false) {
+          if (hasMeasuredTarget && !force) return targetLength
+          const text = element.querySelector('.reveal-text')
+          if (!text) return targetLength
+          const currentProgress = element.style.getPropertyValue('--progress') || '0'
+          element.style.setProperty('--progress', '1')
+          chars.forEach((char) => char.style.setProperty('--char-opacity', '1'))
+          const textWidth = Math.ceil(Math.max(text.scrollWidth, text.getBoundingClientRect().width))
+          element.style.setProperty('--progress', currentProgress)
+          targetLength = Math.max(textWidth, 1)
+          element.style.setProperty('--target-length', `${targetLength}px`)
+          applyCharOpacity(targetLength * (parseFloat(currentProgress) || 0))
+          hasMeasuredTarget = true
+          return targetLength
+        }
+
+        function applyCharOpacity(length) {
+          chars.forEach((char, index) => {
+            const charRight = char.offsetLeft + char.offsetWidth
+            const opacity = clamp((length - charRight) / 18, 0, 1)
+            char.style.setProperty('--char-opacity', opacity.toFixed(3))
+          })
+        }
+
+        function applyRevealProgress(progress) {
+          const text = element.querySelector('.reveal-text')
+          if (!text) return 0
+          const clampedProgress = clamp(progress, 0, 1)
+          element.style.setProperty('--progress', clampedProgress.toFixed(3))
+          const length = clampedProgress <= 0
+            ? 0
+            : Math.ceil(measureTargetLength() * clampedProgress)
+          element.style.setProperty('--length', `${length}px`)
+          applyCharOpacity(length)
+          return length
+        }
+
+        function bandFitsViewport(length, angle) {
+          const x = parseFloat(element.style.getPropertyValue('--x')) || baseX
+          const y = parseFloat(element.style.getPropertyValue('--y')) || baseY
+          const height = element.querySelector('.reveal')?.offsetHeight || 56
+          const radians = angle * Math.PI / 180
+          const cos = Math.cos(radians)
+          const sin = Math.sin(radians)
+          const corners = [
+            [0, -height / 2],
+            [length, -height / 2],
+            [length, height / 2],
+            [0, height / 2],
+          ].map(([cornerX, cornerY]) => ({
+            x: x + cornerX * cos - cornerY * sin,
+            y: y + cornerX * sin + cornerY * cos,
+          }))
+          const xs = corners.map((corner) => corner.x)
+          const ys = corners.map((corner) => corner.y)
+          return (
+            Math.min(...xs) >= 0 &&
+            Math.max(...xs) <= window.innerWidth &&
+            Math.min(...ys) >= 0 &&
+            Math.max(...ys) <= window.innerHeight
+          )
+        }
+
+        remeasureTargets.push(() => {
+          hasMeasuredTarget = false
+          measureTargetLength(true)
+          const currentProgress = parseFloat(element.style.getPropertyValue('--progress')) || 0
+          if (element.classList.contains('is-spent') || element.classList.contains('is-dragging')) {
+            applyRevealProgress(currentProgress)
+          }
+        })
+
+        window.requestAnimationFrame(() => measureTargetLength(true))
+        if (document.fonts) {
+          Promise.all([
+            document.fonts.load('500 40px "Geist"'),
+            document.fonts.load('700 40px "Geist"'),
+          ]).then(() => {
+            hasMeasuredTarget = false
+            measureTargetLength(true)
+          }).catch(() => {})
+
+          document.fonts.ready.then(() => {
+            hasMeasuredTarget = false
+            measureTargetLength(true)
+          })
+        }
+
+        function updateDraw(event) {
+          const dx = event.clientX - startX
+          const dy = event.clientY - startY
+          const maxLength = measureTargetLength()
+          const rawLength = Math.hypot(dx, dy)
+          const progress = maxLength > 0 ? clamp(rawLength / maxLength, 0, 1) : 0
+          const angle = Math.atan2(dy, dx) * 180 / Math.PI
+
+          hasDragged = hasDragged || rawLength > 10
+          lastAngle = angle
+          applyRevealProgress(progress)
+          element.style.setProperty('--angle', `${angle}deg`)
+          updateStretchSound(progress)
+        }
+
+        function updateEdit(event) {
+          const dx = event.clientX - startX
+          const dy = event.clientY - startY
+          const maxLength = measureTargetLength()
+          const angleRad = baseAngle * Math.PI / 180
+          const along = dx * Math.cos(angleRad) + dy * Math.sin(angleRad)
+          const cross = -dx * Math.sin(angleRad) + dy * Math.cos(angleRad)
+          const progress = maxLength > 0 ? clamp(baseProgress + along / maxLength, 0, 1) : 0
+          const angle = baseAngle + clamp(cross * 0.16, -34, 34)
+
+          hasDragged = hasDragged || Math.hypot(dx, dy) > 5
+          lastAngle = angle
+          applyRevealProgress(progress)
+          element.style.setProperty('--angle', `${angle}deg`)
+          updateStretchSound(progress)
+        }
+
+        function updateMove(event) {
+          const dx = event.clientX - startX
+          const dy = event.clientY - startY
+
+          hasDragged = hasDragged || Math.hypot(dx, dy) > 5
+          element.style.setProperty('--x', `${baseX + dx}px`)
+          element.style.setProperty('--y', `${baseY + dy}px`)
+        }
+
+        function reset() {
+          pointerId = null
+          stopStretchSound()
+          element.classList.remove('is-dragging')
+          if (element.classList.contains('is-spent')) return
+          element.style.setProperty('--length', '0px')
+          applyRevealProgress(0)
+        }
+
+        function startDrag(event) {
+          event.preventDefault()
+          pointerId = event.pointerId
+          startX = event.clientX
+          startY = event.clientY
+          hasDragged = false
+          const isResizeHandle = event.target?.closest?.('.resize-handle')
+          editMode = isResizeHandle
+            ? 'edit'
+            : element.classList.contains('is-complete')
+            ? 'move'
+            : element.classList.contains('is-spent')
+              ? 'edit'
+              : 'draw'
+          const freshTargetLength = measureTargetLength(true)
+          baseX = parseFloat(element.style.getPropertyValue('--x')) || baseX
+          baseY = parseFloat(element.style.getPropertyValue('--y')) || baseY
+          baseLength = parseFloat(element.style.getPropertyValue('--length')) || 0
+          baseProgress = parseFloat(element.style.getPropertyValue('--progress')) || 0
+          baseAngle = parseFloat((element.style.getPropertyValue('--angle') || '0').replace('deg', '')) || 0
+          lastAngle = baseAngle
+          if (editMode === 'draw') element.classList.remove('is-spent')
+          element.style.pointerEvents = 'auto'
+          element.classList.add('is-dragging')
+          startStretchSound(baseLength / freshTargetLength)
+          if (event.pointerId && element.setPointerCapture) element.setPointerCapture(pointerId)
+          if (editMode === 'draw') {
+            applyRevealProgress(0)
+          }
+        }
+
+        element.addEventListener('pointerdown', startDrag)
+
+        element.addEventListener('pointermove', (event) => {
+          if (event.pointerId !== pointerId) return
+          if (editMode === 'move') updateMove(event)
+          else if (editMode === 'edit') updateEdit(event)
+          else updateDraw(event)
+        })
+
+        function release(event) {
+          if (pointerId === null) return
+          if (event && event.pointerId !== pointerId) return
+          const currentLength = parseFloat(element.style.getPropertyValue('--length')) || 0
+          const fullLength = measureTargetLength(true)
+          const currentProgress = parseFloat(element.style.getPropertyValue('--progress')) || 0
+          const isFullLength = currentProgress >= 0.999
+          const fitsViewport = bandFitsViewport(currentLength, lastAngle)
+          if (!hasDragged) {
+            element.classList.remove('is-dragging')
+            pointerId = null
+            return
+          }
+          const shouldRemove = editMode === 'edit' && currentLength < 16
+          const shouldKeep = hasDragged && !shouldRemove
+          if (shouldRemove) {
+            element.classList.remove('is-dragging', 'is-spent', 'is-complete')
+            applyRevealProgress(0)
+            stopStretchSound()
+            playTone(96, 0.08, 0.01, 'sine')
+            pointerId = null
+            return
+          }
+          if (shouldKeep) {
+            const keptLength = parseFloat(element.style.getPropertyValue('--length')) || 0
+            element.classList.remove('is-dragging')
+            element.classList.add('is-spent')
+            element.classList.toggle('is-complete', isFullLength && fitsViewport)
+            stopStretchSound()
+            playTone(520, 0.045, 0.012, 'triangle')
+            element.style.pointerEvents = 'auto'
+            element.style.setProperty('--angle', `${lastAngle}deg`)
+            baseX = parseFloat(element.style.getPropertyValue('--x')) || baseX
+            baseY = parseFloat(element.style.getPropertyValue('--y')) || baseY
+            baseLength = keptLength
+            baseProgress = currentProgress
+            baseAngle = lastAngle
+            suppressNextClick = true
+            window.setTimeout(() => {
+              suppressNextClick = false
+            }, 120)
+            pointerId = null
+            return
+          }
+          reset()
+        }
+
+        element.addEventListener('pointerup', release)
+        element.addEventListener('pointercancel', reset)
+        element.addEventListener('lostpointercapture', () => {
+          if (pointerId !== null) release()
+        })
+        window.addEventListener('pointerup', release)
+        window.addEventListener('mouseup', () => release())
+        element.addEventListener('mousedown', (event) => {
+          if (pointerId !== null) return
+          startDrag({
+            pointerId: 'mouse',
+            clientX: event.clientX,
+            clientY: event.clientY,
+            target: event.target,
+            preventDefault: () => event.preventDefault(),
+          })
+        })
+        window.addEventListener('mousemove', (event) => {
+          if (pointerId !== 'mouse') return
+          if (editMode === 'move') updateMove(event)
+          else if (editMode === 'edit') updateEdit(event)
+          else updateDraw(event)
+        })
+        window.addEventListener('mouseup', () => {
+          if (pointerId === 'mouse') release()
+        })
+
+        element.addEventListener('click', (event) => {
+          if (suppressNextClick || !element.classList.contains('is-spent')) {
+            event.preventDefault()
+          }
+        })
+
+        return element
+      }
+
+      items.forEach((work, index) => field.appendChild(createItem(work, index)))
+      ;[80, 320, 900, 1600].forEach((delay) => {
+        window.setTimeout(() => remeasureTargets.forEach((remeasure) => remeasure()), delay)
+      })
+
+      window.addEventListener('resize', () => {
+        positions.length = 0
+        document.querySelectorAll('.drag-item').forEach((element) => {
+          const position = pickPosition()
+          element.style.setProperty('--x', `${position.x}px`)
+          element.style.setProperty('--y', `${position.y}px`)
+          element.style.setProperty('--meta-x', `${randomBetween(-86, 48).toFixed(1)}px`)
+          element.style.setProperty('--meta-y', `${randomBetween(14, 62).toFixed(1)}px`)
+          element.style.setProperty('--length', '0px')
+          element.style.setProperty('--progress', '0')
+        })
+      })
+    </script>
+  </body>
+</html>
