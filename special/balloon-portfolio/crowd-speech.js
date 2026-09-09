@@ -24,7 +24,7 @@ export function createSpeech(scene){
     }
     mc.update();const geometry=new THREE.BufferGeometry(),count=mc.geometry.drawRange.count;
     for(const name of ['position','normal'])geometry.setAttribute(name,new THREE.Float32BufferAttribute(mc.geometry.attributes[name].array.slice(0,count*3),3));
-    geometry.scale(extent,extent,extent);geometry.computeBoundingSphere();mc.geometry.dispose();
+    geometry.scale(extent,extent,extent);geometry.computeBoundingSphere();geometry.computeBoundingBox();mc.geometry.dispose();
     if(shapes.size>=16){const oldest=shapes.keys().next().value;shapes.get(oldest).dispose();shapes.delete(oldest);}
     shapes.set(key,geometry);return geometry;
   }
@@ -33,10 +33,10 @@ export function createSpeech(scene){
   const thought=new THREE.Group();for(const [x,y,s] of [[-.36,-.53,.095],[-.48,-.74,.055]]){const puff=new THREE.Mesh(tailGeometry,mat);puff.position.set(x,y,-.02);puff.scale.setScalar(s);thought.add(puff);}root.add(thought);
   const ctx=document.createElement('canvas').getContext('2d');
   const qa=new URLSearchParams(location.search).get('qa')==='speech';
-  let next=qa?4:6+Math.random()*3,actor=null,start=0,last=-1,lastShape=-1,size=0,velocity=0,rotation=0,dragging=false,persistent=false,bubbleWidth=1,bubbleHeight=.48,lastCaller=null;
+  let next=qa?4:6+Math.random()*3,actor=null,start=0,last=-1,lastShape=-1,size=0,velocity=0,rotation=0,dragging=false,persistent=false,bubbleWidth=1,bubbleHeight=.48,lastCaller=null,anchorSide=1;
   function clear(){actor?.face.speak(0);if(actor)actor.speaking=false;actor=null;root.visible=false;screenBounds=null;caption.hidden=true;document.body.dataset.speech='';dragging=false;persistent=false;}
   function say(who,time,reduced,comment=null,keep=false){
-    if(!who?.face)return;actor?.face.speak(0);if(actor)actor.speaking=false;actor=who;actor.speaking=true;start=time;rotation=Math.sin(who.phase*2.7)*.12;persistent=keep;
+    if(!who?.face)return;actor?.face.speak(0);if(actor)actor.speaking=false;actor=who;actor.speaking=true;start=time;rotation=Math.sin(who.phase*2.7)*.12;persistent=keep;screenBounds=null;anchorSide=who.face.mouthPosition().x>0?-1:1;
       let choice;do{choice=Math.floor(Math.random()*lines.length);}while(choice===last);last=choice;
       const kind=1+(lastShape===1?1:0);lastShape=kind;
       tail.visible=kind===0;thought.visible=kind!==0;mat.color.set('#fffdf8');
@@ -65,13 +65,14 @@ export function createSpeech(scene){
     if(reduced)size=target;else{velocity+=((target-size)*110-velocity*13)*dt;size+=velocity*dt;}
     const voiceAge=persistent?age%7:age;const pulse=reduced?0:Math.abs(Math.sin(voiceAge*9))*Math.max(0,1-voiceAge/4.3);actor.face.speak(pulse);
     const fit=Math.min(persistent?.82:.76,(camera.right-camera.left)/(bubbleWidth*2.4+.7)),margin=bubbleWidth*1.14*fit;
-    const mouth=actor.face.mouthPosition(),side=mouth.x>0?-1:1;
+    const mouth=actor.face.mouthPosition(),side=anchorSide;
     root.position.set(THREE.MathUtils.clamp(mouth.x+side*((bubbleWidth*1.14+.6)*fit),-camera.right+margin,camera.right-margin),THREE.MathUtils.clamp(mouth.y+(.10+Math.sin(time*.85+actor.phase)*.045)*fit,-camera.top+bubbleHeight*1.2*fit,camera.top-bubbleHeight*1.2*fit),Math.min(camera.position.z-1,Math.max(7,mouth.z+1)));
     root.scale.setScalar(Math.max(.001,size)*fit);root.rotation.z=rotation;
     const screen=root.position.clone().project(camera),pixelScale=innerWidth/(camera.right-camera.left)*fit;
     caption.style.left=((screen.x*.5+.5)*innerWidth)+'px';caption.style.top=((-screen.y*.5+.5)*innerHeight)+'px';caption.style.fontSize=(70*.0022*pixelScale)+'px';caption.style.transform='translate(-50%,-50%) rotate('+(-rotation)+'rad) scale('+Math.max(.001,size)+')';
     const cpx=(screen.x*.5+.5)*innerWidth,cpy=(-screen.y*.5+.5)*innerHeight;
-    const halfW=(bubbleWidth*1.38+bubbleHeight*.18+.34)*pixelScale,halfH=(bubbleHeight*1.38+bubbleWidth*.18+.12)*pixelScale;
+    const box=shell.geometry.boundingBox,hw=Math.max(Math.abs(box.min.x),Math.abs(box.max.x))*bubbleWidth,hh=Math.max(Math.abs(box.min.y),Math.abs(box.max.y))*bubbleHeight;
+    const halfW=(hw*Math.abs(Math.cos(rotation))+hh*Math.abs(Math.sin(rotation)))*pixelScale*1.06,halfH=(hh*Math.abs(Math.cos(rotation))+hw*Math.abs(Math.sin(rotation)))*pixelScale*1.06;
     screenBounds={left:cpx-halfW,right:cpx+halfW,top:cpy-halfH,bottom:cpy+halfH};
     // Aim the tail at the actual lip anchor, even when the balloon is rotated.
     const c=Math.cos(-rotation),s=Math.sin(-rotation),wx=(mouth.x-root.position.x)/fit,wy=(mouth.y-root.position.y)/fit;

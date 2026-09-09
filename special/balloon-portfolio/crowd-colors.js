@@ -1,6 +1,6 @@
 // Balance visible area as well as neighbor contrast, once before the entrance.
 export function colorNeighbors(actors,palette,random){
-  const colors=[...new Set([...palette,'#965aca','#f28c27'])],neighbors=actors.map(()=>new Set());
+  const colors=[...new Set(palette)],neighbors=actors.map(()=>new Set());
   for(let i=0;i<actors.length;i++)for(let j=i+1;j<actors.length;j++)if(Math.hypot(actors[i].px-actors[j].px,actors[i].py-actors[j].py)<(actors[i].radius+actors[j].radius)*1.18){neighbors[i].add(j);neighbors[j].add(i);}
   const assignments=actors.map(()=>-1),areas=colors.map(()=>0),weights=actors.map(a=>a.radius*a.radius),target=weights.reduce((a,b)=>a+b,0)/colors.length;
   // Largest balloons receive different colors before small gap fillers are colored.

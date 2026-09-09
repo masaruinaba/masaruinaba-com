@@ -1,5 +1,5 @@
 // One closed surface with a shared equator: no doubled, flat welded flange.
-export function crowdShell(segments=128,rings=20){
+export function crowdShell(segments=192,rings=20){
   const positions=[0,0,.798],triangles=[],rim=[];
   for(let row=1;row<rings;row++){
     const theta=row/rings*Math.PI;
@@ -22,8 +22,21 @@ export function relaxCrowdShell(data){
     const x=positions[i],y=positions[i+1],depth=positions[i+2]-.4;
     const shoulder=Math.exp(-(((x+.26)/.48)**2+((y-.28)/.42)**2));
     const lower=Math.exp(-(((x-.24)/.52)**2+((y+.30)/.40)**2));
-    positions[i+2]=.4+depth*(.95-.075*shoulder-.045*lower);
+    positions[i+2]=.4+depth*(1.02-.115*shoulder-.088*lower);
     positions[i]*=1+.016*Math.exp(-(((y+.38)/.45)**2));
+  }
+  // Relax distance-field ridges where petal/point regions meet. Keep the welded
+  // boundary fixed so this softens the membrane without changing its silhouette.
+  const neighbors=Array.from({length:positions.length/3},()=>new Set()),fixed=new Set(data.rim);
+  for(let t=0;t<data.triangles.length;t+=3)for(let k=0;k<3;k++){
+    const a=data.triangles[t+k],b=data.triangles[t+(k+1)%3];neighbors[a].add(b);neighbors[b].add(a);
+  }
+  for(let pass=0;pass<20;pass++){
+    const previous=positions.slice();
+    for(let i=0;i<neighbors.length;i++)if(!fixed.has(i)&&neighbors[i].size){
+      let mean=0;for(const j of neighbors[i])mean+=previous[j*3+2];mean/=neighbors[i].size;
+      positions[i*3+2]=previous[i*3+2]*.55+mean*.45;
+    }
   }
   return {...data,positions};
 }

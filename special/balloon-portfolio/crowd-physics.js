@@ -35,9 +35,9 @@ export function advancePile(objects,dt,time,held,reduced,width,height){
       
     }
     if(held){
-      const a=held.actor;
-      a.fx+=(held.target.x-held.offset.x-a.px)*28*a.mass;
-      a.fy+=(held.target.y-held.offset.y-a.py)*28*a.mass;
+      const a=held.actor,pressure=held.strength??1;
+      a.fx+=(held.target.x-held.offset.x-a.px)*28*a.mass*(.25+.75*pressure);
+      a.fy+=(held.target.y-held.offset.y-a.py)*28*a.mass*(.25+.75*pressure);
       a.omega+=(held.local.x*.25-a.turn)*h*3;
     }
     for(const a of objects){
@@ -50,7 +50,7 @@ export function advancePile(objects,dt,time,held,reduced,width,height){
       if(Math.abs(a.vx)<.025)a.vx=0;if(Math.abs(a.vy)<.025)a.vy=0;
       a.px+=a.vx*h;a.py+=a.vy*h;
       a.omega+=(-a.turn*6+(a.vx-a.vy)*.10)*h;a.omega*=Math.exp(-5*h);a.turn+=a.omega*h;
-      a.vz+=((held?.actor===a?-.14:0)-a.depth)*30*h;a.vz*=Math.exp(-11*h);a.depth+=a.vz*h;
+      a.vz+=((held?.actor===a?-.14*(held.strength??1):0)-a.depth)*30*h;a.vz*=Math.exp(-11*h);a.depth+=a.vz*h;
     }
   }
   resolveDepth(objects);

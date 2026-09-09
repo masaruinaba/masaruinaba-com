@@ -20,6 +20,17 @@ export function meshParts(root){
 }
 export function worldParts(a){
   const scale=a.baseSize*(a.entry??1),sx=scale*a.squeeze*(1+a.kick*.10),sy=scale/a.squeeze*(1-a.kick*.09),angle=a.angle+a.turn+a.kick*.06+(a.floatAngle||0),c=Math.cos(angle),s=Math.sin(angle);
+  if(a.tiltX||a.tiltY){
+    const rotation=new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(a.tiltX||0,a.tiltY||0,angle));
+    return a.collision.map(part=>{
+      const vertices=[];
+      for(const p of part.points)for(const z of [part.zMin,part.zMax])vertices.push(new THREE.Vector3(p.x*sx,p.y*sy,z*scale*.85).applyMatrix4(rotation));
+      const points=hull(vertices.map(p=>({x:a.px+(a.floatX||0)+p.x,y:a.py+(a.floatY||0)+p.y})));
+      const axes=points.map((p,i)=>{const q=points[(i+1)%points.length],len=Math.hypot(q.x-p.x,q.y-p.y);return len>1e-8?{x:-(q.y-p.y)/len,y:(q.x-p.x)/len}:null;}).filter(Boolean);
+      const z=a.z+a.depth+(a.focusLift||0);
+      return {points,axes,minX:Math.min(...points.map(p=>p.x)),maxX:Math.max(...points.map(p=>p.x)),minY:Math.min(...points.map(p=>p.y)),maxY:Math.max(...points.map(p=>p.y)),zMin:z+Math.min(...vertices.map(p=>p.z)),zMax:z+Math.max(...vertices.map(p=>p.z))};
+    });
+  }
   return a.collision.map(part=>{const points=part.points.map(p=>({x:a.px+(a.floatX||0)+p.x*sx*c-p.y*sy*s,y:a.py+(a.floatY||0)+p.x*sx*s+p.y*sy*c}));const axes=points.map((p,i)=>{const q=points[(i+1)%points.length],len=Math.hypot(q.x-p.x,q.y-p.y);return len>1e-8?{x:-(q.y-p.y)/len,y:(q.x-p.x)/len}:null;}).filter(Boolean);return {points,axes,minX:Math.min(...points.map(p=>p.x)),maxX:Math.max(...points.map(p=>p.x)),minY:Math.min(...points.map(p=>p.y)),maxY:Math.max(...points.map(p=>p.y)),zMin:a.z+a.depth+(a.focusLift||0)+part.zMin*scale*.85,zMax:a.z+a.depth+(a.focusLift||0)+part.zMax*scale*.85};});
 }
 function sat(a,b){
