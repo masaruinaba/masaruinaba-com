@@ -1,0 +1,82 @@
+[
+  {
+    "id": "flower",
+    "label": "花",
+    "color": "#8e79ce"
+  },
+  {
+    "id": "daisy",
+    "label": "デイジー",
+    "color": "#dd7f9e"
+  },
+  {
+    "id": "ring",
+    "label": "リング",
+    "color": "#59a5b5"
+  },
+  {
+    "id": "heart",
+    "label": "ハート",
+    "color": "#d9cc49"
+  },
+  {
+    "id": "spark",
+    "label": "きらめき",
+    "color": "#88b65c"
+  },
+  {
+    "id": "star",
+    "label": "星",
+    "color": "#6d96d1"
+  },
+  {
+    "id": "cloud",
+    "label": "雲",
+    "color": "#8e79ce"
+  },
+  {
+    "id": "bow",
+    "label": "リボン",
+    "color": "#dd7f9e"
+  },
+  {
+    "id": "pillow",
+    "label": "クッション",
+    "color": "#59a5b5"
+  },
+  {
+    "id": "quilt",
+    "label": "キルト",
+    "color": "#d9cc49"
+  },
+  {
+    "id": "moon",
+    "label": "月",
+    "color": "#88b65c"
+  },
+  {
+    "id": "bean",
+    "label": "まめ",
+    "color": "#6d96d1"
+  },
+  {
+    "id": "wave",
+    "label": "うねり",
+    "color": "#8e79ce"
+  },
+  {
+    "id": "leaf",
+    "label": "葉",
+    "color": "#dd7f9e"
+  },
+  {
+    "id": "arch",
+    "label": "アーチ",
+    "color": "#59a5b5"
+  },
+  {
+    "id": "bubbles",
+    "label": "泡",
+    "color": "#d9cc49"
+  }
+]

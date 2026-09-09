@@ -1,0 +1,7 @@
+import {roundedStarPath} from './origin-body.js';
+export const classicPaths={
+  triangle:'M 474 205 Q 500 160 526 205 L 774 635 Q 800 680 748 680 L 252 680 Q 200 680 226 635 Z',
+  square:'M 295 180 L 705 180 Q 820 180 820 295 L 820 705 Q 820 820 705 820 L 295 820 Q 180 820 180 705 L 180 295 Q 180 180 295 180 Z',
+  heart:'M 500 340 C 415 185 180 220 180 390 C 180 535 350 665 480 765 Q 500 781 520 765 C 650 665 820 535 820 390 C 820 220 585 185 500 340 Z',
+  star:roundedStarPath()
+};

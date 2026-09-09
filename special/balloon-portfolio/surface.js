@@ -1,0 +1,24 @@
+export const creatureProfiles={
+ cat:[[.90,.19,.31],[2.23,.19,.31]],
+ rabbit:[[1.10,.16,.65],[1.98,.17,.53]],
+ bear:[[.82,.30,.24],[2.31,.30,.24]],
+ devil:[[1.00,.13,.46],[2.14,.13,.46]],
+ sprout:[[1.32,.28,.37],[1.98,.21,.25]],
+ bat:[[.10,.19,.28],[.54,.13,.18],[2.60,.13,.18],[3.04,.19,.28]],
+ seal:[[3.85,.22,.20],[5.38,.22,.28]],
+ ghost:[[4.05,.17,.22],[4.72,.18,.29],[5.40,.17,.22]],
+ axolotl:[[.30,.13,.23],[.62,.13,.27],[.92,.13,.23],[2.22,.13,.23],[2.54,.13,.27],[2.84,.13,.23]],
+ droop:[[1.04,.29,.47],[2.23,.36,.19]],
+ fin:[[.18,.25,.23],[1.63,.16,.27],[4.9,.32,.27]],
+ crown:[[1.05,.14,.23],[1.57,.15,.36],[2.09,.14,.23]]};
+// Loop subdivision stencils keep render smoothing attached to the physical mesh.
+export function skin(data){const count=data.positions.length/3,links=Array.from({length:count},(_,i)=>[i,i]),neighbors=Array.from({length:count},()=>new Set()),edges=new Map(),triangles=[];
+for(let i=0;i<data.triangles.length;i+=3){const t=data.triangles.slice(i,i+3);for(let k=0;k<3;k++){const a=t[k],b=t[(k+1)%3],c=t[(k+2)%3],key=[a,b].sort((a,b)=>a-b).join(',');neighbors[a].add(b);neighbors[b].add(a);if(!edges.has(key))edges.set(key,{a,b,op:[]});edges.get(key).op.push(c);}}
+const stencils=neighbors.map((set,i)=>{const n=set.size,b=n===3?3/16:3/(8*n);return [[i,1-n*b],...[...set].map(j=>[j,b])];});
+for(const e of edges.values()){e.id=links.length;links.push([e.a,e.b]);stencils.push([[e.a,.375],[e.b,.375],...e.op.map(i=>[i,.125])]);}
+const mid=(a,b)=>edges.get([a,b].sort((a,b)=>a-b).join(',')).id;
+for(let i=0;i<data.triangles.length;i+=3){const[a,b,c]=data.triangles.slice(i,i+3),ab=mid(a,b),bc=mid(b,c),ca=mid(c,a);triangles.push(a,ab,ca,ab,b,bc,ca,bc,c,ab,bc,ca);}
+const boundary=[];for(let i=0;i<data.rim.length;i++){const a=data.rim[i],b=data.rim[(i+1)%data.rim.length];boundary.push(a);if(!neighbors[a].has(b)){const common=[...neighbors[a]].filter(v=>neighbors[b].has(v));if(!common.length)throw Error('Disconnected seam boundary');common.sort((u,v)=>Math.abs(data.positions[u*3+2]-.45)-Math.abs(data.positions[v*3+2]-.45));boundary.push(common[0]);}}const rim=boundary.flatMap((a,i)=>[a,mid(a,boundary[(i+1)%boundary.length])]);return {links,stencils,triangles,rim};}
+export function sampleSkin(p,stencil){const out=[0,0,0];for(const [id,w] of stencil)for(let k=0;k<3;k++)out[k]+=p[id*3+k]*w;return out;}
+export function shapeData(base,kind='round'){const positions=base.positions.slice();for(let i=0;i<positions.length;i+=3){const x=base.positions[i],y=base.positions[i+1],a=Math.atan2(y,x);let sx=1,sy=1,depth=1;if(creatureProfiles[kind]){const r=Math.hypot(x,y)/.95;let f=.82;for(const[c,w,h]of creatureProfiles[kind]){const d=Math.atan2(Math.sin(a-c),Math.cos(a-c));f+=h*Math.exp(-((d/w)**2))*Math.min(1,r*r);}sx=f;sy=f;depth=.91;}if(kind==='horn'){const g=(c,w)=>Math.exp(-((Math.atan2(Math.sin(a-c),Math.cos(a-c))/w)**2)),r=Math.hypot(x,y)/.95;const f=.84+(.49*g(1.48,.145)+.19*g(.72,.22)+.15*g(2.40,.25))*Math.min(1,r*r);sx=f;sy=f;depth=.92;}if(kind==='bolster'){sx=.60*(.92+.12*Math.exp(-(((y-.48)/.3)**2)));sy=1.22;depth=.88;}if(kind==='buddy'){const f=.74+.055*Math.cos(8*a+.2);sx=f;sy=f;depth=.88;}if(kind==='pal'){const g=(c,w)=>Math.exp(-((Math.atan2(Math.sin(a-c),Math.cos(a-c))/w)**2));const r=Math.hypot(x,y)/.95,f=.84+(.40*g(1.02,.27)+.15*g(4.12,.29)+.16*g(5.23,.29)-.09*g(4.68,.22))*Math.min(1,r*r);sx=f;sy=f;depth=.90;}if(kind==='oval'){sx=.77;sy=1.14;}if(kind==='bean'){sx=.92;sy=.88;}if(kind==='twin'){sx=1-.30*Math.exp(-((y/.23)**2));sy=1.10;depth=1-.12*Math.exp(-((y/.23)**2));}if(kind==='cloud'){const f=.9+.1*Math.cos(3*a+.4);sx=1.06*f;sy=.85*f;}if(kind==='flower'){const f=.82+.18*Math.cos(5*a);sx=f;sy=f;depth=.93;}positions[i]=x*sx+(kind==='bolster'?.18*((y/.95)**2-.4):0);positions[i+1]=y*sy+(kind==='bean'?.16*(x/.95)**2:0);positions[i+2]=.008+(base.positions[i+2]-.008)*depth;}return {...base,positions};}
+export function wrinkle(x,y,z,kind,tension){const a=Math.atan2(y,x);let radius=.95;if(kind==='oval')radius=.95/Math.hypot(Math.cos(a)/.77,Math.sin(a)/1.14);if(kind==='flower')radius*=.82+.18*Math.cos(5*a);if(kind==='cloud')radius*=.9+.1*Math.cos(3*a+.4);const r=Math.hypot(x,y)/radius,side=Math.sign(z-.45);if(r<.53||r>1.04)return 0;let d=0;for(const[c,w,l,amp]of [[.32,.07,.84,.023],[1.91,.09,.88,.034],[3.4,.065,.80,.026],[4.85,.11,.89,.021],[5.7,.06,.91,.02]]){const angle=Math.atan2(Math.sin(a-c),Math.cos(a-c));const taper=Math.exp(-(((r-l)/.115)**2));d+=amp*taper*(-Math.exp(-((angle/w)**2))+.35*Math.exp(-(((angle-w*1.65)/(w*.9))**2)));}if(kind==='pal'){for(const cy of [-.59,.63])d-=.014*Math.exp(-(((y-cy)/.075)**2))*Math.exp(-(((Math.abs(x)-.32)/.15)**2));}if(kind==='flower'||kind==='twin'){const valley=kind==='flower'?Math.pow((1-Math.cos(5*a))/2,9):Math.exp(-((y/.2)**2));d-=.022*valley*Math.exp(-(((r-.83)/.15)**2));}return side*d*(1.15-.4*tension);}

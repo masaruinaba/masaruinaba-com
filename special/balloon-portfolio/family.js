@@ -1,0 +1,3 @@
+import {shapeData} from './surface.js';
+export function familyData(base,kind,age=.76){const d=shapeData(base,kind);const adult=age>=.9,baby=age<.6;for(let i=0;i<d.positions.length;i+=3){const x=d.positions[i],y=d.positions[i+1],z=d.positions[i+2];if(adult){d.positions[i]=x*(.86-.12*Math.tanh(y*2));d.positions[i+1]=y*1.27;d.positions[i+2]=.008+(z-.008)*(1.02-.10*Math.tanh(y*2));}else{d.positions[i]=x*(1+.065*Math.exp(-(((y-.15)/.5)**2)));d.positions[i+1]=y*(baby?.77:.88);d.positions[i+2]=.008+(z-.008)*(baby?1.04:.98);if(kind==='pal'){const ear=Math.max(0,(y-.58)/.6);d.positions[i]-=ear*.09;d.positions[i+1]+=ear*.18;d.positions[i+2]-=ear*.055;}}}return d;}
+export function familyScale(age){return age>=.9?.78:age<.6?.56:.65;}
