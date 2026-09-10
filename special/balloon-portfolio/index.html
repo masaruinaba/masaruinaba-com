@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#dcd8d0">
+  <link id="character-favicon" rel="icon" type="image/png" sizes="64x64" href="./favicons/blue.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="./favicons/apple-touch-icon.png">
   <link rel="stylesheet" data-adobe-font href="https://use.typekit.net/nid0bqi.css">
   <title>Masaru Inaba — Playground</title>
   <meta name="description" content="A collection of little experiments, made for the fun of it.">
@@ -70,7 +72,6 @@
       .play-controls #sensor-status:empty{display:none}
     }
   #work-bubble::before{inset:-32px;-webkit-mask:var(--frame-mask) center/100% 100% no-repeat;mask:var(--frame-mask) center/100% 100% no-repeat}
-  body[data-color-mode=chic][data-chic-variant=mono] :is(#world,#work-bubble,#camera-window,.play-controls,.color-modes,.portfolio-home,#speech-caption){filter:grayscale(1)}
   .color-modes{background:linear-gradient(#fffdf5,#eee9d8);backdrop-filter:none}
   .color-modes button:hover{transform:translateY(-2px) rotate(-3deg)}
   .portfolio-home{transition:transform .2s cubic-bezier(.2,.8,.2,1)}
@@ -82,13 +83,18 @@
   }
   #work-bubble::before{background:var(--frame-surface) center/100% 100% no-repeat;-webkit-mask:none;mask:none;filter:drop-shadow(0 2px 3px #3b342212)}
   body:not([data-ready=true]) #world{visibility:hidden}
+  @media(max-width:620px){
+    #camera-window{left:50%;right:auto;top:auto;bottom:calc(80px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);cursor:default;touch-action:auto;transition:none}
+    .play-controls #sensor-status{bottom:64px;left:50%;width:max-content;max-width:calc(100vw - 32px);text-align:center;white-space:normal}
+    body:has(#camera-preview:not([hidden])) .play-controls #sensor-status{bottom:184px}
+  }
   </style>
 </head>
 <body>
   <canvas id="world" tabindex="0" aria-label="A playful crowd of soft balloon creatures. Press and drag to squish creatures or move items. Shift-drag or twist with two fingers to rotate a character. Press Space to bounce the crowd."></canvas>
   <div class="play-controls"><span id="sensor-status" role="status" aria-live="polite"></span><button id="camera-toggle" aria-pressed="false">Camera</button><button id="mic-toggle" aria-pressed="false">Blow</button><button id="reload-crowd" type="button" aria-label="Reload with new friends and colors" title="New friends"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 9a8 8 0 1 0 .15 5.7M20 4v5h-5"/></svg></button></div>
   <a class="portfolio-home" href="https://www.masaruinaba.com/" target="_blank" rel="noopener noreferrer">masaruinaba.com</a>
-  <div class="color-modes" role="group" aria-label="Color tone"><button type="button" data-color-mode="pop" aria-pressed="true" title="Playful colors">Pop</button><button type="button" data-color-mode="chic" aria-pressed="false" title="Warm chic, then black monochrome.">Chic</button></div>
+  <div class="color-modes" role="group" aria-label="Color tone"><button type="button" data-color-mode="pop" aria-pressed="true" title="Playful colors">Pop</button><button type="button" data-color-mode="chic" aria-pressed="false" title="Chic — click again to change the accent color">Chic</button></div>
   <div id="camera-window" tabindex="0" aria-label="Camera preview. Drag to a corner. Arrow keys move between corners."><canvas id="camera-friends" hidden aria-label="Little monsters bouncing around your face"></canvas>
   <video id="camera-preview" autoplay muted playsinline hidden aria-label="Your camera preview"></video></div>
   <p id="work-hello" hidden role="status"></p>

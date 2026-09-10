@@ -3,20 +3,42 @@ import * as THREE from 'three';
 export function createColorMode(scene,renderer,redraw=()=>{}){
   const originals=new WeakMap(),lights=new WeakMap();
   const buttons=[...document.querySelectorAll('[data-color-mode]')];
-  const palettes=[
-    {background:'#242522',accent:'#e85a18',tones:['#494640','#837767','#b8aa92','#353633','#625b52']},
-    {background:'#141414',accent:'#a6a6a6',tones:['#333333','#555555','#929292','#222222','#707070'],mono:true}
+  // Keep the warm Chic base; cycle the accent and randomly choose its characters.
+  const accents=[
+    '#e85a18','#ed4935','#e9b51b','#a4bd22','#14b785',
+    '#12a9c4','#337fe5','#9252df','#e33c90','#ef8420',
+    '#df2852','#f06479','#edcd20','#6ebc27','#19aa52',
+    '#08b3a4','#16b5e3','#405de0','#bc43dc','#ed45b9'
   ];
-  let current='pop',lastPalette=-1;
+  const palettes=accents.map(accent=>({
+    background:'#242522',accent,tones:['#494640','#837767','#b8aa92','#353633','#625b52']
+  }));
+  let current='pop',lastPalette=-1,previousAccents=new Set();
   try{current=localStorage.getItem('crowd-color-mode')==='chic'?'chic':'pop';}catch{}
 
   function apply(mode){
     if(current!==mode)lastPalette=-1;current=mode;document.body.dataset.colorMode=mode;
     let selected;
     if(mode==='chic'){lastPalette=(lastPalette+1)%palettes.length;selected=palettes[lastPalette];}
-    document.body.dataset.chicVariant=selected?.mono?'mono':'warm';
+    document.body.dataset.chicVariant='warm';
+    document.body.dataset.chicAccent=selected?.accent||'';
+    document.body.dataset.chicAccentIndex=selected?String(lastPalette):'';
     try{localStorage.setItem('crowd-color-mode',mode);}catch{}
 
+    const accentActors=new Set();
+    if(selected){
+      const candidates=[];
+      scene.traverse(object=>{const actor=object.userData.actor;if(actor?.face&&actor.body===object)candidates.push(actor);});
+      for(let i=candidates.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[candidates[i],candidates[j]]=[candidates[j],candidates[i]];}
+      const count=Math.ceil(candidates.length*.3);
+      for(const actor of candidates.slice(0,count))accentActors.add(actor);
+      // Avoid repeating the exact same cast on consecutive clicks.
+      if(count<candidates.length&&accentActors.size===previousAccents.size&&[...accentActors].every(actor=>previousAccents.has(actor))){
+        accentActors.delete(candidates[count-1]);accentActors.add(candidates[count]);
+      }
+      previousAccents=accentActors;
+    }
+    document.body.dataset.chicAccentCount=String(accentActors.size);
     const done=new Set();
     scene.traverse(object=>{
       if(object.isLight){if(!lights.has(object))lights.set(object,object.color.clone());object.color.copy(mode==='pop'?lights.get(object):new THREE.Color('#ffffff'));}
@@ -30,7 +52,7 @@ export function createColorMode(scene,renderer,redraw=()=>{}){
         const actor=object.userData.actor,body=actor?.body===object||actor&&!actor.face;
         let tone;
         if(!body){tone=luminance<.20?'#242320':luminance>.80?'#f3eddf':'#a18a78';}
-        else if(hsl.s>.25&&hsl.h<.12){tone=selected.accent;}
+        else if(accentActors.has(actor)){tone=selected.accent;}
         else{
           const tones=selected.tones;
           tone=tones[Math.min(4,Math.floor(hsl.h*5))];

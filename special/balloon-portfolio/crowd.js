@@ -1,3 +1,4 @@
+import {createOpening} from './opening.js';
 import {setupFeedback} from './crowd-feedback.js';
 import {createProfile} from './crowd-profile.js';
 import {attachFrost} from './crowd-frost.js';
@@ -24,6 +25,7 @@ import {initializeMotion,advancePile} from './crowd-physics.js';
 import {polygonParts,meshParts,convexPart} from './crowd-collision.js';
 
 const canvas=document.querySelector('#world'),status=document.querySelector('#status');
+const opening=createOpening();let openingReleased=false;
 const feedback=setupFeedback();
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const sessionSeed=Number(new URLSearchParams(location.search).get('seed'))||crypto.getRandomValues(new Uint32Array(1))[0];
@@ -114,7 +116,7 @@ function resize(){
   for(const a of ornaments)initializeMotion(a,(a.letter?.60:.29)*a.baseSize);
   // Choose neighboring colors once, before the first visible frame.
   if(!entered)document.body.dataset.colorConflicts=String(colorNeighbors(actors,palette,random));
-  if(!entered&&!reduced.matches){
+  if((!entered||!openingReleased)&&!reduced.matches){
     for(const a of [...actors,...ornaments]){a.px=a.x*.06;a.py=a.y*.06;a.vx=a.x*3.9;a.vy=a.y*3.9;a.turn=(random()-.5)*2.7;a.omega=(random()-.5)*5;a.entry=.07;a.entryVelocity=0;a.delay=random()*.13;}
   }
   entered=true;draw(0);wake();
@@ -163,7 +165,7 @@ function draw(dt){
   }
 }
 function tick(now){raf=0;if(document.hidden)return;if(time>=motionUntil&&!held&&now-last<32){raf=requestAnimationFrame(tick);return;}const dt=Math.min((now-last)/1000||0,.035);last=now;time+=dt;draw(dt);if(!reduced.matches||held||[...actors,...ornaments].some(a=>a.deforming||Math.abs(a.kick)+Math.abs(a.velocity)+Math.hypot(a.vx,a.vy)>.002))raf=requestAnimationFrame(tick);}
-function wake(){if(!raf&&!document.hidden){last=performance.now();raf=requestAnimationFrame(tick);}}
+function wake(){if(openingReleased&&!raf&&!document.hidden){last=performance.now();raf=requestAnimationFrame(tick);}}
 function applyWind(dx,dy,strength){
   if(!actors.length)return;
   motionUntil=time+5;
@@ -267,8 +269,9 @@ async function init(){
     const manifest=await fetch('./items/manifest.json');if(!manifest.ok)throw Error('Items load failed');const items=(await manifest.json()).filter(item=>!['bean','pillow','cloud','leaf'].includes(item.id)),loader=new GLTFLoader();
     models=await Promise.all(items.map(async item=>{if(['flower','daisy','spark','star'].includes(item.id))return balloonFlower(item.id);const gltf=await loader.loadAsync('./items/'+item.id+'.glb');gltf.scene.traverse(o=>{if(!o.isMesh)return;for(const a of [o.geometry.attributes.position,o.geometry.attributes.normal]){if(!a)continue;for(let i=0;i<a.count;i++){const y=a.getY(i),z=a.getZ(i);a.setY(i,-z);a.setZ(i,y);}a.needsUpdate=true;}o.geometry.computeBoundingBox();o.geometry.computeBoundingSphere();o.material.side=item.id==='heart'?THREE.DoubleSide:THREE.FrontSide;if(item.id!=='heart'&&!o.material.map){const original=o.geometry;o.geometry=compactItemGeometry(original);if(o.geometry!==original)original.dispose();}});gltf.scene.userData.itemId=item.id;return gltf.scene;}));
     await document.fonts.load('400 80px fatfrank');document.body.dataset.typeface=document.fonts.check('400 80px fatfrank')?'FatFrank':'fallback';
-    speech=createSpeech(scene);createWindControls(applyWind);resize();createColorMode(scene,renderer,()=>draw(0));window.addEventListener('resize',resize);await renderer.compileAsync(scene,camera);draw(0);status.hidden=true;document.body.dataset.ready='true';wake();
-  }catch(error){console.error(error);status.textContent='Could not load the playground. Please refresh.';document.body.dataset.error=error.message;}
+    speech=createSpeech(scene);createWindControls(applyWind);resize();createColorMode(scene,renderer,()=>draw(0));window.addEventListener('resize',resize);await renderer.compileAsync(scene,camera);draw(0);status.hidden=true;document.body.dataset.ready='true';
+    await opening.finish(()=>{openingReleased=true;wake();});
+  }catch(error){opening.cancel();console.error(error);status.hidden=false;status.textContent='Could not load the playground. Please refresh.';document.body.dataset.error=error.message;}
 }
 document.querySelector('#reload-crowd').addEventListener('click',event=>{
   const button=event.currentTarget;button.disabled=true;button.dataset.reloading='true';
