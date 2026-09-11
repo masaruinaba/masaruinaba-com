@@ -226,7 +226,7 @@
       .cursor-preview {
         position: fixed;
         pointer-events: none;
-        z-index: 1000;
+        z-index: 80;
         opacity: 0;
         width: 320px;
         aspect-ratio: 4/3;
@@ -831,7 +831,7 @@
        */
       const cursorPreview = document.getElementById('cursorPreview');
       const cursorPreviewImg = document.getElementById('cursorPreviewImg');
-      let cursorTween = null;
+      const previewReducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
       document.addEventListener('mousemove', (e) => {
         gsap.to(cursorPreview, {
@@ -846,7 +846,9 @@
       let _previewVisible = false;
 
       function showCursorPreview(src, type = 'image') {
+        const entering = !_previewVisible;
         _previewVisible = true;
+        const tilt = (Math.random() - 0.5) * 24;
         // 進行中の hide アニメをキャンセル
         gsap.killTweensOf(cursorPreview);
 
@@ -865,18 +867,24 @@
           cursorPreviewImg.style.display = 'block';
           cursorPreviewImg.src = src;
         }
+        if (entering) gsap.set(cursorPreview, { scale: 0.96, rotation: tilt });
         gsap.to(cursorPreview, {
           opacity: 1,
-          duration: 0.25,
+          scale: 1,
+          rotation: tilt,
+          duration: previewReducedMotion.matches ? 0 : 0.4,
           ease: 'power2.out'
         });
       }
 
       function hideCursorPreview() {
+        if (!_previewVisible) return;
         _previewVisible = false;
+        // Stop the longer entrance tween before fading out during rapid row changes.
+        gsap.killTweensOf(cursorPreview, 'opacity,scale,rotation');
         gsap.to(cursorPreview, {
           opacity: 0,
-          duration: 0.2,
+          duration: previewReducedMotion.matches ? 0 : 0.12,
           ease: 'power2.in',
           onComplete: () => {
             // 再ホバーされていなければ iframe をアンロード
@@ -1404,6 +1412,10 @@
         };
         document.querySelector('.table-wrapper').addEventListener('scroll', hideAllPreviews);
         document.addEventListener('mouseleave', hideAllPreviews);
+        document.querySelectorAll('.footer-links, .mobile-footer, .versions-nav, .app-icon-link').forEach((footer) => {
+          footer.addEventListener('mouseenter', hideAllPreviews);
+          footer.addEventListener('focusin', hideAllPreviews);
+        });
 
       });
     </script>
