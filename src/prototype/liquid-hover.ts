@@ -121,7 +121,7 @@ export class LiquidHover {
   private flowmap!: Flowmap
   private program!: Program
 
-  private cache = new Map<string, TexEntry>()
+  private cache = new Map<string, Promise<TexEntry>>()
   private blank!: Texture
   private currentSrc: string | null = null
 
@@ -235,43 +235,40 @@ export class LiquidHover {
     const texture = new Texture(this.gl, { generateMipmaps: false })
     const img = new Image()
     img.crossOrigin = 'anonymous'
-    img.src = src
-    const entry: TexEntry = { texture, size: [1, 1] }
-    this.cache.set(src, entry)
-
-    return new Promise((resolve) => {
+    const pending = new Promise<TexEntry>((resolve, reject) => {
       img.onload = () => {
         texture.image = img
-        entry.size = [img.naturalWidth, img.naturalHeight]
-        resolve(entry)
+        resolve({ texture, size: [img.naturalWidth, img.naturalHeight] })
       }
-      img.onerror = () => resolve(entry)
+      img.onerror = () => { this.cache.delete(src); reject(new Error(`Image unavailable: ${src}`)) }
+      img.src = src
     })
+    this.cache.set(src, pending)
+    return pending
   }
 
   async show(src: string, rect?: DOMRect) {
-    this.targetReveal = 1
+    this.currentSrc = src
+    let entry: TexEntry
+    try { entry = await this.load(src) }
+    catch { if (this.currentSrc === src) this.hide(); return false }
+    if (this.currentSrc !== src) return false
     if (this.contained) {
       this.resize()
       this.mouse.set(.5, .5)
       this.velocity.set(.45, .15)
     }
     if (rect) this.setMask(rect)
-
-    if (src === this.currentSrc) return
-    this.currentSrc = src
-
-    const entry = await this.load(src)
-    if (this.currentSrc !== src) return
-
-    this.uniforms.tPrev.value = this.uniforms.tCurr.value
-    this.uniforms.uPrevSize.value = this.uniforms.uCurrSize.value
+    const firstReveal = this.uniforms.uReveal.value < 0.01
+    this.uniforms.tPrev.value = firstReveal ? entry.texture : this.uniforms.tCurr.value
+    this.uniforms.uPrevSize.value = firstReveal ? entry.size : this.uniforms.uCurrSize.value
     this.uniforms.tCurr.value = entry.texture
     this.uniforms.uCurrSize.value = entry.size
-
-    this.uniforms.uFade.value = 0
+    this.uniforms.uFade.value = firstReveal ? 1 : 0
     this.targetFade = 1
+    this.targetReveal = 1
     this.uniforms.uSeed.value = Math.random() * 100
+    return true
   }
 
   setMask(rect: DOMRect) {

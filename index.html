@@ -134,7 +134,7 @@
       .works-table th:nth-child(3) { width: 110px; }
       .works-table th:nth-child(4) { width: auto; }
       .works-table th:nth-child(5) { width: 28%; }
-      .works-table th:nth-child(6) { width: 32px; }
+      .works-table th:nth-child(6) { width: 56px; }
 
       .work-row {
         position: relative;
@@ -168,8 +168,8 @@
         line-height: 16px;
         vertical-align: middle;
         white-space: nowrap;
-        box-shadow: inset 0 -1px rgba(0, 0, 0, 0.04);
-        transition: padding 420ms cubic-bezier(0.16, 1, 0.3, 1), color 180ms ease, text-shadow 180ms ease, transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
+        border-bottom: 1px solid var(--row-line, rgba(0, 0, 0, 0.04));
+        transition: padding 420ms cubic-bezier(0.16, 1, 0.3, 1), color 180ms ease, transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
       }
 
       .works-table tbody td:first-child {
@@ -178,42 +178,54 @@
       }
 
       .works-table tbody td:last-child {
-        padding-right: 12px;
+        padding-right: 28px;
         text-align: right;
       }
 
-      .work-row:hover .title,
-      .work-row.is-active .title {
-        transform: translateX(6px);
-      }
+      @media (min-width: 769px) and (hover: hover) {
+        body:has(.work-row.is-active) {
+          --quiet-text: rgba(255, 255, 255, 0.32);
+        }
+        body:has(.work-row.is-active[data-tone="dark"]) {
+          --quiet-text: rgba(23, 23, 23, 0.30);
+        }
+        body:has(.work-row.is-active) .work-row:not(.is-active) td,
+        body:has(.work-row.is-active) .works-table th,
+        body:has(.work-row.is-active) .section-label {
+          color: var(--quiet-text);
+        }
+        .thumbnail, .section-label, .works-table th {
+          transition: color 180ms ease, opacity 180ms ease;
+        }
+        body:has(.work-row.is-active) .work-row:not(.is-active) .thumbnail {
+          filter: brightness(0) invert(1);
+          opacity: 0.32;
+        }
+        body:has(.work-row.is-active) .works-table th {
+          border-bottom-color: rgba(255, 255, 255, 0.24);
+        }
+        body:has(.work-row.is-active) .work-row {
+          --row-line: rgba(255, 255, 255, 0.18);
+        }
 
       .work-row.normal-row:hover .row-bg,
       .work-row.normal-row.is-active .row-bg {
         transform: scaleX(1);
       }
 
-      .work-row:not(.normal-row):hover td,
       .work-row:not(.normal-row).is-active td {
-        padding-top: 92px;
-        padding-bottom: 92px;
+        padding-top: 132px;
+        padding-bottom: 132px;
       }
 
-      .work-row:not(.normal-row):hover td:first-child,
       .work-row:not(.normal-row).is-active td:first-child {
         padding-left: 22px;
       }
 
-      .work-row:not(.normal-row):hover td:last-child,
       .work-row:not(.normal-row).is-active td:last-child {
-        padding-right: 12px;
+        padding-right: 28px;
       }
 
-      .work-row[data-has-image="true"][data-tone="light"]:hover td,
-      .work-row[data-has-image="true"][data-tone="light"]:hover .year,
-      .work-row[data-has-image="true"][data-tone="light"]:hover .type,
-      .work-row[data-has-image="true"][data-tone="light"]:hover .title,
-      .work-row[data-has-image="true"][data-tone="light"]:hover .filename,
-      .work-row[data-has-image="true"][data-tone="light"]:hover .arrow-icon,
       .work-row[data-has-image="true"][data-tone="light"].is-active td,
       .work-row[data-has-image="true"][data-tone="light"].is-active .year,
       .work-row[data-has-image="true"][data-tone="light"].is-active .type,
@@ -221,15 +233,8 @@
       .work-row[data-has-image="true"][data-tone="light"].is-active .filename,
       .work-row[data-has-image="true"][data-tone="light"].is-active .arrow-icon {
         color: #f7f7f7;
-        text-shadow: 0 1px 14px rgba(0, 0, 0, 0.36);
       }
 
-      .work-row[data-has-image="true"][data-tone="dark"]:hover td,
-      .work-row[data-has-image="true"][data-tone="dark"]:hover .year,
-      .work-row[data-has-image="true"][data-tone="dark"]:hover .type,
-      .work-row[data-has-image="true"][data-tone="dark"]:hover .title,
-      .work-row[data-has-image="true"][data-tone="dark"]:hover .filename,
-      .work-row[data-has-image="true"][data-tone="dark"]:hover .arrow-icon,
       .work-row[data-has-image="true"][data-tone="dark"].is-active td,
       .work-row[data-has-image="true"][data-tone="dark"].is-active .year,
       .work-row[data-has-image="true"][data-tone="dark"].is-active .type,
@@ -237,7 +242,8 @@
       .work-row[data-has-image="true"][data-tone="dark"].is-active .filename,
       .work-row[data-has-image="true"][data-tone="dark"].is-active .arrow-icon {
         color: #171717;
-        text-shadow: 0 1px 12px rgba(255, 255, 255, 0.42);
+      }
+
       }
 
       .thumbnail {
@@ -669,15 +675,62 @@
       mobileLink.className = 'mobile-preview-link'
       mobileLink.target = '_blank'
       mobileLink.rel = 'noopener'
-      mobileCell.append(mobileSurface, mobileLink)
+      const mobileClip = document.createElement('div')
+      mobileClip.className = 'mobile-preview-clip'
+      const mobileContent = document.createElement('div')
+      mobileContent.className = 'mobile-preview-content'
+      mobileContent.append(mobileSurface, mobileLink)
+      mobileClip.append(mobileContent)
+      mobileCell.append(mobileClip)
       mobilePreview.append(mobileCell)
       let mobileLiquid = null
       let activeMobileRow = null
-      function openMobilePreview(row, work, href) {
-        const close = activeMobileRow === row && !mobilePreview.hidden
+      let previewMotion = null
+      let previewRequest = 0
+      let requestedMobileRow = null
+      const reducePreviewMotion = matchMedia('(prefers-reduced-motion: reduce)')
+      async function animateMobileHeight(height, opening, anchor) {
+        const from = mobileClip.getBoundingClientRect().height
+        previewMotion?.cancel()
+        mobileClip.style.height = `${from}px`
+        const scrollArea = document.getElementById('scrollArea')
+        let anchorTop = anchor?.getBoundingClientRect().top
+        let frame = 0
+        const keepAnchor = () => {
+          if (anchor && anchorTop !== undefined) {
+            const delta = anchor.getBoundingClientRect().top - anchorTop
+            scrollArea.scrollTop += delta
+            anchorTop = anchor.getBoundingClientRect().top
+          }
+          frame = requestAnimationFrame(keepAnchor)
+        }
+        if (anchor) frame = requestAnimationFrame(keepAnchor)
+        const motion = mobileClip.animate([
+          { height: `${from}px`, opacity: getComputedStyle(mobileClip).opacity },
+          { height: `${height}px`, opacity: opening ? 1 : 0 }
+        ], { duration: reducePreviewMotion.matches ? 0 : opening ? 380 : 220,
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' })
+        previewMotion = motion
+        try {
+          await motion.finished
+          mobileClip.style.height = `${height}px`
+          mobileClip.style.opacity = opening ? '1' : '0'
+          motion.cancel()
+        } catch {} finally { cancelAnimationFrame(frame) }
+      }
+      async function openMobilePreview(row, work, href) {
+        const request = ++previewRequest
+        const close = requestedMobileRow === row
+        requestedMobileRow = close ? null : row
         if (activeMobileRow) activeMobileRow.setAttribute('aria-expanded', 'false')
-        mobilePreview.hidden = close
-        if (close) { mobileLiquid?.hide(); activeMobileRow = null; return }
+        if (!mobilePreview.hidden) {
+          await animateMobileHeight(0, false, activeMobileRow !== row ? row : null)
+          if (request !== previewRequest) return
+          mobileLiquid?.hide()
+          mobilePreview.hidden = true
+        }
+        activeMobileRow = null
+        if (close) return
         activeMobileRow = row
         row.setAttribute('aria-expanded', 'true')
         row.after(mobilePreview)
@@ -685,12 +738,17 @@
         mobileImage.alt = work.title
         mobileLink.href = href
         mobileLink.textContent = `${work.title} ↗`
-        if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        mobilePreview.hidden = false
+        mobileClip.style.height = '0px'
+        mobileClip.style.opacity = '0'
+        if (!reducePreviewMotion.matches) {
           try {
             mobileLiquid ||= new LiquidHover(mobileSurface, true)
             mobileLiquid.show(mobileImage.src)
           } catch (error) { console.warn('Mobile liquid preview unavailable', error) }
         }
+        await animateMobileHeight(mobileContent.getBoundingClientRect().height, true)
+        if (request === previewRequest) mobileClip.style.height = 'auto'
       }
 
       function createRow(work) {
@@ -768,7 +826,8 @@
           arrow.style.transform = active ? 'translateX(0)' : 'translateX(-4px)'
         }
 
-        row.addEventListener('mouseenter', () => {
+        let hoverRequest = 0
+        row.addEventListener('mouseenter', async () => {
           if (compactLayout()) return
           if (!hasImage) {
             row.classList.add('is-active')
@@ -779,6 +838,12 @@
             return
           }
 
+          const request = ++hoverRequest
+          row.setAttribute('aria-busy', 'true')
+          const ready = await liquid?.show(previewImage, row.getBoundingClientRect())
+          if (request !== hoverRequest || compactLayout()) return
+          row.removeAttribute('aria-busy')
+          if (!ready) return
           const scrollArea = document.getElementById('scrollArea')
           const beforeHeight = row.getBoundingClientRect().height
           row.classList.add('is-active')
@@ -790,7 +855,6 @@
           })
           if (hasImage) {
             const updateMask = () => liquid?.setMask(row.getBoundingClientRect())
-            liquid?.show(previewImage, row.getBoundingClientRect())
             requestAnimationFrame(updateMask)
             window.setTimeout(updateMask, 120)
             window.setTimeout(updateMask, 320)
@@ -799,9 +863,12 @@
           }
         })
         row.addEventListener('mousemove', () => {
+          if (compactLayout()) return
           if (hasImage) liquid?.setMask(row.getBoundingClientRect())
         })
         row.addEventListener('mouseleave', () => {
+          hoverRequest++
+          row.removeAttribute('aria-busy')
           if (!hasImage) {
             row.classList.remove('is-active')
             resetTextShuffle(title)
