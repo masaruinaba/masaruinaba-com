@@ -88,17 +88,24 @@
     .play-controls #sensor-status{bottom:64px;left:50%;width:max-content;max-width:calc(100vw - 32px);text-align:center;white-space:normal}
     body:has(#camera-preview:not([hidden])) .play-controls #sensor-status{bottom:184px}
   }
-  </style>
+    #work-close{position:absolute;top:-30px;right:-30px;z-index:2;width:40px;height:40px;display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:linear-gradient(145deg,#fffef9 15%,#fffdf7 65%,#eeeae1);color:#fffdf8;box-shadow:inset 1px 2px 3px #ffffffb3,inset -1px -2px 3px #d8d2c34d,0 2px 3px #3b342212;isolation:isolate;cursor:pointer;touch-action:manipulation;transition:transform .16s,background .16s}
+  #work-close::before{content:"";position:absolute;inset:5px;border-radius:50%;background:#383734;box-shadow:inset 0 1px 2px #17171538,0 1px 0 #ffffffa6;z-index:-1}
+  #work-close svg{width:16px;height:16px;pointer-events:none}
+  #work-close:hover{transform:scale(1.04)}
+  #work-close:active{transform:translateY(2px)}
+  #work-close:focus-visible{outline:2px solid #383734;outline-offset:3px}
+  @media(prefers-reduced-motion:reduce){#work-close{transition:none}}
+</style>
 </head>
 <body>
-  <canvas id="world" tabindex="0" aria-label="A playful crowd of soft balloon creatures. Press and drag to squish creatures or move items. Shift-drag or twist with two fingers to rotate a character. Press Space to bounce the crowd."></canvas>
+  <canvas id="world" tabindex="0" aria-label="A playful crowd of soft balloon creatures. Drag to move and roll creatures freely. Use the wheel over a creature or pinch with two fingers to resize it; twist two fingers to turn it. Press Space to bounce the crowd."></canvas>
   <div class="play-controls"><span id="sensor-status" role="status" aria-live="polite"></span><button id="camera-toggle" aria-pressed="false">Camera</button><button id="mic-toggle" aria-pressed="false">Blow</button><button id="reload-crowd" type="button" aria-label="Reload with new friends and colors" title="New friends"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 9a8 8 0 1 0 .15 5.7M20 4v5h-5"/></svg></button></div>
   <a class="portfolio-home" href="https://www.masaruinaba.com/" target="_blank" rel="noopener noreferrer">masaruinaba.com</a>
   <div class="color-modes" role="group" aria-label="Color tone"><button type="button" data-color-mode="pop" aria-pressed="true" title="Playful colors">Pop</button><button type="button" data-color-mode="chic" aria-pressed="false" title="Chic — click again to change the accent color">Chic</button></div>
   <div id="camera-window" tabindex="0" aria-label="Camera preview. Drag to a corner. Arrow keys move between corners."><canvas id="camera-friends" hidden aria-label="Little monsters bouncing around your face"></canvas>
   <video id="camera-preview" autoplay muted playsinline hidden aria-label="Your camera preview"></video></div>
   <p id="work-hello" hidden role="status"></p>
-  <aside id="work-bubble" aria-label="Featured project" aria-live="polite" hidden><a id="work-link" target="_blank" rel="noopener noreferrer"><img id="work-image" alt=""></a></aside>
+  <aside id="work-bubble" aria-label="Featured project" aria-live="polite" hidden><button id="work-close" type="button" aria-label="Close project" title="Close project"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/></svg></button><a id="work-link" target="_blank" rel="noopener noreferrer"><img id="work-image" alt=""></a></aside>
   <div id="status" role="status"></div>
   <script type="module" src="./crowd.js"></script>
 </body>

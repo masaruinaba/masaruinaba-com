@@ -1,3 +1,4 @@
+import {rollGrip,coastGrip,scaleGrip} from './crowd-manipulation.js';
 import {createOpening} from './opening.js';
 import {setupFeedback} from './crowd-feedback.js';
 import {createProfile} from './crowd-profile.js';
@@ -112,8 +113,8 @@ function resize(){
     const second=near[i%Math.min(3,near.length)];
     a.x=(first.x+second.x)/2+(random()-.5)*.3;a.y=(first.y+second.y)/2+(random()-.5)*.3;a.baseSize=cell/1.9;
   });
-  for(const a of actors)initializeMotion(a,a.radius);
-  for(const a of ornaments)initializeMotion(a,(a.letter?.60:.29)*a.baseSize);
+  for(const a of actors){const size=a.userScale||1;a.userScale=1;initializeMotion(a,a.radius);scaleGrip(a,size);}
+  for(const a of ornaments){const size=a.userScale||1;a.userScale=1;initializeMotion(a,(a.letter?.60:.29)*a.baseSize);scaleGrip(a,size);}
   // Choose neighboring colors once, before the first visible frame.
   if(!entered)document.body.dataset.colorConflicts=String(colorNeighbors(actors,palette,random));
   if((!entered||!openingReleased)&&!reduced.matches){
@@ -122,6 +123,7 @@ function resize(){
   entered=true;draw(0);wake();
 }
 function pose(a,dt,isMonster){
+  coastGrip(a,dt,held?.actor===a);
   if(a.delay>0)a.delay-=dt;
   else if(a.entry!==undefined){a.entryVelocity+=((1-a.entry)*90-a.entryVelocity*10)*dt;a.entry+=a.entryVelocity*dt;}
   a.velocity+=(-a.kick*55-a.velocity*15)*dt;a.kick+=a.velocity*dt;
@@ -141,7 +143,7 @@ function pose(a,dt,isMonster){
 }
 function deform(a,dt){
   if(!a.sim||!a.deforming||!dt)return;
-  const pressing=held?.actor===a&&!held.rotating;
+  const pressing=held?.actor===a;
   a.press+=((pressing?held.strength:0)-a.press)*(1-Math.exp(-14*dt));
   if(pressing&&a.press>.65&&!held.feltCompression){held.feltCompression=true;feedback.pulse('grip',a.press);}
   if(pressing){
@@ -156,7 +158,7 @@ function draw(dt){
   const objects=[...actors,...ornaments];
   if(held){held.elapsed+=dt;held.strength=.08+.92*Math.min(1,held.elapsed/2);}
   const awake=!!held||time<motionUntil;
-  const contacts=awake?advancePile(objects,dt,time,held?.rotating?null:held,reduced.matches,viewWidth,viewHeight):0;
+  const contacts=awake?advancePile(objects,dt,time,held,reduced.matches,viewWidth,viewHeight):0;
   if(!awake)for(const a of objects){a.angle+=a.turn;a.turn=0;a.entry=1;a.entryVelocity=0;a.vx=a.vy=a.omega=a.velocity=a.vz=0;a.kick=0;a.x=a.px;a.y=a.py;}
 
   for(const a of actors)pose(a,dt,true);for(const a of ornaments)pose(a,dt,false);updateGaze();speech?.update(time,dt,actors,camera,reduced.matches,held);updateWork(camera);profiler?.begin();renderer.render(scene,camera);profiler?.end();
@@ -187,26 +189,38 @@ function updateGaze(){
 }
 const dragPlane=new THREE.Plane(new THREE.Vector3(0,0,1),0);
 function pointerWorld(e){pointer.set(e.clientX/innerWidth*2-1,1-e.clientY/innerHeight*2);ray.setFromCamera(pointer,camera);return ray.ray.intersectPlane(dragPlane,new THREE.Vector3());}
-// The sloped edge behaves like the rim of a real balloon: pulling it turns it.
-function edgeGrab(hit){
-  if(!hit?.face)return false;
-  const normal=hit.face.normal.clone().applyNormalMatrix(new THREE.Matrix3().getNormalMatrix(hit.object.matrixWorld));
-  return Math.abs(normal.z)<.68;
+function anchorGrip(){
+  const a=held.actor;
+  a.root.rotation.set(a.tiltX||0,a.tiltY||0,a.angle+a.turn);
+  a.root.updateMatrixWorld(true);
+  const anchor=a.root.localToWorld(held.local.clone());
+  held.offset.set(anchor.x-a.px,anchor.y-a.py,0);
+}
+function rebaseGesture(){
+  const p=[...held.points.values()];
+  held.previous=p.length===2?p[0].clone().add(p[1]).multiplyScalar(.5):p[0].clone();
+  held.distance=p.length===2?p[0].distanceTo(p[1]):0;
+  held.twist=p.length===2?Math.atan2(p[1].y-p[0].y,p[1].x-p[0].x):0;
+  held.lastMove=performance.now();
+  held.target=held.previous.clone();
+  held.offset.set(held.target.x-held.actor.px,held.target.y-held.actor.py,0);
+  held.local=held.actor.root.worldToLocal(new THREE.Vector3(held.target.x,held.target.y,held.actor.root.position.z));
 }
 canvas.addEventListener('pointerdown',e=>{
   if(!camera||e.button!==0)return;
   const world=pointerWorld(e);
   if(held){
-    if(e.pointerType==='touch'&&e.pointerId!==held.id){held.points.set(e.pointerId,world);const points=[...held.points.values()];held.twistStart=Math.atan2(points[1].y-points[0].y,points[1].x-points[0].x);held.rotationStart=held.actor.angle;held.tiltStartX=held.actor.tiltX||0;held.tiltStartY=held.actor.tiltY||0;held.centerStart=points[0].clone().add(points[1]).multiplyScalar(.5);held.rotating=held.moved=true;canvas.setPointerCapture(e.pointerId);}return;
+    if(e.pointerType==='touch'&&!held.points.has(e.pointerId)&&held.points.size<2){held.points.set(e.pointerId,world);held.moved=true;rebaseGesture();canvas.setPointerCapture(e.pointerId);}return;
   }
   const invitation=speech?.invitedActor(ray);if(invitation){showWork(invitation,speech,time,reduced.matches);return;}
   if(speech?.hit(ray))return;
   closeWork();
   const hit=ray.intersectObjects(pickables,false)[0];if(!hit)return;
   const a=hit.object.userData.actor,bodyHit=a.body?ray.intersectObject(a.body)[0]:null,local=a.root.worldToLocal((bodyHit?.point||hit.point).clone());
-  held={id:e.pointerId,actor:a,startX:e.clientX,startY:e.clientY,startAt:performance.now(),elapsed:0,strength:.08,moved:false,rotating:e.shiftKey||edgeGrab(bodyHit||hit),rotationStart:a.angle,tiltStartX:a.tiltX||0,tiltStartY:a.tiltY||0,points:new Map([[e.pointerId,world]]),local,target:world,offset:new THREE.Vector3(world.x-a.px,world.y-a.py,0)};
-  if(a.body&&!a.isGlyph&&!held.rotating){if(!a.sim){a.sim=new Membrane(a.shape.data);a.body.geometry=a.body.geometry.clone();a.rim.geometry=a.rim.geometry.clone();}a.deforming=true;}
-  feedback.pulse('press',.35);canvas.setPointerCapture(e.pointerId);if(!held.rotating)bounce(a,.08);else motionUntil=time+2.3;document.body.dataset.held='true';wake();
+  held={id:e.pointerId,actor:a,startX:e.clientX,startY:e.clientY,startAt:performance.now(),elapsed:0,strength:.08,moved:false,points:new Map([[e.pointerId,world]]),local,target:world,offset:new THREE.Vector3(world.x-a.px,world.y-a.py,0)};
+  held.previous=world.clone();held.lastMove=performance.now();
+  if(a.body&&!a.isGlyph){if(!a.sim){a.sim=new Membrane(a.shape.data);a.body.geometry=a.body.geometry.clone();a.rim.geometry=a.rim.geometry.clone();}a.deforming=true;}
+  feedback.pulse('press',.25+Math.min(.4,Math.hypot(local.x,local.y)*.2),{size:a.userScale||1});canvas.setPointerCapture(e.pointerId);bounce(a,.08);document.body.dataset.held='true';wake();
 });
 canvas.addEventListener('pointermove',e=>{
   if(!camera)return;
@@ -217,31 +231,52 @@ canvas.addEventListener('pointermove',e=>{
   if(!held||!held.points.has(e.pointerId))return;
   held.points.set(e.pointerId,gaze);
   if(Math.hypot(e.clientX-held.startX,e.clientY-held.startY)>9)held.moved=true;
-  if(held.rotating){
-    const p=[...held.points.values()];
-    if(p.length>1){
-      const center=p[0].clone().add(p[1]).multiplyScalar(.5);
-      held.actor.tiltX=held.tiltStartX-(center.y-held.centerStart.y)*.7;
-      held.actor.tiltY=held.tiltStartY+(center.x-held.centerStart.x)*.7;
-      held.actor.angle=held.rotationStart+Math.atan2(p[1].y-p[0].y,p[1].x-p[0].x)-held.twistStart;
-    }else{
-      held.actor.tiltX=held.tiltStartX+(e.clientY-held.startY)*.008;
-      held.actor.tiltY=held.tiltStartY+(e.clientX-held.startX)*.008;
-    }
-    held.actor.turn=held.actor.omega=0;
-    document.body.dataset.rotation3d=JSON.stringify({x:held.actor.tiltX,y:held.actor.tiltY});
-    document.body.dataset.rotation=held.actor.angle.toFixed(3);wake();return;
+  const p=[...held.points.values()],center=p.length===2?p[0].clone().add(p[1]).multiplyScalar(.5):gaze;
+  const now=performance.now(),dt=Math.max(.008,Math.min(.1,(now-held.lastMove)/1000));
+  rollGrip(held.actor,held.offset,center.x-held.previous.x,center.y-held.previous.y,dt);
+  if(p.length===2){
+    const distance=p[0].distanceTo(p[1]),twist=Math.atan2(p[1].y-p[0].y,p[1].x-p[0].x);
+    if(held.distance>.05)scaleGrip(held.actor,(held.actor.userScale||1)*distance/held.distance);
+    held.actor.angle+=Math.atan2(Math.sin(twist-held.twist),Math.cos(twist-held.twist));
+    held.distance=distance;held.twist=twist;
   }
-  held.target=gaze;
-  const hit=held.actor.body&&ray.intersectObject(held.actor.body)[0];if(hit){const local=held.actor.root.worldToLocal(hit.point.clone());held.local.x=local.x;held.local.y=local.y;}
+  const speed=center.distanceTo(held.previous)/dt;
+  if(speed>.12)feedback.pulse('rub',Math.min(1,speed/6),{size:held.actor.userScale||1});
+  if(p.length===2&&Math.abs((held.actor.userScale||1)-(held.soundScale||1))>.035){
+    feedback.pulse('scale',.5,{size:held.actor.userScale||1,direction:(held.actor.userScale||1)-(held.soundScale||1)});held.soundScale=held.actor.userScale||1;
+  }
+  held.previous=center.clone();held.lastMove=now;held.target=center;
+  anchorGrip();
+  document.body.dataset.rotation3d=JSON.stringify({x:held.actor.tiltX,y:held.actor.tiltY});
+  document.body.dataset.balloonScale=String(held.actor.userScale||1);
   wake();
 });
+canvas.addEventListener('wheel',e=>{
+  if(!camera)return;
+  pointerWorld(e);
+  const actor=held?.actor||ray.intersectObjects(pickables,false)[0]?.object.userData.actor;
+  if(!actor)return;
+  e.preventDefault();
+  const delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?innerHeight:1);
+  const before=actor.userScale||1;
+  scaleGrip(actor,(actor.userScale||1)*Math.exp(-Math.max(-100,Math.min(100,delta))*.002));
+  if(actor.userScale!==before){feedback.unlock();feedback.pulse('scale',Math.min(1,Math.abs(delta)/80),{size:actor.userScale,direction:actor.userScale-before});}
+  if(held)anchorGrip();
+  motionUntil=time+2.3;document.body.dataset.balloonScale=String(actor.userScale);wake();
+},{passive:false});
+
 function release(tap=false){
-  if(held){if(tap&&(held.moved||held.actor.press>.15))feedback.pulse('release',.5);motionUntil=time+2.3;if(tap&&!held.rotating&&!held.moved&&performance.now()-held.startAt<650&&held.actor.face){showWork(held.actor,speech,time,reduced.matches);}}
+  if(held){if(tap&&(held.moved||held.actor.press>.15))feedback.pulse('release',Math.min(1,.25+Math.hypot(held.actor.vx,held.actor.vy)/8),{size:held.actor.userScale||1});motionUntil=time+2.3;if(tap&&!held.moved&&performance.now()-held.startAt<650&&held.actor.face){showWork(held.actor,speech,time,reduced.matches);}}
   held=null;document.body.dataset.held='false';wake();
 }
-canvas.addEventListener('pointerup',()=>release(true));
-for(const event of ['pointercancel','lostpointercapture'])canvas.addEventListener(event,()=>release(false));
+function endPointer(e,tap){
+  if(!held?.points.has(e.pointerId))return;
+  held.points.delete(e.pointerId);
+  if(held.points.size){held.id=held.points.keys().next().value;rebaseGesture();return;}
+  release(tap);
+}
+canvas.addEventListener('pointerup',e=>endPointer(e,true));
+for(const event of ['pointercancel','lostpointercapture'])canvas.addEventListener(event,e=>endPointer(e,false));
 window.addEventListener('blur',()=>release(false));
 canvas.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();actors.forEach(a=>bounce(a));}});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(raf);raf=0;}else wake();});
@@ -269,7 +304,7 @@ async function init(){
     const manifest=await fetch('./items/manifest.json');if(!manifest.ok)throw Error('Items load failed');const items=(await manifest.json()).filter(item=>!['bean','pillow','cloud','leaf'].includes(item.id)),loader=new GLTFLoader();
     models=await Promise.all(items.map(async item=>{if(['flower','daisy','spark','star'].includes(item.id))return balloonFlower(item.id);const gltf=await loader.loadAsync('./items/'+item.id+'.glb');gltf.scene.traverse(o=>{if(!o.isMesh)return;for(const a of [o.geometry.attributes.position,o.geometry.attributes.normal]){if(!a)continue;for(let i=0;i<a.count;i++){const y=a.getY(i),z=a.getZ(i);a.setY(i,-z);a.setZ(i,y);}a.needsUpdate=true;}o.geometry.computeBoundingBox();o.geometry.computeBoundingSphere();o.material.side=item.id==='heart'?THREE.DoubleSide:THREE.FrontSide;if(item.id!=='heart'&&!o.material.map){const original=o.geometry;o.geometry=compactItemGeometry(original);if(o.geometry!==original)original.dispose();}});gltf.scene.userData.itemId=item.id;return gltf.scene;}));
     await document.fonts.load('400 80px fatfrank');document.body.dataset.typeface=document.fonts.check('400 80px fatfrank')?'FatFrank':'fallback';
-    speech=createSpeech(scene);createWindControls(applyWind);resize();createColorMode(scene,renderer,()=>draw(0));window.addEventListener('resize',resize);await renderer.compileAsync(scene,camera);draw(0);status.hidden=true;document.body.dataset.ready='true';
+    speech=createSpeech(scene,(actor,message,phrase)=>feedback.babble({size:actor.userScale||1,message,phrase}),()=>feedback.stopVoice());createWindControls(applyWind);resize();createColorMode(scene,renderer,()=>draw(0));window.addEventListener('resize',resize);await renderer.compileAsync(scene,camera);draw(0);status.hidden=true;document.body.dataset.ready='true';
     await opening.finish(()=>{openingReleased=true;wake();});
   }catch(error){opening.cancel();console.error(error);status.hidden=false;status.textContent='Could not load the playground. Please refresh.';document.body.dataset.error=error.message;}
 }

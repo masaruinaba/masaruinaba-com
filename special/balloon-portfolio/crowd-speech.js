@@ -1,7 +1,8 @@
+import {voicePhrase,voiceMouth} from './voice-phrase.js';
 import * as THREE from 'three';
 import {MarchingCubes} from 'three/addons/objects/MarchingCubes.js';
 const lines=['psst… over here!','a tiny tap? pretty please.','I have something to show you.','pick me! I brought a project.','hellooo, curious human.','tap for a little peek.','my pockets are full of work.','look what I helped make!','a little work, a lot of heart.','got a second? got a project.','come closer. tiny surprise.','your next little peek is here.'];
-export function createSpeech(scene){
+export function createSpeech(scene,onSay=()=>{},onClear=()=>{}){
   const root=new THREE.Group();root.visible=false;scene.add(root);
   const mat=new THREE.MeshBasicMaterial({color:'#fffdf8',toneMapped:false});
   mat.onBeforeCompile=shader=>{
@@ -9,7 +10,7 @@ export function createSpeech(scene){
     shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 balloonNormal;').replace('#include <color_fragment>','#include <color_fragment>\ndiffuseColor.rgb*=mix(vec3(.76,.75,.72),vec3(1.0),smoothstep(-.8,.65,balloonNormal.y));');
   };
   const caption=document.createElement('div');caption.id='speech-caption';caption.hidden=true;caption.setAttribute('role','status');document.body.append(caption);
-  const shapes=new Map();let screenBounds=null;
+  const shapes=new Map();let screenBounds=null,phrase=null;
   function bubbleGeometry(lobes,variant,width=1,height=.48){
     const key=[lobes,variant,width.toFixed(2),height.toFixed(2)].join(':');if(shapes.has(key))return shapes.get(key);
     const resolution=38,extent=1.4,mc=new MarchingCubes(resolution,mat,false,false,18000);mc.isolation=0;
@@ -34,7 +35,7 @@ export function createSpeech(scene){
   const ctx=document.createElement('canvas').getContext('2d');
   const qa=new URLSearchParams(location.search).get('qa')==='speech';
   let next=qa?4:6+Math.random()*3,actor=null,start=0,last=-1,lastShape=-1,size=0,velocity=0,rotation=0,dragging=false,persistent=false,bubbleWidth=1,bubbleHeight=.48,lastCaller=null,anchorSide=1;
-  function clear(){actor?.face.speak(0);if(actor)actor.speaking=false;actor=null;root.visible=false;screenBounds=null;caption.hidden=true;document.body.dataset.speech='';dragging=false;persistent=false;}
+  function clear(){onClear();actor?.face.speak(0);if(actor)actor.speaking=false;actor=null;root.visible=false;screenBounds=null;caption.hidden=true;document.body.dataset.speech='';dragging=false;persistent=false;}
   function say(who,time,reduced,comment=null,keep=false){
     if(!who?.face)return;actor?.face.speak(0);if(actor)actor.speaking=false;actor=who;actor.speaking=true;start=time;rotation=Math.sin(who.phase*2.7)*.12;persistent=keep;screenBounds=null;anchorSide=who.face.mouthPosition().x>0?-1:1;
       let choice;do{choice=Math.floor(Math.random()*lines.length);}while(choice===last);last=choice;
@@ -51,7 +52,7 @@ export function createSpeech(scene){
       const lobes=kind?Math.max(5,Math.min(9,3+Math.ceil(widest/260)+rows.length-1)):0;
       shell.geometry=bubbleGeometry(lobes,kind,bubbleWidth,bubbleHeight);shell.scale.set(bubbleWidth,bubbleHeight,.34);
       document.body.dataset.bubbleShape=kind===0?'oval':kind===1?'thought-cloud':'speech-cloud';document.body.dataset.bubbleLobes=String(lobes);document.body.dataset.bubbleLines=String(rows.length);
-      size=reduced?1:0;velocity=0;root.visible=true;document.body.dataset.speech=message;
+      phrase=voicePhrase(message);onSay(who,message,phrase);size=reduced?1:0;velocity=0;root.visible=true;document.body.dataset.speech=message;
     next=time+14+Math.random()*10;
   }
   return {clear,say,bounds(){return screenBounds;},invitedActor(ray){return !persistent&&actor&&root.visible&&ray.intersectObjects(root.children,true).length?actor:null;},hit(ray){return root.visible&&ray.intersectObjects(root.children,true).length>0;},update(time,dt,actors,camera,reduced,held){
@@ -63,7 +64,7 @@ export function createSpeech(scene){
     if(dragging)start+=dt;
     const age=time-start,target=persistent||age<4.2?1:0;
     if(reduced)size=target;else{velocity+=((target-size)*110-velocity*13)*dt;size+=velocity*dt;}
-    const voiceAge=persistent?age%7:age;const pulse=reduced?0:Math.abs(Math.sin(voiceAge*9))*Math.max(0,1-voiceAge/4.3);actor.face.speak(pulse);
+    const pulse=reduced?0:voiceMouth(phrase,age);actor.face.speak(pulse);
     const fit=Math.min(persistent?.82:.76,(camera.right-camera.left)/(bubbleWidth*2.4+.7)),margin=bubbleWidth*1.14*fit;
     const mouth=actor.face.mouthPosition(),side=anchorSide;
     root.position.set(THREE.MathUtils.clamp(mouth.x+side*((bubbleWidth*1.14+.6)*fit),-camera.right+margin,camera.right-margin),THREE.MathUtils.clamp(mouth.y+(.10+Math.sin(time*.85+actor.phase)*.045)*fit,-camera.top+bubbleHeight*1.2*fit,camera.top-bubbleHeight*1.2*fit),Math.min(camera.position.z-1,Math.max(7,mouth.z+1)));

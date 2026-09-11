@@ -46,3 +46,5 @@ export function closeWork(){owner?.face.speak(0);speaker?.clear();speaker=null;o
 
 link.addEventListener('click',closeWork);
 window.addEventListener('keydown',e=>{if(e.key==='Escape')closeWork();});
+
+document.querySelector('#work-close').addEventListener('click',event=>{event.preventDefault();event.stopPropagation();closeWork();document.querySelector('#world').focus({preventScroll:true});});
