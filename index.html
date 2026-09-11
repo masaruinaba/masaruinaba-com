@@ -4,24 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Masaru Inaba</title>
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="Masaru Inaba" />
-    <meta property="og:description" content="Masaru Inaba — Web Designer. Selected works and playful experiments." />
-    <meta property="og:image" content="https://www.masaruinaba.com/ogp.png" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Masaru Inaba" />
-    <meta name="twitter:description" content="Masaru Inaba — Web Designer. Selected works and playful experiments." />
-    <meta name="twitter:image" content="https://www.masaruinaba.com/ogp.png" />
-    <meta name="description" content="Masaru Inaba — Web Designer. Selected works and playful experiments." />
-
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-    
-    <!-- GSAP -->
-    <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
-
+<link rel="canonical" href="https://www.masaruinaba.com/">
+<meta property="og:url" content="https://www.masaruinaba.com/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Masaru Inaba">
+<meta property="og:description" content="Masaru Inaba — Web Designer. Selected works and playful experiments.">
+<meta property="og:image" content="https://www.masaruinaba.com/portfolio-og-e8e71e85d2cc.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.masaruinaba.com/portfolio-og-e8e71e85d2cc.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1920">
+<meta property="og:image:height" content="1008">
+<meta name="twitter:site" content="@im_inaba">
+<meta name="twitter:image:alt" content="Masaru Inaba — Web Designer Portfolio">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <style>
       * {
         margin: 0;
@@ -29,77 +27,106 @@
         box-sizing: border-box;
       }
 
-      html, body {
-        height: 100%;
+      html,
+      body {
         width: 100%;
+        height: 100%;
         overflow: hidden;
       }
 
       body {
         background: #f7f7f7;
-        font-family: "IBM Plex Mono", monospace;
         color: #222222;
+        font-family: "IBM Plex Mono", monospace;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         display: flex;
         flex-direction: column;
       }
 
+      #gl {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        pointer-events: none;
+      }
+
+      .cursor-preview {
+        position: fixed;
+        pointer-events: none;
+        z-index: 1000;
+        opacity: 0;
+        width: 320px;
+        aspect-ratio: 4 / 3;
+        overflow: hidden;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        transform: translate(-50%, -50%);
+        transition: opacity 0.22s ease;
+      }
+
+      #cursorPreviewFrame {
+        width: 1280px;
+        height: 960px;
+        border: none;
+        transform: scale(0.25);
+        transform-origin: top left;
+        pointer-events: none;
+        display: block;
+      }
+
       .container {
-        flex: 1;
+        z-index: 30;
         display: flex;
         flex-direction: column;
-        padding: 0;
-        overflow: hidden;
         width: 100%;
-      }
-
-      .header {
-        margin-bottom: 24px;
-        flex-shrink: 0;
-        padding: 40px 16px 0 16px;
-      }
-
-      .header h1 {
-        font-size: 24px;
-        font-weight: 600;
-        letter-spacing: -0.01em;
-        color: #222222;
-        font-family: "Bricolage Grotesque", sans-serif;
+        flex: 1;
+        height: 100%;
+        overflow: hidden;
       }
 
       .table-wrapper {
         flex: 1;
-        overflow-y: auto;
-        overflow-x: hidden;
-        padding-bottom: 200px;
         width: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+        padding-bottom: 200px;
+      }
+
+      .portfolio-section {
+        margin-bottom: 60px;
+      }
+
+      .section-label {
+        padding: 40px 16px 0;
+        margin-bottom: 24px;
+        color: #222222;
+        font-family: "Bricolage Grotesque", sans-serif;
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: 0;
       }
 
       .works-table {
         width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        background: #f7f7f7;
         table-layout: fixed;
+        border-spacing: 0;
+        border-collapse: separate;
+        background: transparent;
       }
 
       .works-table thead {
+        position: static;
         background: transparent;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        background: #f7f7f7;
       }
 
       .works-table th {
-        text-align: left;
         padding: 10px 12px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        color: #222222;
         font-size: 9px;
         font-weight: 500;
-        color: #222222;
         letter-spacing: 0.01em;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        text-align: left;
       }
 
       .works-table th:nth-child(1) { width: 32px; }
@@ -109,26 +136,13 @@
       .works-table th:nth-child(5) { width: 28%; }
       .works-table th:nth-child(6) { width: 32px; }
 
-      .works-table tbody td {
-        overflow: hidden;
-        white-space: nowrap;
-      }
-
-      .works-table tbody tr {
-        background: transparent;
-        cursor: pointer;
+      .work-row {
         position: relative;
-      }
-
-      .works-table tbody tr.work-row {
         height: 48px;
+        cursor: pointer;
+        overflow: hidden;
       }
 
-      .works-table tbody tr {
-        position: relative;
-        background: transparent;
-      }
-      
       .row-bg {
         position: absolute;
         left: 0;
@@ -140,33 +154,27 @@
         pointer-events: none;
         transform: scaleX(0);
         transform-origin: left center;
+        transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
         will-change: transform;
-      }
-      
-      .works-table tbody td:first-child {
-        position: relative;
-        overflow: visible;
-      }
-      
-      .works-table tbody tr {
-        overflow: hidden;
       }
 
       .works-table tbody td {
+        position: relative;
+        z-index: 4;
         padding: 16px 12px;
+        overflow: hidden;
+        color: #222222;
         font-size: 13px;
         line-height: 16px;
-        color: #222222;
         vertical-align: middle;
+        white-space: nowrap;
         box-shadow: inset 0 -1px rgba(0, 0, 0, 0.04);
-        position: relative;
-        z-index: 2;
+        transition: padding 420ms cubic-bezier(0.16, 1, 0.3, 1), color 180ms ease, text-shadow 180ms ease, transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
       }
-
-      
 
       .works-table tbody td:first-child {
         padding-left: 22px;
+        overflow: visible;
       }
 
       .works-table tbody td:last-child {
@@ -174,244 +182,111 @@
         text-align: right;
       }
 
+      .work-row:hover .title,
+      .work-row.is-active .title {
+        transform: translateX(6px);
+      }
+
+      .work-row.normal-row:hover .row-bg,
+      .work-row.normal-row.is-active .row-bg {
+        transform: scaleX(1);
+      }
+
+      .work-row:not(.normal-row):hover td,
+      .work-row:not(.normal-row).is-active td {
+        padding-top: 92px;
+        padding-bottom: 92px;
+      }
+
+      .work-row:not(.normal-row):hover td:first-child,
+      .work-row:not(.normal-row).is-active td:first-child {
+        padding-left: 22px;
+      }
+
+      .work-row:not(.normal-row):hover td:last-child,
+      .work-row:not(.normal-row).is-active td:last-child {
+        padding-right: 12px;
+      }
+
+      .work-row[data-has-image="true"][data-tone="light"]:hover td,
+      .work-row[data-has-image="true"][data-tone="light"]:hover .year,
+      .work-row[data-has-image="true"][data-tone="light"]:hover .type,
+      .work-row[data-has-image="true"][data-tone="light"]:hover .title,
+      .work-row[data-has-image="true"][data-tone="light"]:hover .filename,
+      .work-row[data-has-image="true"][data-tone="light"]:hover .arrow-icon,
+      .work-row[data-has-image="true"][data-tone="light"].is-active td,
+      .work-row[data-has-image="true"][data-tone="light"].is-active .year,
+      .work-row[data-has-image="true"][data-tone="light"].is-active .type,
+      .work-row[data-has-image="true"][data-tone="light"].is-active .title,
+      .work-row[data-has-image="true"][data-tone="light"].is-active .filename,
+      .work-row[data-has-image="true"][data-tone="light"].is-active .arrow-icon {
+        color: #f7f7f7;
+        text-shadow: 0 1px 14px rgba(0, 0, 0, 0.36);
+      }
+
+      .work-row[data-has-image="true"][data-tone="dark"]:hover td,
+      .work-row[data-has-image="true"][data-tone="dark"]:hover .year,
+      .work-row[data-has-image="true"][data-tone="dark"]:hover .type,
+      .work-row[data-has-image="true"][data-tone="dark"]:hover .title,
+      .work-row[data-has-image="true"][data-tone="dark"]:hover .filename,
+      .work-row[data-has-image="true"][data-tone="dark"]:hover .arrow-icon,
+      .work-row[data-has-image="true"][data-tone="dark"].is-active td,
+      .work-row[data-has-image="true"][data-tone="dark"].is-active .year,
+      .work-row[data-has-image="true"][data-tone="dark"].is-active .type,
+      .work-row[data-has-image="true"][data-tone="dark"].is-active .title,
+      .work-row[data-has-image="true"][data-tone="dark"].is-active .filename,
+      .work-row[data-has-image="true"][data-tone="dark"].is-active .arrow-icon {
+        color: #171717;
+        text-shadow: 0 1px 12px rgba(255, 255, 255, 0.42);
+      }
+
       .thumbnail {
+        display: block;
         width: 8px;
         height: 8px;
         object-fit: cover;
         background: #e0e0e0;
-        display: block;
         position: relative;
         z-index: 2;
       }
 
-      .arrow-icon {
-        font-size: 14px;
-        color: #222222;
-        font-weight: 400;
-        opacity: 0;
-        display: inline-block;
-        transform: translateX(-4px);
-      }
-
-      .year {
-        font-weight: 400;
-        font-size: 10px;
+      .works-table tbody td.year,
+      .works-table tbody td.type,
+      .works-table tbody td.filename {
         color: #999999;
         font-family: "IBM Plex Mono", monospace;
+        font-size: 10px;
+        font-weight: 400;
       }
 
       .type {
-        font-weight: 400;
         text-transform: capitalize;
-        font-size: 10px;
-        color: #999999;
-        font-family: "IBM Plex Mono", monospace;
       }
 
       .title {
-        font-weight: 400;
+        color: #222222;
+        font-family: "Bricolage Grotesque", sans-serif;
         font-size: 13px;
         line-height: 16px;
-        font-family: "Bricolage Grotesque", sans-serif;
-      }
-
-      .filename {
         font-weight: 400;
-        font-size: 10px;
-        color: #999999;
-        font-family: "IBM Plex Mono", monospace;
       }
 
-      /* Cursor-following image */
-      .cursor-preview {
-        position: fixed;
-        pointer-events: none;
-        z-index: 80;
-        opacity: 0;
-        width: 320px;
-        aspect-ratio: 4/3;
-        overflow: hidden;
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-        transform: translate(-50%, -50%);
-      }
-
-      .cursor-preview img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-      }
-
-      #cursorPreviewFrame {
-        width: 1280px;
-        height: 960px;
-        border: none;
-        transform: scale(0.25);
-        transform-origin: top left;
-        pointer-events: none;
-        display: none;
-      }
-
-      /* Section spacing */
-      .works-section,
-      .playground-section,
-      .studio-section {
-        margin-bottom: 60px;
-      }
-
-      .section-label {
-        font-size: 18px;
-        font-weight: 600;
-        margin-bottom: 24px;
-        padding: 40px 16px 0 16px;
-        font-family: 'Bricolage Grotesque', sans-serif;
+      .arrow-icon {
+        display: inline-block;
         color: #222222;
+        font-size: 14px;
+        font-weight: 400;
+        opacity: 0;
+        transform: translateX(-4px);
+        transition: opacity 260ms ease, transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
       }
 
-      @media (max-width: 768px) {
-        .container { padding: 0; }
-        .header { padding: 32px 16px 0 16px; }
-        .header h1 { font-size: 20px; }
-        .section-label { font-size: 16px; padding: 32px 16px 0 16px; margin-bottom: 12px; }
-        .works-table td:nth-child(1) { padding-right: 0; }
-        .works-table td:nth-child(4) { padding-left: 16px; }
-        .works-table th, .works-table td { padding: 10px 8px; }
-        .thumbnail { width: 8px; height: 8px; }
-        .title { font-size: 14px; }
-
-        /* Year(2), Type(3), URL/File(5) 列を幅0で非表示
-           display:none だと table-layout:fixed が幅を保持して colspan がずれるため */
-        .works-table th:nth-child(2),
-        .works-table td:nth-child(2),
-        .works-table th:nth-child(3),
-        .works-table td:nth-child(3),
-        .works-table th:nth-child(5),
-        .works-table td:nth-child(5) {
-          width: 0 !important;
-          padding: 0 !important;
-          overflow: hidden;
-          white-space: nowrap;
-          font-size: 0;
-          border: none;
-        }
-
-        /* dot | Title | expand-btn */
-        .works-table th:nth-child(1) { width: 24px; }
-        .works-table th:nth-child(4) { width: auto; font-size: 0; }
-        .works-table th:nth-child(6) { width: 40px; text-align: center; }
-
-        /* モバイルフッター（インライン）は非表示 */
-        .mobile-footer { display: none !important; }
-
-        /* モバイルフッター */
-        .mobile-footer {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 32px 16px 48px 16px;
-        }
-        .mobile-footer .app-icon-link {
-          position: static;
-          display: block;
-          width: 24px;
-          height: 24px;
-          flex-shrink: 0;
-        }
-        .mobile-footer-links {
-          display: flex;
-          gap: 16px;
-        }
-        .mobile-footer-links a {
-          font-family: "IBM Plex Mono", monospace;
-          font-size: 9px;
-          color: #999999;
-          text-decoration: none;
-          letter-spacing: 0.02em;
-        }
-
-        .versions-nav {
-          display: none;
-        }
-
-        /* Arrow非表示、expand icon表示 */
-        .arrow-icon { display: none !important; }
-        .expand-icon {
-          display: none !important;
-          align-items: center;
-          justify-content: center;
-          width: 24px;
-          height: 24px;
-          font-size: 18px;
-          color: #999;
-          line-height: 1;
-          margin-left: auto;
-        }
-        .work-row.is-expanded .expand-icon {
-          display: flex !important;
-          color: #222;
-        }
-
-        /* Detail row */
-        .work-detail-cell {
-          padding: 0 !important;
-          border-top: 1px solid rgba(0,0,0,0.08) !important;
-          text-align: left !important;
-        }
-        .work-detail-inner {
-          overflow: hidden;
-          height: 0;
-        }
-        .work-detail-content {
-          padding: 16px;
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-          text-align: left;
-        }
-        .work-detail-preview {
-          width: 100%;
-          overflow: hidden;
-          background: #e0e0e0;
-        }
-        .work-detail-preview img {
-          width: 100%;
-          height: auto;
-          object-fit: contain;
-          display: block;
-        }
-        .work-detail-meta-list {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-        .work-detail-meta-item {
-          display: flex;
-          align-items: baseline;
-          gap: 16px;
-          font-family: "IBM Plex Mono", monospace;
-          font-size: 11px;
-        }
-        .work-detail-meta-label {
-          color: #999;
-          width: 36px;
-          flex-shrink: 0;
-        }
-        .work-detail-meta-value {
-          color: #222;
-          text-decoration: none;
-          word-break: break-all;
-        }
-        a.work-detail-meta-value {
-          text-decoration: underline;
-          text-underline-offset: 3px;
-        }
+      .work-row:hover .arrow-icon,
+      .work-row.is-active .arrow-icon {
+        opacity: 1;
+        transform: translateX(0);
       }
 
-      @media (min-width: 769px) {
-        .work-detail-row { display: none !important; }
-        .expand-icon { display: none !important; }
-        .mobile-footer { display: none; }
-      }
       .app-icon-link {
         position: fixed;
         bottom: 24px;
@@ -448,7 +323,7 @@
         position: fixed;
         left: 50%;
         bottom: 24px;
-        z-index: 110;
+        z-index: 60;
         transform: translateX(-50%);
         display: flex;
         flex-direction: column;
@@ -465,6 +340,7 @@
         color: #999999;
         text-decoration: none;
         letter-spacing: 0.02em;
+        transition: color 0.2s ease;
       }
 
       .versions-nav button {
@@ -491,36 +367,89 @@
       }
 
       .versions-nav a:hover,
-      .versions-nav button:hover {
+      .versions-nav button:hover,
+      .versions-nav a.is-current {
         color: #222222;
       }
 
       @media (max-width: 768px) {
-        .versions-nav {
-          display: none !important;
+        .section-label {
+          padding: 32px 16px 0;
+          margin-bottom: 12px;
+          font-size: 16px;
         }
+
+        .work-row {
+          height: 48px;
+        }
+
+        .works-table th,
+        .works-table td {
+          padding: 10px 8px;
+        }
+
+        .works-table td:nth-child(1) {
+          padding-right: 0;
+        }
+
+        .works-table td:nth-child(4) {
+          padding-left: 16px;
+        }
+
+        .works-table tbody td {
+          padding-top: 10px;
+          padding-bottom: 10px;
+        }
+
+        .works-table th:nth-child(2),
+        .works-table td:nth-child(2),
+        .works-table th:nth-child(3),
+        .works-table td:nth-child(3),
+        .works-table th:nth-child(5),
+        .works-table td:nth-child(5) {
+          width: 0 !important;
+          padding: 0 !important;
+          overflow: hidden;
+          border: none;
+          font-size: 0;
+          white-space: nowrap;
+        }
+
+        .works-table th:nth-child(1) { width: 24px; }
+        .works-table th:nth-child(4) { width: auto; font-size: 0; }
+        .works-table th:nth-child(6) { width: 40px; text-align: center; }
+        .title { font-size: 14px; }
+        .arrow-icon { display: none; }
+        .app-icon-link,
+        .footer-links,
+        .versions-nav { display: none; }
       }
           .versions-nav .is-current { cursor: default; color: #222222; text-decoration: underline; text-underline-offset: 3px; }
     </style>
       <link id="character-favicon" rel="icon" type="image/png" sizes="64x64" href="/special/balloon-portfolio/favicons/blue.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/special/balloon-portfolio/favicons/apple-touch-icon.png">
-    <link rel="canonical" href="https://www.masaruinaba.com/">
-    <meta property="og:url" content="https://www.masaruinaba.com/">
-    <meta property="og:image:type" content="image/png">
-    <meta property="og:image:width" content="1920">
-    <meta property="og:image:height" content="1008">
-    <meta name="twitter:site" content="@im_inaba">
+
+
+
+
+
+
+
+
+
+
+
+
 </head>
   <body>
-    <!-- Cursor preview -->
+    <div id="gl"></div>
     <div class="cursor-preview" id="cursorPreview">
-      <img id="cursorPreviewImg" src="" alt="">
+      <img id="cursorPreviewImg" alt="" style="width:100%;height:100%;object-fit:cover;display:none">
       <iframe id="cursorPreviewFrame" src="" scrolling="no" tabindex="-1" sandbox="allow-same-origin allow-scripts"></iframe>
     </div>
     <div class="container">
-      <div class="table-wrapper">
-        <!-- Works section -->
-        <div class="works-section">
+      <div class="table-wrapper" id="scrollArea">
+        <section class="portfolio-section">
           <h2 class="section-label">Works</h2>
           <table class="works-table">
             <thead>
@@ -533,906 +462,397 @@
                 <th></th>
               </tr>
             </thead>
-            <tbody id="clientWorksTableBody">
-              <!-- Client works dynamically added -->
-            </tbody>
+            <tbody id="clientWorksBody"></tbody>
           </table>
-        </div>
+        </section>
 
-        <!-- Playground section -->
-        <div class="playground-section">
+        <section class="portfolio-section">
           <h2 class="section-label">Playground</h2>
           <table class="works-table">
-          <thead>
-            <tr>
-              <th></th>
-              <th>Year</th>
-              <th>Type</th>
-              <th>Title</th>
-              <th>File</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="worksTableBody">
-            <!-- Works are dynamically added via JavaScript -->
-          </tbody>
-        </table>
-        </div>
+            <thead>
+              <tr>
+                <th></th>
+                <th>Year</th>
+                <th>Type</th>
+                <th>Title</th>
+                <th>File</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="worksBody"></tbody>
+          </table>
+        </section>
 
-
-        <!-- モバイルフッター -->
-        <div class="mobile-footer">
-          <a class="app-icon-link" href="/special/balloon-portfolio/" aria-label="Balloon Portfolio"></a>
-          <nav class="mobile-footer-links">
-            <a href="https://x.com/im_inaba" target="_blank" rel="noopener">X - @masruinaba</a>
-          </nav>
-        </div>
       </div>
     </div>
 
-    <script>
-      /**
-       * Check if color is light (for text color adjustment)
-       */
-      function isLightColor(color) {
-        // Handle rgb() format
-        if (color.startsWith('rgb')) {
-          const matches = color.match(/\d+/g);
-          if (matches && matches.length >= 3) {
-            const r = parseInt(matches[0]);
-            const g = parseInt(matches[1]);
-            const b = parseInt(matches[2]);
-            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-            return brightness > 180;
-          }
-        }
-        
-        // Handle hex format
-        const hex = color.replace('#', '');
-        if (hex.length === 3) {
-          // Expand shorthand hex
-          const r = parseInt(hex[0] + hex[0], 16);
-          const g = parseInt(hex[1] + hex[1], 16);
-          const b = parseInt(hex[2] + hex[2], 16);
-          const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-          return brightness > 180;
-        }
-        
-        const r = parseInt(hex.substr(0, 2), 16);
-        const g = parseInt(hex.substr(2, 2), 16);
-        const b = parseInt(hex.substr(4, 2), 16);
-        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-        return brightness > 180;
-      }
-
-      /**
-       * Adjust color if it's too light
-       */
-      function adjustColorForHover(color) {
-        if (isLightColor(color)) {
-          // If color is light, use a darker version or complementary color
-          const hex = color.replace('#', '');
-          const r = parseInt(hex.substr(0, 2), 16);
-          const g = parseInt(hex.substr(2, 2), 16);
-          const b = parseInt(hex.substr(4, 2), 16);
-          
-          // Darken by 40%
-          const newR = Math.max(0, Math.floor(r * 0.6));
-          const newG = Math.max(0, Math.floor(g * 0.6));
-          const newB = Math.max(0, Math.floor(b * 0.6));
-          
-          return `rgb(${newR}, ${newG}, ${newB})`;
-        }
-        return color;
-      }
-
-      const titleShuffleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?/\\[]{}*&^%$#@';
-
-      function randomShuffleChar(originalChar) {
-        if (/\s/.test(originalChar)) return originalChar;
-        return titleShuffleChars.charAt(Math.floor(Math.random() * titleShuffleChars.length));
-      }
-
-      function shuffleArray(items) {
-        const shuffled = [...items];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        return shuffled;
-      }
-
-      function animateTitleShuffle(element) {
-        const originalText = element.dataset.originalTitle || element.textContent;
-        const characters = Array.from(originalText);
-        const revealOrder = shuffleArray(characters.map((_, index) => index));
-        const revealStepByIndex = new Map(revealOrder.map((index, step) => [index, step]));
-        const token = Symbol('title-shuffle');
-        const randomFrames = Math.max(8, Math.floor(characters.length * 0.8));
-        let frame = 0;
-
-        element.dataset.originalTitle = originalText;
-        element._shuffleToken = token;
-        clearTimeout(element._shuffleTimer);
-
-        const tick = () => {
-          if (element._shuffleToken !== token) return;
-
-          const revealCount = Math.max(0, frame - randomFrames);
-          element.textContent = characters.map((char, index) => {
-            if (revealStepByIndex.get(index) < revealCount) return char;
-            return randomShuffleChar(char);
-          }).join('');
-
-          frame++;
-
-          if (revealCount <= characters.length) {
-            element._shuffleTimer = setTimeout(tick, 1000 / 28);
-          } else {
-            element.textContent = originalText;
-            element._shuffleToken = null;
-          }
-        };
-
-        tick();
-      }
-
-      function resetTitleShuffle(element) {
-        clearTimeout(element._shuffleTimer);
-        element._shuffleToken = null;
-        if (element.dataset.originalTitle) {
-          element.textContent = element.dataset.originalTitle;
-        }
-      }
-
-      /**
-       * Capture thumbnail from HTML file using iframe
-       */
-      async function captureThumbnail(file) {
-        return new Promise((resolve) => {
-          const iframe = document.createElement('iframe');
-          iframe.style.width = '800px';
-          iframe.style.height = '600px';
-          iframe.style.position = 'absolute';
-          iframe.style.left = '-9999px';
-          iframe.style.top = '0';
-          iframe.style.border = 'none';
-          
-          iframe.onload = () => {
-            setTimeout(() => {
-              try {
-                const canvas = document.createElement('canvas');
-                canvas.width = 50;
-                canvas.height = 38;
-                const ctx = canvas.getContext('2d');
-                
-                // Try to capture from iframe (may fail due to CORS)
-                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                const body = iframeDoc.body;
-                
-                // Use html2canvas if available, otherwise fallback to color
-                // For now, use a placeholder approach
-                ctx.fillStyle = '#e0e0e0';
-                ctx.fillRect(0, 0, 50, 38);
-                
-                document.body.removeChild(iframe);
-                resolve(canvas.toDataURL());
-              } catch (e) {
-                document.body.removeChild(iframe);
-                // Fallback to color-based thumbnail
-                resolve(null);
-              }
-            }, 1000);
-          };
-          
-          iframe.src = file;
-          document.body.appendChild(iframe);
-        });
-      }
-
-      /**
-       * Client works list
-       */
-      const clientWorks = [
-  {
-    year: '2026',
-    type: 'Design',
-    title: 'Studio.Drop',
-    url: 'https://drop.studio.design/',
-    image: '/works/studio-drop.png',
-    color: '#a5deda',
-  },
-  {
-    year: '2026',
-    type: 'Design',
-    title: 'Studio.Design',
-    url: 'https://studio.design/ja',
-    displayFile: 'studio.design',
-    image: '/works/studio-design-2026.png',
-    color: '#f0f0f0',
-  },
-        {
-          year: '2025',
-          type: 'Design',
-          title: '互色-互縁 goshiki-goen',
-          url: 'https://goshiki-goen.jp/',
-          image: '/works/goshiki-goen.webp',
-          color: '#1a1a18'
-        },
-        {
-          year: '2025',
-          type: 'Design',
-          title: 'Studio Design Award 2025',
-          url: 'https://designaward2025.studio.design/',
-          image: '/works/studio-design-award.webp',
-          color: '#2a1a0e'
-        },
-        {
-          year: '2025',
-          type: 'Design',
-          title: 'Studio',
-          url: 'https://studio.design/ja',
-    displayFile: 'studio.design',
-          image: '/works/studio.webp',
-          color: '#f0f0f0'
-        },
-        {
-          year: '2025',
-          type: 'Design',
-          title: '豊田自動織機技能専修学園',
-          url: 'https://gakuen.toyota-shokki.co.jp/',
-          image: '/works/toyota-shokki.png',
-          color: '#015EB8'
-        },
-        {
-          year: '2024',
-          type: 'Design',
-          title: 'UNIPOTA',
-          url: 'https://unipota.jp/',
-          image: '/works/unipota.webp',
-          color: '#EA76A9'
-        },
-        {
-          year: '2023',
-          type: 'Design',
-          title: 'écrit architects',
-          url: 'https://ecrit.jp/',
-          image: '/works/ecrit.webp',
-          color: '#DBD5CA'
-        },
-        {
-          year: '2023',
-          type: 'Design',
-          title: 'MIKATA',
-          url: 'https://mi-kata.jp/',
-          image: '/works/mikata.webp',
-          color: '#1a29cc'
-        },
-        {
-          year: '2022',
-          type: 'Design',
-          title: '萬珍軒',
-          url: 'https://manchinken.com/',
-          image: '/works/manchinken.webp',
-          color: '#FFC200'
-        },
-        {
-          year: '2020',
-          type: 'Design',
-          title: "L'as International",
-          url: 'https://lasinternational.co.jp/',
-          image: '/works/las-international.webp',
-          color: '#0086CE'
-        }
-      ];
-
-      /**
-       * Cursor-following image preview
-       */
-      const cursorPreview = document.getElementById('cursorPreview');
-      const cursorPreviewImg = document.getElementById('cursorPreviewImg');
-      const previewReducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-
-      document.addEventListener('mousemove', (e) => {
-        gsap.to(cursorPreview, {
-          x: e.clientX + 24,
-          y: e.clientY - 60,
-          duration: 0.35,
-          ease: 'power2.out'
-        });
-      });
-
-      const cursorPreviewFrame = document.getElementById('cursorPreviewFrame');
-      let _previewVisible = false;
-
-      function showCursorPreview(src, type = 'image') {
-        const entering = !_previewVisible;
-        _previewVisible = true;
-        const tilt = (Math.random() - 0.5) * 24;
-        // 進行中の hide アニメをキャンセル
-        gsap.killTweensOf(cursorPreview);
-
-        if (type === 'iframe') {
-          cursorPreviewImg.style.display = 'none';
-          cursorPreviewFrame.style.display = 'block';
-          // data-src で管理することで空文字リセット後も正しく比較できる
-          if (cursorPreviewFrame.dataset.src !== src) {
-            cursorPreviewFrame.src = src;
-            cursorPreviewFrame.dataset.src = src;
-          }
-        } else {
-          cursorPreviewFrame.style.display = 'none';
-          cursorPreviewFrame.removeAttribute('src');
-          delete cursorPreviewFrame.dataset.src;
-          cursorPreviewImg.style.display = 'block';
-          cursorPreviewImg.src = src;
-        }
-        if (entering) gsap.set(cursorPreview, { scale: 0.96, rotation: tilt });
-        gsap.to(cursorPreview, {
-          opacity: 1,
-          scale: 1,
-          rotation: tilt,
-          duration: previewReducedMotion.matches ? 0 : 0.4,
-          ease: 'power2.out'
-        });
-      }
-
-      function hideCursorPreview() {
-        if (!_previewVisible) return;
-        _previewVisible = false;
-        // Stop the longer entrance tween before fading out during rapid row changes.
-        gsap.killTweensOf(cursorPreview, 'opacity,scale,rotation');
-        gsap.to(cursorPreview, {
-          opacity: 0,
-          duration: previewReducedMotion.matches ? 0 : 0.12,
-          ease: 'power2.in',
-          onComplete: () => {
-            // 再ホバーされていなければ iframe をアンロード
-            if (!_previewVisible) {
-              cursorPreviewFrame.style.display = 'none';
-              cursorPreviewFrame.src = '';
-              delete cursorPreviewFrame.dataset.src;
-            }
-          }
-        });
-      }
-
-      /**
-      /**
-       * Render client works
-       */
-      function renderClientWorks() {
-        const tbody = document.getElementById('clientWorksTableBody');
-        clientWorks.forEach(work => {
-          const displayWork = {
-            ...work,
-            file: work.url,
-            displayFile: work.displayFile || work.url.replace('https://', '').replace(/\/$/, '')
-          };
-          const row = createWorkRow(displayWork);
-          const detailRow = createDetailRow(displayWork);
-          row._detailRow = detailRow;
-
-          if (window.matchMedia('(hover: hover)').matches) {
-            row.addEventListener('mouseenter', () => showCursorPreview(work.image));
-            row.addEventListener('mouseleave', hideCursorPreview);
-          }
-
-          tbody.appendChild(row);
-          tbody.appendChild(detailRow);
-        });
-      }
-
-      /**
-       * Works list with color information
-       */
-      const works = [
-        {
-          year: '2026',
-          type: 'Visual',
-          title: 'Balloon Portfolio',
-          displayFile: 'special/balloon-portfolio',
-          file: 'https://www.masaruinaba.com/special/balloon-portfolio/',
-          thumbnail: '/thumbnails/balloon-playground.png',
-          color: '#1685E5',
-        },
-        {
-          year: '2026',
-          type: 'App',
-          title: 'Origin Shapes',
-          displayFile: 'apps/origin',
-          file: 'https://tiny-apps-phi.vercel.app/apps/origin/',
-          thumbnail: '/thumbnails/origin.png',
-          color: '#FF5299',
-        },
-        {
-          year: '2026',
-          type: 'App',
-          title: 'Little Numbers',
-          displayFile: 'apps/little-numbers',
-          file: 'https://kids-math-iwua.vercel.app/index.html',
-          thumbnail: '/thumbnails/kids-123.png',
-          color: '#ff7900',
-        },
-        {
-          year: '2026',
-          type: 'App',
-          title: 'Open Table',
-          thumbnail: '/thumbnails/open-table.png',
-          file: 'https://meeting-board-v1.vercel.app/',
-          displayFile: 'apps/open-table',
-          color: '#8672E2'
-        },
-        {
-          year: '2026',
-          type: 'Animation',
-          title: 'Animation Notes',
-          thumbnail: '/thumbnails/animation-notes.png',
-          file: 'https://fable-notes.vercel.app/',
-          displayFile: 'apps/fable-notes',
-          color: '#CAC2A3'
-        },
-        {
-          year: '2025',
-          type: 'App',
-          title: 'Creative Weather',
-          thumbnail: '/thumbnails/creative-weather.png',
-          file: 'apps/creative-weather/',
-          color: '#57295F'
-        },
-        {
-          year: '2025',
-          type: 'App',
-          title: 'Layered Clock',
-          thumbnail: '/thumbnails/layered-clock.png',
-          file: 'apps/layered-clock/',
-          color: '#CAFF00'
-        },
-        {
-          year: '2025',
-          type: 'Animation',
-          title: 'A Letter of Letters',
-          thumbnail: '/thumbnails/letter-morphing.png',
-          file: 'playground/letter-morphing/',
-          color: '#0b0b0c'
-        },
-        {
-          year: '2025',
-          type: 'Animation',
-          title: 'Mosaic Reveal Animation',
-          thumbnail: '/thumbnails/mosaic-reveal.png',
-          file: 'playground/mosaic-reveal/',
-          color: '#F7F7F7'
-        },
-        {
-          year: '2025',
-          type: 'Visual',
-          title: 'Font Patterns',
-          thumbnail: '/thumbnails/font-patterns.png',
-          file: 'playground/font-patterns/',
-          color: '#0b0b0c'
-        },
-        {
-          year: '2025',
-          type: 'Animation',
-          title: 'Hover Text Path',
-          thumbnail: '/thumbnails/hover-text-path.png',
-          file: 'playground/hover-text-path/',
-          color: '#20453B'
-        },
-        {
-          year: '2025',
-          type: 'Animation',
-          title: 'Interactive Eye-Following Card',
-          thumbnail: '/thumbnails/eye-following.png',
-          file: 'playground/eye-following/',
-          color: '#0062AD'
-        },
-        {
-          year: '2025',
-          type: 'Animation',
-          title: 'Scroll-driven Pinned Text Sequence',
-          thumbnail: '/thumbnails/scroll-text.png',
-          file: 'playground/scroll-text/',
-          color: '#FF4800'
-        },
-        {
-          year: '2025',
-          type: 'App',
-          title: 'Easel Pro',
-          thumbnail: '/thumbnails/easel-pro.png',
-          file: 'apps/design-board/',
-          color: '#fcfcfc'
-        }
-      ];
-
-
-      /**
-       * Create accordion detail row (mobile only)
-       */
-      function createDetailRow(work) {
-        const detailRow = document.createElement('tr');
-        detailRow.className = 'work-detail-row';
-
-        const cell = document.createElement('td');
-        cell.colSpan = 6;
-        cell.className = 'work-detail-cell';
-
-        const inner = document.createElement('div');
-        inner.className = 'work-detail-inner';
-
-        const content = document.createElement('div');
-        content.className = 'work-detail-content';
-
-        // Static preview for client works and Playground
-        if (work.image || work.thumbnail) {
-          const preview = document.createElement('div');
-          preview.className = 'work-detail-preview';
-          const img = document.createElement('img');
-          img.src = work.image || work.thumbnail;
-          img.alt = work.title;
-          preview.appendChild(img);
-          content.appendChild(preview);
-        }
-
-        // Meta list: Year / Type / URL or File
-        const metaList = document.createElement('div');
-        metaList.className = 'work-detail-meta-list';
-
-        const urlLabel = work.image ? 'URL' : 'File';
-        const urlValue = work.displayFile || work.file.replace(/\/$/, '');
-
-        [
-          { label: 'Year', value: work.year },
-          { label: 'Type', value: work.type },
-          { label: urlLabel, value: urlValue, href: work.file },
-        ].forEach(({ label, value, href }) => {
-          const item = document.createElement('div');
-          item.className = 'work-detail-meta-item';
-
-          const labelEl = document.createElement('span');
-          labelEl.className = 'work-detail-meta-label';
-          labelEl.textContent = label;
-
-          const valueEl = href ? document.createElement('a') : document.createElement('span');
-          valueEl.className = 'work-detail-meta-value';
-          valueEl.textContent = value;
-          if (href) {
-            valueEl.href = href;
-            valueEl.target = '_blank';
-            valueEl.rel = 'noopener';
-          }
-
-          item.appendChild(labelEl);
-          item.appendChild(valueEl);
-          metaList.appendChild(item);
-        });
-
-        content.appendChild(metaList);
-        inner.appendChild(content);
-        cell.appendChild(inner);
-        detailRow.appendChild(cell);
-
-        return detailRow;
-      }
-
-      /**
-       * Create work row
-       */
-      function createWorkRow(work) {
-        const row = document.createElement('tr');
-        row.className = 'work-row';
-        
-        const adjustedColor = adjustColorForHover(work.color);
-        row.style.setProperty('--hover-color', adjustedColor);
-        
-        // Determine text color based on background
-        const textColor = isLightColor(adjustedColor) ? '#222222' : '#ffffff';
-        const secondaryTextColor = isLightColor(adjustedColor) ? '#666666' : 'rgba(255, 255, 255, 0.8)';
-        
-        // Create row background element
-        const rowBg = document.createElement('div');
-        rowBg.className = 'row-bg';
-        rowBg.style.backgroundColor = adjustedColor;
-        
-        // Thumbnail
-        const thumbnailCell = document.createElement('td');
-        thumbnailCell.style.position = 'relative';
-        
-        const thumbnail = document.createElement('img');
-        thumbnail.alt = work.title;
-        thumbnail.className = 'thumbnail';
-        const dotCanvas = document.createElement('canvas');
-        dotCanvas.width = 8;
-        dotCanvas.height = 8;
-        const dotContext = dotCanvas.getContext('2d');
-        dotContext.fillStyle = adjustedColor;
-        dotContext.fillRect(0, 0, 8, 8);
-        thumbnail.src = dotCanvas.toDataURL();
-
-        // Place rowBg in first cell and make it cover entire row
-        thumbnailCell.appendChild(rowBg);
-        thumbnailCell.appendChild(thumbnail);
-        
-        // Year
-        const yearCell = document.createElement('td');
-        yearCell.className = 'year';
-        yearCell.style.fontSize = '10px';
-        yearCell.style.fontWeight = '400';
-        yearCell.style.color = '#999999';
-        yearCell.style.fontFamily = '"IBM Plex Mono", monospace';
-        yearCell.textContent = work.year;
-        yearCell.setAttribute('data-text-color', secondaryTextColor);
-        
-        // Type
-        const typeCell = document.createElement('td');
-        typeCell.className = 'type';
-        typeCell.style.fontSize = '10px';
-        typeCell.style.fontWeight = '400';
-        typeCell.style.color = '#999999';
-        typeCell.style.textTransform = 'capitalize';
-        typeCell.style.fontFamily = '"IBM Plex Mono", monospace';
-        typeCell.textContent = work.type;
-        typeCell.setAttribute('data-text-color', secondaryTextColor);
-        
-        // Title
-        const titleCell = document.createElement('td');
-        titleCell.className = 'title';
-        titleCell.style.fontSize = '13px';
-        titleCell.style.fontWeight = '400';
-        titleCell.style.fontFamily = '"Bricolage Grotesque", sans-serif';
-        titleCell.textContent = work.title;
-        titleCell.dataset.originalTitle = work.title;
-        titleCell.setAttribute('data-text-color', textColor);
-        
-        // Filename
-        const filenameCell = document.createElement('td');
-        filenameCell.className = 'filename';
-        filenameCell.style.fontSize = '10px';
-        filenameCell.style.fontWeight = '400';
-        filenameCell.style.color = '#999999';
-        filenameCell.style.fontFamily = '"IBM Plex Mono", monospace';
-        filenameCell.textContent = work.displayFile || work.file.replace(/\/index\.html$/, '').replace(/\/$/, '');
-        filenameCell.setAttribute('data-text-color', secondaryTextColor);
-        
-        // Arrow (desktop) + Expand icon (mobile)
-        const arrowCell = document.createElement('td');
-        const arrowSpan = document.createElement('span');
-        arrowSpan.className = 'arrow-icon';
-        arrowSpan.textContent = '→';
-        arrowSpan.setAttribute('data-text-color', textColor);
-        arrowCell.appendChild(arrowSpan);
-
-        const expandIcon = document.createElement('span');
-        expandIcon.className = 'expand-icon';
-        expandIcon.textContent = '−';
-        arrowCell.appendChild(expandIcon);
-        
-        row.appendChild(thumbnailCell);
-        row.appendChild(yearCell);
-        row.appendChild(typeCell);
-        row.appendChild(titleCell);
-        row.appendChild(filenameCell);
-        row.appendChild(arrowCell);
-        
-        // Position rowBg to cover entire row
-        // Calculate offset to cover entire row from first cell
-        const updateRowBgPosition = () => {
-          const tableRect = row.closest('table').getBoundingClientRect();
-          const cellRect = thumbnailCell.getBoundingClientRect();
-          const offsetLeft = cellRect.left - tableRect.left;
-          rowBg.style.left = `${-offsetLeft}px`;
-          rowBg.style.width = `${tableRect.width}px`;
-        };
-        
-        // Initial position update
-        setTimeout(updateRowBgPosition, 0);
-        
-        // GSAP hover animation（ホバー対応デバイスのみ）
-        const canHover = window.matchMedia('(hover: hover)').matches;
-        const cells = [yearCell, typeCell, titleCell, filenameCell, arrowSpan];
-        let hoverTimeline = null;
-
-        // Store original colors
-        const originalColors = {
-          year: yearCell.style.color || '#999999',
-          type: typeCell.style.color || '#999999',
-          title: titleCell.style.color || '#222222',
-          filename: filenameCell.style.color || '#999999',
-          arrow: arrowSpan.style.color || '#222222'
-        };
-
-        if (canHover) row.addEventListener('mouseenter', () => {
-          // Kill any existing animations
-          if (hoverTimeline) {
-            hoverTimeline.kill();
-          }
-
-          animateTitleShuffle(titleCell);
-          
-          updateRowBgPosition();
-          
-          hoverTimeline = gsap.timeline();
-          
-          // Background animation with scaleX - smoother easing
-          hoverTimeline.to(rowBg, {
-            scaleX: 1,
-            transformOrigin: 'left center',
-            duration: 0.7,
-            ease: 'power3.out'
-          }, 0);
-          
-          // Text color animations with stagger
-          cells.forEach((cell, index) => {
-            const color = cell.getAttribute('data-text-color');
-            hoverTimeline.to(cell, {
-              color: color,
-              duration: 0.35,
-              ease: 'power2.out'
-            }, 0.05 + index * 0.02);
-          });
-          
-          // Arrow animation with bounce
-          hoverTimeline.to(arrowSpan, {
-            opacity: 1,
-            x: 0,
-            duration: 0.5,
-            ease: 'back.out(1.2)'
-          }, 0.15);
-        });
-
-        if (canHover) row.addEventListener('mouseleave', () => {
-          resetTitleShuffle(titleCell);
-          
-          // Kill any existing animations
-          if (hoverTimeline) {
-            hoverTimeline.kill();
-            hoverTimeline = null;
-          }
-          
-          hoverTimeline = gsap.timeline({
-            onComplete: () => {
-              // Ensure everything is reset
-              gsap.set(rowBg, { scaleX: 0 });
-              yearCell.style.color = originalColors.year;
-              typeCell.style.color = originalColors.type;
-              titleCell.style.color = originalColors.title;
-              filenameCell.style.color = originalColors.filename;
-              arrowSpan.style.opacity = '0';
-              arrowSpan.style.transform = 'translateX(-4px)';
-              arrowSpan.style.color = originalColors.arrow;
-              hoverTimeline = null;
-            }
-          });
-          
-          // Background animation - reset to 0 - smoother easing
-          hoverTimeline.to(rowBg, {
-            scaleX: 0,
-            transformOrigin: 'left center',
-            duration: 0.5,
-            ease: 'power3.in'
-          }, 0);
-          
-          // Text color animations - reset to original colors
-          hoverTimeline.to(yearCell, {
-            color: originalColors.year,
-            duration: 0.25,
-            ease: 'power2.in'
-          }, 0);
-          
-          hoverTimeline.to(typeCell, {
-            color: originalColors.type,
-            duration: 0.25,
-            ease: 'power2.in'
-          }, 0);
-          
-          hoverTimeline.to(titleCell, {
-            color: originalColors.title,
-            duration: 0.25,
-            ease: 'power2.in'
-          }, 0);
-          
-          hoverTimeline.to(filenameCell, {
-            color: originalColors.filename,
-            duration: 0.25,
-            ease: 'power2.in'
-          }, 0);
-          
-          // Arrow animation - reset
-          hoverTimeline.to(arrowSpan, {
-            opacity: 0,
-            x: -4,
-            color: originalColors.arrow,
-            duration: 0.3,
-            ease: 'power2.in'
-          }, 0);
-        });
-        
-        // Click: mobile → accordion toggle / desktop → open link
-        row.addEventListener('click', (e) => {
-          if (window.innerWidth <= 768) {
-            // アコーディオン内のリンクはそのまま通す
-            if (e.target.tagName === 'A') return;
-            const isExpanded = row.classList.toggle('is-expanded');
-            if (row._detailRow) {
-              const detailInner = row._detailRow.querySelector('.work-detail-inner');
-              if (isExpanded) {
-                gsap.set(detailInner, { height: 'auto' });
-                const h = detailInner.offsetHeight;
-                gsap.fromTo(detailInner, { height: 0 }, { height: h, duration: 0.35, ease: 'power2.out',
-                  onComplete: () => { detailInner.style.height = 'auto'; }
-                });
-              } else {
-                gsap.to(detailInner, { height: 0, duration: 0.25, ease: 'power2.in' });
-              }
-            }
-          } else {
-            window.open(work.file, '_blank');
-          }
-        });
-        
-        return row;
-      }
-
-      /**
-       * Render works list
-       */
-      function renderWorks() {
-        const tbody = document.getElementById('worksTableBody');
-
-        works.forEach(work => {
-          const row = createWorkRow(work);
-          const detailRow = createDetailRow(work);
-          row._detailRow = detailRow;
-
-          if (window.matchMedia('(hover: hover)').matches) {
-            row.addEventListener('mouseenter', () => showCursorPreview(work.thumbnail));
-            row.addEventListener('mouseleave', hideCursorPreview);
-          }
-
-          tbody.appendChild(row);
-          tbody.appendChild(detailRow);
-        });
-      }
-
-      // DOM Ready
-      document.addEventListener('DOMContentLoaded', () => {
-        renderClientWorks();
-        renderWorks();
-
-        document.querySelectorAll('.footer-links a, .mobile-footer-links a, .versions-nav a, .versions-nav button').forEach((link) => {
-          link.dataset.originalTitle = link.textContent;
-          link.addEventListener('mouseenter', () => animateTitleShuffle(link));
-          link.addEventListener('mouseleave', () => resetTitleShuffle(link));
-        });
-
-        // スクロール時・カーソルがウィンドウ外に出た時にプレビューを隠す
-        const hideAllPreviews = () => {
-          hideCursorPreview();
-        };
-        document.querySelector('.table-wrapper').addEventListener('scroll', hideAllPreviews);
-        document.addEventListener('mouseleave', hideAllPreviews);
-        document.querySelectorAll('.footer-links, .mobile-footer, .versions-nav, .app-icon-link').forEach((footer) => {
-          footer.addEventListener('mouseenter', hideAllPreviews);
-          footer.addEventListener('focusin', hideAllPreviews);
-        });
-
-      });
-    </script>
-    <a class="app-icon-link" href="/special/balloon-portfolio/" aria-label="Balloon Portfolio"></a>
     <nav class="versions-nav" aria-label="Portfolio versions">
       <div class="version-list">
         <span class="is-current" aria-current="page">v00</span>
         <a href="/special/balloon-portfolio/">v01</a>
-        <a href="/versions/liquid-hover/">v02</a>
-        <a href="/versions/drag-reveal/">v03</a>
-        <a href="/versions/v3/">v04</a>
+
+        <a href="/versions/drag-reveal/">v02</a>
+        <a href="/versions/v3/">v03</a>
       </div>
       <button type="button">versions</button>
     </nav>
+    <a class="app-icon-link" href="/special/balloon-portfolio/" aria-label="Balloon Portfolio"></a>
     <nav class="footer-links">
       <a href="https://x.com/im_inaba" target="_blank" rel="noopener">X - @masruinaba</a>
     </nav>
+
+    <script type="module">
+      import { LiquidHover } from '/src/prototype/liquid-hover.ts'
+      import { clientWorks, works } from '/src/data/portfolio.ts'
+
+      let liquid = null
+
+      const shuffleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?/\\\\[]{}*&^%$#@'
+
+      function randomShuffleChar(char) {
+        if (/\s/.test(char)) return char
+        return shuffleChars.charAt(Math.floor(Math.random() * shuffleChars.length))
+      }
+
+      function shuffleArray(items) {
+        const shuffled = [...items]
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1))
+          ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+        }
+        return shuffled
+      }
+
+      function animateTextShuffle(element) {
+        const originalText = element.dataset.originalTitle || element.textContent
+        const characters = Array.from(originalText)
+        const revealOrder = shuffleArray(characters.map((_, index) => index))
+        const revealStepByIndex = new Map(revealOrder.map((index, step) => [index, step]))
+        const token = Symbol('text-shuffle')
+        const randomFrames = Math.max(8, Math.floor(characters.length * 0.8))
+        let frame = 0
+
+        element.dataset.originalTitle = originalText
+        element._shuffleToken = token
+        clearTimeout(element._shuffleTimer)
+
+        const tick = () => {
+          if (element._shuffleToken !== token) return
+
+          const revealCount = Math.max(0, frame - randomFrames)
+          element.textContent = characters.map((char, index) => {
+            if (revealStepByIndex.get(index) < revealCount) return char
+            return randomShuffleChar(char)
+          }).join('')
+
+          frame++
+
+          if (revealCount <= characters.length) {
+            element._shuffleTimer = setTimeout(tick, 1000 / 28)
+          } else {
+            element.textContent = originalText
+            element._shuffleToken = null
+          }
+        }
+
+        tick()
+      }
+
+      function resetTextShuffle(element) {
+        clearTimeout(element._shuffleTimer)
+        element._shuffleToken = null
+        if (element.dataset.originalTitle) element.textContent = element.dataset.originalTitle
+      }
+
+      function colorDot(color) {
+        const canvas = document.createElement('canvas')
+        canvas.width = 8
+        canvas.height = 8
+        const ctx = canvas.getContext('2d')
+        ctx.fillStyle = color
+        ctx.fillRect(0, 0, 8, 8)
+        return canvas.toDataURL()
+      }
+
+      function isLightColor(color) {
+        if (color.startsWith('rgb')) {
+          const matches = color.match(/\d+/g)
+          if (matches && matches.length >= 3) {
+            const r = parseInt(matches[0])
+            const g = parseInt(matches[1])
+            const b = parseInt(matches[2])
+            return (r * 299 + g * 587 + b * 114) / 1000 > 180
+          }
+        }
+
+        const hex = color.replace('#', '')
+        const full = hex.length === 3 ? hex.split('').map((c) => c + c).join('') : hex
+        const r = parseInt(full.slice(0, 2), 16)
+        const g = parseInt(full.slice(2, 4), 16)
+        const b = parseInt(full.slice(4, 6), 16)
+        return (r * 299 + g * 587 + b * 114) / 1000 > 180
+      }
+
+      function adjustColorForHover(color) {
+        if (!isLightColor(color)) return color
+
+        const hex = color.replace('#', '')
+        const full = hex.length === 3 ? hex.split('').map((c) => c + c).join('') : hex
+        const r = parseInt(full.slice(0, 2), 16)
+        const g = parseInt(full.slice(2, 4), 16)
+        const b = parseInt(full.slice(4, 6), 16)
+        return `rgb(${Math.max(0, Math.floor(r * 0.6))}, ${Math.max(0, Math.floor(g * 0.6))}, ${Math.max(0, Math.floor(b * 0.6))})`
+      }
+
+      function itemHref(work) {
+        const href = work.url || work.file || '#'
+        if (href === '#' || href.startsWith('http') || href.startsWith('/')) return href
+        return `/${href}`
+      }
+
+      function itemLabel(work) {
+        const href = work.url || work.file || '#'
+        return work.displayFile || href.replace('https://', '').replace(/\/$/, '')
+      }
+
+      const cursorPreview = document.getElementById('cursorPreview')
+      const cursorPreviewFrame = document.getElementById('cursorPreviewFrame')
+      const cursorPreviewImg = document.getElementById('cursorPreviewImg')
+      let previewVisible = false
+
+      document.addEventListener('mousemove', (event) => {
+        cursorPreview.style.left = `${event.clientX + 24}px`
+        cursorPreview.style.top = `${event.clientY - 60}px`
+      })
+
+      function showCursorPreview(src, thumbnail, title) {
+        previewVisible = true
+        cursorPreviewImg.style.display = thumbnail ? 'block' : 'none'
+        cursorPreviewFrame.style.display = thumbnail ? 'none' : 'block'
+        if (thumbnail) {
+          cursorPreviewFrame.removeAttribute('src')
+          delete cursorPreviewFrame.dataset.src
+          cursorPreviewImg.src = thumbnail
+          cursorPreviewImg.alt = title
+          cursorPreview.style.opacity = '1'
+          return
+        }
+        if (cursorPreviewFrame.dataset.src !== src) {
+          cursorPreviewFrame.src = src
+          cursorPreviewFrame.dataset.src = src
+        }
+        cursorPreview.style.opacity = '1'
+      }
+
+      function hideCursorPreview() {
+        previewVisible = false
+        cursorPreview.style.opacity = '0'
+        window.setTimeout(() => {
+          if (!previewVisible) {
+            cursorPreviewFrame.src = ''
+            delete cursorPreviewFrame.dataset.src
+          }
+        }, 240)
+      }
+
+      const compactLayout = () => window.innerWidth <= 768 || !matchMedia('(hover: hover)').matches
+      const mobilePreview = document.createElement('tr')
+      mobilePreview.className = 'mobile-preview-row'
+      mobilePreview.hidden = true
+      const mobileCell = document.createElement('td')
+      mobileCell.colSpan = 6
+      const mobileSurface = document.createElement('div')
+      mobileSurface.className = 'mobile-liquid-surface'
+      const mobileImage = document.createElement('img')
+      mobileSurface.append(mobileImage)
+      const mobileLink = document.createElement('a')
+      mobileLink.className = 'mobile-preview-link'
+      mobileLink.target = '_blank'
+      mobileLink.rel = 'noopener'
+      mobileCell.append(mobileSurface, mobileLink)
+      mobilePreview.append(mobileCell)
+      let mobileLiquid = null
+      let activeMobileRow = null
+      function openMobilePreview(row, work, href) {
+        const close = activeMobileRow === row && !mobilePreview.hidden
+        if (activeMobileRow) activeMobileRow.setAttribute('aria-expanded', 'false')
+        mobilePreview.hidden = close
+        if (close) { mobileLiquid?.hide(); activeMobileRow = null; return }
+        activeMobileRow = row
+        row.setAttribute('aria-expanded', 'true')
+        row.after(mobilePreview)
+        mobileImage.src = work.image || work.thumbnail
+        mobileImage.alt = work.title
+        mobileLink.href = href
+        mobileLink.textContent = `${work.title} ↗`
+        if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          try {
+            mobileLiquid ||= new LiquidHover(mobileSurface, true)
+            mobileLiquid.show(mobileImage.src)
+          } catch (error) { console.warn('Mobile liquid preview unavailable', error) }
+        }
+      }
+
+      function createRow(work) {
+        const row = document.createElement('tr')
+        const href = itemHref(work)
+        const previewImage = work.image || work.thumbnail
+        const hasImage = Boolean(previewImage)
+        const adjustedColor = adjustColorForHover(work.color)
+        const textColor = isLightColor(adjustedColor) ? '#222222' : '#ffffff'
+        const secondaryTextColor = isLightColor(adjustedColor) ? '#666666' : 'rgba(255, 255, 255, 0.8)'
+        row.className = 'work-row'
+        if (!hasImage) row.classList.add('normal-row')
+        row.dataset.hasImage = String(hasImage)
+        row.dataset.tone = hasImage && isLightColor(adjustedColor) ? 'dark' : 'light'
+
+        const thumbCell = document.createElement('td')
+        const rowBg = document.createElement('div')
+        rowBg.className = 'row-bg'
+        rowBg.style.backgroundColor = adjustedColor
+        const thumb = document.createElement('img')
+        thumb.className = 'thumbnail'
+        thumb.src = colorDot(adjustedColor)
+        thumb.alt = work.title
+        thumbCell.appendChild(rowBg)
+        thumbCell.appendChild(thumb)
+
+        const year = document.createElement('td')
+        year.className = 'year'
+        year.textContent = work.year
+        year.dataset.originalColor = '#999999'
+
+        const type = document.createElement('td')
+        type.className = 'type'
+        type.textContent = work.type
+        type.dataset.originalColor = '#999999'
+
+        const title = document.createElement('td')
+        title.className = 'title'
+        title.textContent = work.title
+        title.dataset.originalColor = '#222222'
+
+        const filename = document.createElement('td')
+        filename.className = 'filename'
+        filename.textContent = itemLabel(work)
+        filename.dataset.originalColor = '#999999'
+
+        const arrowCell = document.createElement('td')
+        const arrow = document.createElement('span')
+        arrow.className = 'arrow-icon'
+        arrow.textContent = '→'
+        arrow.dataset.originalColor = '#222222'
+        arrowCell.appendChild(arrow)
+
+        row.append(thumbCell, year, type, title, filename, arrowCell)
+
+        const normalCells = [year, type, title, filename, arrow]
+
+        function updateRowBgPosition() {
+          const table = row.closest('table')
+          if (!table) return
+          const tableRect = table.getBoundingClientRect()
+          const cellRect = thumbCell.getBoundingClientRect()
+          rowBg.style.left = `${tableRect.left - cellRect.left}px`
+          rowBg.style.width = `${tableRect.width}px`
+        }
+
+        window.setTimeout(updateRowBgPosition, 0)
+
+        function setNormalHover(active) {
+          normalCells.forEach((cell, index) => {
+            const nextColor = active ? (index === 2 || index === 4 ? textColor : secondaryTextColor) : cell.dataset.originalColor
+            cell.style.color = nextColor
+          })
+          arrow.style.opacity = active ? '1' : '0'
+          arrow.style.transform = active ? 'translateX(0)' : 'translateX(-4px)'
+        }
+
+        row.addEventListener('mouseenter', () => {
+          if (compactLayout()) return
+          if (!hasImage) {
+            row.classList.add('is-active')
+            animateTextShuffle(title)
+            updateRowBgPosition()
+            setNormalHover(true)
+            if (window.matchMedia('(hover: hover)').matches) showCursorPreview(href, work.thumbnail, work.title)
+            return
+          }
+
+          const scrollArea = document.getElementById('scrollArea')
+          const beforeHeight = row.getBoundingClientRect().height
+          row.classList.add('is-active')
+          animateTextShuffle(title)
+          requestAnimationFrame(() => {
+            const afterHeight = row.getBoundingClientRect().height
+            const delta = Math.max(0, afterHeight - beforeHeight) * 0.5
+            if (scrollArea && delta > 0) scrollArea.scrollTop += delta
+          })
+          if (hasImage) {
+            const updateMask = () => liquid?.setMask(row.getBoundingClientRect())
+            liquid?.show(previewImage, row.getBoundingClientRect())
+            requestAnimationFrame(updateMask)
+            window.setTimeout(updateMask, 120)
+            window.setTimeout(updateMask, 320)
+          } else {
+            liquid?.hide()
+          }
+        })
+        row.addEventListener('mousemove', () => {
+          if (hasImage) liquid?.setMask(row.getBoundingClientRect())
+        })
+        row.addEventListener('mouseleave', () => {
+          if (!hasImage) {
+            row.classList.remove('is-active')
+            resetTextShuffle(title)
+            setNormalHover(false)
+            hideCursorPreview()
+            return
+          }
+
+          row.classList.remove('is-active')
+          resetTextShuffle(title)
+          if (hasImage) liquid?.hide()
+        })
+        row.addEventListener('click', () => {
+          if (compactLayout()) { openMobilePreview(row, work, href); return }
+          if (href.startsWith('http')) {
+            window.open(href, '_blank')
+          } else {
+            window.location.href = href
+          }
+        })
+
+        row.tabIndex = 0
+        row.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); row.click() } })
+        return row
+      }
+
+      function renderRows(id, items) {
+        const body = document.getElementById(id)
+        items.forEach((work) => body.appendChild(createRow(work)))
+      }
+
+      renderRows('clientWorksBody', clientWorks)
+      renderRows('worksBody', works)
+
+      if (window.matchMedia('(hover: hover)').matches) {
+        try {
+          liquid = new LiquidHover(document.getElementById('gl'))
+          window.liquid = liquid
+        } catch (error) {
+          console.warn('LiquidHover failed to initialize', error)
+        }
+      }
+
+      document.querySelectorAll('.footer-links a, .versions-nav a, .versions-nav button').forEach((item) => {
+        item.addEventListener('mouseenter', () => animateTextShuffle(item))
+        item.addEventListener('mouseleave', () => resetTextShuffle(item))
+      })
+
+      document.getElementById('scrollArea').addEventListener('scroll', () => liquid?.hide())
+      document.addEventListener('mouseleave', () => liquid?.hide())
+    </script>
   <script type="module" src="/src/balloon-icon.js"></script>
   <script type="module" src="/src/portfolio-chrome.js"></script>
 </body>

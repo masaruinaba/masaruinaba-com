@@ -229,14 +229,6 @@ export const portfolioVersions = [
   {
     year: '2026',
     type: 'Version',
-    title: 'Liquid Hover',
-    file: 'versions/liquid-hover/',
-    displayFile: 'portfolio/versions/liquid-hover',
-    color: '#111111',
-  },
-  {
-    year: '2026',
-    type: 'Version',
     title: 'Drag Reveal',
     file: 'versions/drag-reveal/',
     displayFile: 'portfolio/versions/drag-reveal',
