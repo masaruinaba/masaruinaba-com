@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "build": "npm --prefix special/balloon-portfolio run build && tsc && vite build",
+    "preview": "vite preview",
+    "prebuild": "npm ci --prefix special/balloon-portfolio --no-audit --no-fund"
   },
   "devDependencies": {
     "typescript": "~5.9.3",

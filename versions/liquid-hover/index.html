@@ -321,6 +321,7 @@
         font-family: "IBM Plex Mono", monospace;
       }
 
+      .versions-nav .is-current,
       .versions-nav a,
       .versions-nav button {
         font-family: inherit;
@@ -412,11 +413,27 @@
         .footer-links,
         .versions-nav { display: none; }
       }
+          .versions-nav .is-current { cursor: default; color: #222222; text-decoration: underline; text-underline-offset: 3px; }
     </style>
-  </head>
+      <link id="character-favicon" rel="icon" type="image/png" sizes="64x64" href="/special/balloon-portfolio/favicons/blue.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/special/balloon-portfolio/favicons/apple-touch-icon.png">
+    <link rel="canonical" href="https://www.masaruinaba.com/versions/liquid-hover/">
+    <meta property="og:url" content="https://www.masaruinaba.com/versions/liquid-hover/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Masaru Inaba">
+    <meta property="og:description" content="Masaru Inaba — Web Designer. Selected works and playful experiments.">
+    <meta property="og:image" content="https://www.masaruinaba.com/ogp.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://www.masaruinaba.com/ogp.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1920">
+    <meta property="og:image:height" content="1008">
+    <meta name="twitter:site" content="@im_inaba">
+</head>
   <body>
     <div id="gl"></div>
     <div class="cursor-preview" id="cursorPreview">
+      <img id="cursorPreviewImg" alt="" style="width:100%;height:100%;object-fit:cover;display:none">
       <iframe id="cursorPreviewFrame" src="" scrolling="no" tabindex="-1" sandbox="allow-same-origin allow-scripts"></iframe>
     </div>
     <div class="container">
@@ -455,78 +472,27 @@
           </table>
         </section>
 
-        <section class="portfolio-section">
-          <h2 class="section-label">Lab.</h2>
-          <table class="works-table">
-            <thead>
-              <tr>
-                <th></th>
-                <th>Year</th>
-                <th>Type</th>
-                <th>Title</th>
-                <th>File</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="studioBody"></tbody>
-          </table>
-        </section>
       </div>
     </div>
 
     <nav class="versions-nav" aria-label="Portfolio versions">
       <div class="version-list">
-        <a href="/">Top</a>
-        <a class="is-current" href="/versions/liquid-hover/">v01</a>
-        <a href="/versions/drag-reveal/">v02</a>
+        <a href="/">v00</a>
+        <a href="/special/balloon-portfolio/">v01</a>
+        <span class="is-current" aria-current="page">v02</span>
+        <a href="/versions/drag-reveal/">v03</a>
+        <a href="/versions/v3/">v04</a>
       </div>
       <button type="button">versions</button>
     </nav>
-    <a class="app-icon-link" href="https://kids-math-iwua.vercel.app/index.html" target="_blank" rel="noopener">
-      <svg width="24" height="24" viewBox="0 0 281 281" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <g clip-path="url(#appIconClip0)">
-          <rect width="280.549" height="280.549" rx="64.494" fill="white"/>
-          <g opacity="0.5">
-            <g clip-path="url(#appIconClip1)">
-              <rect width="280.549" height="280.549" fill="#F8F9FA"/>
-              <path d="M0 193.5H281.856" stroke="#007AFF" stroke-width="0.27525"/>
-              <path d="M0 140.928H281.856" stroke="#007AFF" stroke-width="0.27525"/>
-              <path d="M0 88.355H281.856" stroke="#007AFF" stroke-width="0.27525"/>
-              <path d="M193.5 281.856V0" stroke="#007AFF" stroke-width="0.27525"/>
-              <path d="M140.93 281.856V0" stroke="#007AFF" stroke-width="0.27525"/>
-              <path d="M88.3555 281.856V0" stroke="#007AFF" stroke-width="0.27525"/>
-              <path d="M281.856 281.856L0 0" stroke="#007AFF" stroke-width="0.27525"/>
-              <path d="M0 281.856L281.856 0" stroke="#007AFF" stroke-width="0.27525"/>
-              <rect x="18.3555" y="18.3564" width="243.836" height="243.836" stroke="#007AFF" stroke-width="0.27525"/>
-              <circle cx="139.998" cy="140" r="52.5727" stroke="#007AFF" stroke-width="0.27525"/>
-              <circle cx="139.999" cy="140" r="74.0422" stroke="#007AFF" stroke-width="0.27525"/>
-              <circle cx="140.928" cy="140.928" r="122.486" stroke="#007AFF" stroke-width="0.27525"/>
-            </g>
-            <rect x="0.137625" y="0.137625" width="280.274" height="280.274" stroke="#FF3B30" stroke-width="0.27525"/>
-          </g>
-          <rect width="280.549" height="287.197" transform="translate(0 -3.32422)" fill="#FF6B00"/>
-          <g clip-path="url(#appIconClip2)">
-            <path d="M36.7344 141.174C36.7344 169.705 59.8632 192.834 88.3941 192.834C116.925 192.834 140.054 169.705 140.054 141.174C140.054 112.643 116.925 89.5145 88.3941 89.5145C59.8632 89.5145 36.7344 112.643 36.7344 141.174Z" fill="#FFF9EE"/>
-            <path id="appIconPupilL" d="M82.3984 165.944C82.3984 176.573 91.0151 185.19 101.644 185.19C112.273 185.19 120.89 176.573 120.89 165.944C120.89 155.315 112.273 146.698 101.644 146.698C91.0151 146.698 82.3984 155.315 82.3984 165.944Z" fill="black"/>
-            <path d="M141.828 140.921C141.828 112.39 164.957 89.2612 193.488 89.2612C222.019 89.2612 245.148 112.39 245.148 140.921C245.148 169.452 222.019 192.581 193.488 192.581C164.957 192.581 141.828 169.452 141.828 140.921Z" fill="#FFF9EE"/>
-            <path id="appIconPupilR" d="M202.391 129.69C202.391 119.061 211.007 110.444 221.636 110.444C232.266 110.444 240.882 119.061 240.882 129.69C240.882 140.319 232.266 148.936 221.636 148.936C211.007 148.936 202.391 140.319 202.391 129.69Z" fill="black"/>
-          </g>
-        </g>
-        <defs>
-          <clipPath id="appIconClip0"><rect width="280.549" height="280.549" rx="64.494" fill="white"/></clipPath>
-          <clipPath id="appIconClip1"><rect width="280.549" height="280.549" fill="white"/></clipPath>
-          <clipPath id="appIconClip2"><rect width="213.73" height="218.794" fill="white" transform="translate(34.0625 31.5459)"/></clipPath>
-        </defs>
-      </svg>
-    </a>
+    <a class="app-icon-link" href="/special/balloon-portfolio/" aria-label="Balloon Portfolio"></a>
     <nav class="footer-links">
-      <a href="https://x.com/im_inaba" target="_blank" rel="noopener">@im_inaba</a>
-      <a href="https://x.com/masaruinaba" target="_blank" rel="noopener">@masaruinaba</a>
+      <a href="https://x.com/im_inaba" target="_blank" rel="noopener">X - @masruinaba</a>
     </nav>
 
     <script type="module">
       import { LiquidHover } from '/src/prototype/liquid-hover.ts'
-      import { clientWorks, works, studioWorks } from '/src/data/portfolio.ts'
+      import { clientWorks, works } from '/src/data/portfolio.ts'
 
       let liquid = null
 
@@ -640,6 +606,7 @@
 
       const cursorPreview = document.getElementById('cursorPreview')
       const cursorPreviewFrame = document.getElementById('cursorPreviewFrame')
+      const cursorPreviewImg = document.getElementById('cursorPreviewImg')
       let previewVisible = false
 
       document.addEventListener('mousemove', (event) => {
@@ -647,8 +614,18 @@
         cursorPreview.style.top = `${event.clientY - 60}px`
       })
 
-      function showCursorPreview(src) {
+      function showCursorPreview(src, thumbnail, title) {
         previewVisible = true
+        cursorPreviewImg.style.display = thumbnail ? 'block' : 'none'
+        cursorPreviewFrame.style.display = thumbnail ? 'none' : 'block'
+        if (thumbnail) {
+          cursorPreviewFrame.removeAttribute('src')
+          delete cursorPreviewFrame.dataset.src
+          cursorPreviewImg.src = thumbnail
+          cursorPreviewImg.alt = title
+          cursorPreview.style.opacity = '1'
+          return
+        }
         if (cursorPreviewFrame.dataset.src !== src) {
           cursorPreviewFrame.src = src
           cursorPreviewFrame.dataset.src = src
@@ -667,10 +644,49 @@
         }, 240)
       }
 
+      const compactLayout = () => window.innerWidth <= 768 || !matchMedia('(hover: hover)').matches
+      const mobilePreview = document.createElement('tr')
+      mobilePreview.className = 'mobile-preview-row'
+      mobilePreview.hidden = true
+      const mobileCell = document.createElement('td')
+      mobileCell.colSpan = 6
+      const mobileSurface = document.createElement('div')
+      mobileSurface.className = 'mobile-liquid-surface'
+      const mobileImage = document.createElement('img')
+      mobileSurface.append(mobileImage)
+      const mobileLink = document.createElement('a')
+      mobileLink.className = 'mobile-preview-link'
+      mobileLink.target = '_blank'
+      mobileLink.rel = 'noopener'
+      mobileCell.append(mobileSurface, mobileLink)
+      mobilePreview.append(mobileCell)
+      let mobileLiquid = null
+      let activeMobileRow = null
+      function openMobilePreview(row, work, href) {
+        const close = activeMobileRow === row && !mobilePreview.hidden
+        if (activeMobileRow) activeMobileRow.setAttribute('aria-expanded', 'false')
+        mobilePreview.hidden = close
+        if (close) { mobileLiquid?.hide(); activeMobileRow = null; return }
+        activeMobileRow = row
+        row.setAttribute('aria-expanded', 'true')
+        row.after(mobilePreview)
+        mobileImage.src = work.image || work.thumbnail
+        mobileImage.alt = work.title
+        mobileLink.href = href
+        mobileLink.textContent = `${work.title} ↗`
+        if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          try {
+            mobileLiquid ||= new LiquidHover(mobileSurface, true)
+            mobileLiquid.show(mobileImage.src)
+          } catch (error) { console.warn('Mobile liquid preview unavailable', error) }
+        }
+      }
+
       function createRow(work) {
         const row = document.createElement('tr')
         const href = itemHref(work)
-        const hasImage = Boolean(work.image)
+        const previewImage = work.image || work.thumbnail
+        const hasImage = Boolean(previewImage)
         const adjustedColor = adjustColorForHover(work.color)
         const textColor = isLightColor(adjustedColor) ? '#222222' : '#ffffff'
         const secondaryTextColor = isLightColor(adjustedColor) ? '#666666' : 'rgba(255, 255, 255, 0.8)'
@@ -742,12 +758,13 @@
         }
 
         row.addEventListener('mouseenter', () => {
+          if (compactLayout()) return
           if (!hasImage) {
             row.classList.add('is-active')
             animateTextShuffle(title)
             updateRowBgPosition()
             setNormalHover(true)
-            if (window.matchMedia('(hover: hover)').matches) showCursorPreview(href)
+            if (window.matchMedia('(hover: hover)').matches) showCursorPreview(href, work.thumbnail, work.title)
             return
           }
 
@@ -762,7 +779,7 @@
           })
           if (hasImage) {
             const updateMask = () => liquid?.setMask(row.getBoundingClientRect())
-            liquid?.show(work.image, row.getBoundingClientRect())
+            liquid?.show(previewImage, row.getBoundingClientRect())
             requestAnimationFrame(updateMask)
             window.setTimeout(updateMask, 120)
             window.setTimeout(updateMask, 320)
@@ -787,6 +804,7 @@
           if (hasImage) liquid?.hide()
         })
         row.addEventListener('click', () => {
+          if (compactLayout()) { openMobilePreview(row, work, href); return }
           if (href.startsWith('http')) {
             window.open(href, '_blank')
           } else {
@@ -794,6 +812,8 @@
           }
         })
 
+        row.tabIndex = 0
+        row.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); row.click() } })
         return row
       }
 
@@ -804,7 +824,6 @@
 
       renderRows('clientWorksBody', clientWorks)
       renderRows('worksBody', works)
-      renderRows('studioBody', studioWorks)
 
       if (window.matchMedia('(hover: hover)').matches) {
         try {
@@ -820,36 +839,10 @@
         item.addEventListener('mouseleave', () => resetTextShuffle(item))
       })
 
-      const svgSize = 281
-      const leftEye = { cx: 88.394, cy: 141.174, px: 101.644, py: 165.944 }
-      const rightEye = { cx: 193.488, cy: 140.921, px: 221.636, py: 129.69 }
-      const maxMove = 52.57 - 19.25
-
-      function movePupil(el, eye, svgX, svgY) {
-        if (!el) return
-        const dx = svgX - eye.cx
-        const dy = svgY - eye.cy
-        const dist = Math.sqrt(dx * dx + dy * dy) || 0.001
-        const factor = Math.min(maxMove, dist) / dist
-        const tx = (eye.cx + dx * factor) - eye.px
-        const ty = (eye.cy + dy * factor) - eye.py
-        el.setAttribute('transform', `translate(${tx}, ${ty})`)
-      }
-
-      document.addEventListener('mousemove', (event) => {
-        const link = document.querySelector('body > .app-icon-link')
-        const pupilL = document.getElementById('appIconPupilL')
-        const pupilR = document.getElementById('appIconPupilR')
-        if (!link || !pupilL || !pupilR) return
-        const rect = link.getBoundingClientRect()
-        const svgX = ((event.clientX - rect.left) / rect.width) * svgSize
-        const svgY = ((event.clientY - rect.top) / rect.height) * svgSize
-        movePupil(pupilL, leftEye, svgX, svgY)
-        movePupil(pupilR, rightEye, svgX, svgY)
-      })
-
       document.getElementById('scrollArea').addEventListener('scroll', () => liquid?.hide())
       document.addEventListener('mouseleave', () => liquid?.hide())
     </script>
-  </body>
+  <script type="module" src="/src/balloon-icon.js"></script>
+  <script type="module" src="/src/portfolio-chrome.js"></script>
+</body>
 </html>

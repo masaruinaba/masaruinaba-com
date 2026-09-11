@@ -153,7 +153,10 @@ export class LiquidHover {
 
   private container: HTMLElement
 
-  constructor(container: HTMLElement) {
+  private contained: boolean
+
+  constructor(container: HTMLElement, contained = false) {
+    this.contained = contained
     this.container = container
     this.init()
   }
@@ -192,14 +195,19 @@ export class LiquidHover {
 
     this.resize()
     window.addEventListener('resize', this.resize)
-    window.addEventListener('mousemove', this.onMove)
+    if (this.contained) {
+      this.container.addEventListener('pointermove', this.onMove)
+      this.container.addEventListener('pointerdown', this.onMove)
+      new ResizeObserver(this.resize).observe(this.container)
+      this.uniforms.uMaskSize.value = [2, 2]
+    } else window.addEventListener('mousemove', this.onMove)
 
     requestAnimationFrame(this.loop)
   }
 
   private resize = () => {
-    const w = window.innerWidth
-    const h = window.innerHeight
+    const w = this.contained ? Math.max(1, this.container.clientWidth) : window.innerWidth
+    const h = this.contained ? Math.max(1, this.container.clientHeight) : window.innerHeight
     this.renderer.setSize(w, h)
     this.uniforms.uResolution.value = [w, h]
     this.flowmap.aspect = w / h
@@ -215,7 +223,9 @@ export class LiquidHover {
     }
     this.velocity.set((e.clientX - this.lastMouse.x) / dt, (e.clientY - this.lastMouse.y) / dt)
     this.lastMouse.set(e.clientX, e.clientY)
-    this.mouse.set(e.clientX / window.innerWidth, 1 - e.clientY / window.innerHeight)
+    const rect = this.container.getBoundingClientRect()
+    this.mouse.set(this.contained ? (e.clientX - rect.left) / rect.width : e.clientX / window.innerWidth,
+      this.contained ? 1 - (e.clientY - rect.top) / rect.height : 1 - e.clientY / window.innerHeight)
   }
 
   private load(src: string): Promise<TexEntry> {
@@ -241,6 +251,11 @@ export class LiquidHover {
 
   async show(src: string, rect?: DOMRect) {
     this.targetReveal = 1
+    if (this.contained) {
+      this.resize()
+      this.mouse.set(.5, .5)
+      this.velocity.set(.45, .15)
+    }
     if (rect) this.setMask(rect)
 
     if (src === this.currentSrc) return
@@ -275,6 +290,7 @@ export class LiquidHover {
 
   private loop = (t: number) => {
     requestAnimationFrame(this.loop)
+    if (document.hidden || (this.contained && (!this.container.getClientRects().length || this.container.getBoundingClientRect().bottom < 0))) { this.lastFrameT = t; return }
     this.uniforms.uTime.value = t * 0.001
 
     const dt = Math.max(0, (t - this.lastFrameT) / 1000)

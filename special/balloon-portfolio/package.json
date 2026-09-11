@@ -4,7 +4,9 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 4190 --strictPort",
     "build": "vite build && node sync-portfolio.mjs",
-    "test": "node --test *.test.mjs"
+    "test": "node --test *.test.mjs",
+    "prebuild": "node prepare-portfolio.mjs",
+    "predev": "node prepare-portfolio.mjs"
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "^0.10.32",

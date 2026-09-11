@@ -248,6 +248,7 @@
         pointer-events: auto;
       }
 
+      .versions-nav .is-current,
       .versions-nav a,
       .versions-nav button,
       .reload-link,
@@ -266,7 +267,7 @@
       }
 
       .versions-nav a:hover,
-      .versions-nav a.is-current,
+      .versions-nav .is-current,
       .versions-nav button:hover,
       .reload-link:hover,
       .footer-links a:hover {
@@ -309,8 +310,23 @@
           display: none;
         }
       }
+          .versions-nav .is-current { cursor: default; color: #222222; text-decoration: underline; text-underline-offset: 3px; }
     </style>
-  </head>
+      <link id="character-favicon" rel="icon" type="image/png" sizes="64x64" href="/special/balloon-portfolio/favicons/blue.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/special/balloon-portfolio/favicons/apple-touch-icon.png">
+    <link rel="canonical" href="https://www.masaruinaba.com/versions/drag-reveal/">
+    <meta property="og:url" content="https://www.masaruinaba.com/versions/drag-reveal/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Masaru Inaba">
+    <meta property="og:description" content="Masaru Inaba — Web Designer. Selected works and playful experiments.">
+    <meta property="og:image" content="https://www.masaruinaba.com/ogp.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://www.masaruinaba.com/ogp.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1920">
+    <meta property="og:image:height" content="1008">
+    <meta name="twitter:site" content="@im_inaba">
+</head>
   <body>
     <main class="field" id="field" aria-label="Works drag field"></main>
 
@@ -318,63 +334,27 @@
 
     <nav class="versions-nav" aria-label="Portfolio versions">
       <div class="version-list">
-        <a href="/">Top</a>
-        <a href="/versions/liquid-hover/">v01</a>
-        <a class="is-current" href="/versions/drag-reveal/">v02</a>
+        <a href="/">v00</a>
+        <a href="/special/balloon-portfolio/">v01</a>
+        <a href="/versions/liquid-hover/">v02</a>
+        <span class="is-current" aria-current="page">v03</span>
+        <a href="/versions/v3/">v04</a>
       </div>
       <button type="button">versions</button>
     </nav>
 
-    <a class="app-icon-link" href="https://kids-math-iwua.vercel.app/index.html" target="_blank" rel="noopener">
-      <svg width="24" height="24" viewBox="0 0 281 281" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <g clip-path="url(#appIconClip0)">
-          <rect width="280.549" height="280.549" rx="64.494" fill="white"/>
-          <g opacity="0.5">
-            <g clip-path="url(#appIconClip1)">
-              <rect width="280.549" height="280.549" fill="#F8F9FA"/>
-              <path d="M0 193.5H281.856" stroke="#007AFF" stroke-width="0.27525"/>
-              <path d="M0 140.928H281.856" stroke="#007AFF" stroke-width="0.27525"/>
-              <path d="M0 88.355H281.856" stroke="#007AFF" stroke-width="0.27525"/>
-              <path d="M193.5 281.856V0" stroke="#007AFF" stroke-width="0.27525"/>
-              <path d="M140.93 281.856V0" stroke="#007AFF" stroke-width="0.27525"/>
-              <path d="M88.3555 281.856V0" stroke="#007AFF" stroke-width="0.27525"/>
-              <path d="M281.856 281.856L0 0" stroke="#007AFF" stroke-width="0.27525"/>
-              <path d="M0 281.856L281.856 0" stroke="#007AFF" stroke-width="0.27525"/>
-              <rect x="18.3555" y="18.3564" width="243.836" height="243.836" stroke="#007AFF" stroke-width="0.27525"/>
-              <circle cx="139.998" cy="140" r="52.5727" stroke="#007AFF" stroke-width="0.27525"/>
-              <circle cx="139.999" cy="140" r="74.0422" stroke="#007AFF" stroke-width="0.27525"/>
-              <circle cx="140.928" cy="140.928" r="122.486" stroke="#007AFF" stroke-width="0.27525"/>
-            </g>
-            <rect x="0.137625" y="0.137625" width="280.274" height="280.274" stroke="#FF3B30" stroke-width="0.27525"/>
-          </g>
-          <rect width="280.549" height="287.197" transform="translate(0 -3.32422)" fill="#FF6B00"/>
-          <g clip-path="url(#appIconClip2)">
-            <path d="M36.7344 141.174C36.7344 169.705 59.8632 192.834 88.3941 192.834C116.925 192.834 140.054 169.705 140.054 141.174C140.054 112.643 116.925 89.5145 88.3941 89.5145C59.8632 89.5145 36.7344 112.643 36.7344 141.174Z" fill="#FFF9EE"/>
-            <path id="appIconPupilL" d="M82.3984 165.944C82.3984 176.573 91.0151 185.19 101.644 185.19C112.273 185.19 120.89 176.573 120.89 165.944C120.89 155.315 112.273 146.698 101.644 146.698C91.0151 146.698 82.3984 155.315 82.3984 165.944Z" fill="black"/>
-            <path d="M141.828 140.921C141.828 112.39 164.957 89.2612 193.488 89.2612C222.019 89.2612 245.148 112.39 245.148 140.921C245.148 169.452 222.019 192.581 193.488 192.581C164.957 192.581 141.828 169.452 141.828 140.921Z" fill="#FFF9EE"/>
-            <path id="appIconPupilR" d="M202.391 129.69C202.391 119.061 211.007 110.444 221.636 110.444C232.266 110.444 240.882 119.061 240.882 129.69C240.882 140.319 232.266 148.936 221.636 148.936C211.007 148.936 202.391 140.319 202.391 129.69Z" fill="black"/>
-          </g>
-        </g>
-        <defs>
-          <clipPath id="appIconClip0"><rect width="280.549" height="280.549" rx="64.494" fill="white"/></clipPath>
-          <clipPath id="appIconClip1"><rect width="280.549" height="280.549" fill="white"/></clipPath>
-          <clipPath id="appIconClip2"><rect width="213.73" height="218.794" fill="white" transform="translate(34.0625 31.5459)"/></clipPath>
-        </defs>
-      </svg>
-    </a>
+    <a class="app-icon-link" href="/special/balloon-portfolio/" aria-label="Balloon Portfolio"></a>
 
     <nav class="footer-links">
-      <a href="https://x.com/im_inaba" target="_blank" rel="noopener">@im_inaba</a>
-      <a href="https://x.com/masaruinaba" target="_blank" rel="noopener">@masaruinaba</a>
+      <a href="https://x.com/im_inaba" target="_blank" rel="noopener">X - @masruinaba</a>
     </nav>
 
     <script type="module">
-      import { clientWorks, works, studioWorks } from '/src/data/portfolio.ts'
+      import { clientWorks, works } from '/src/data/portfolio.ts'
 
       const items = [
         ...clientWorks.map((work) => ({ ...work, group: 'Works' })),
         ...works.map((work) => ({ ...work, group: 'Playground' })),
-        ...studioWorks.map((work) => ({ ...work, group: 'Lab.' })),
       ]
 
       const field = document.getElementById('field')
@@ -792,6 +772,18 @@
         })
 
         element.addEventListener('click', (event) => {
+          if (window.innerWidth <= 768 && !hasDragged && !element.classList.contains('is-touch-open')) {
+            event.preventDefault()
+            const width = Math.min(240, window.innerWidth - 48)
+            element.style.setProperty('--x', `${Math.max(24, Math.min(parseFloat(element.style.getPropertyValue('--x')), window.innerWidth - width - 24))}px`)
+            element.style.setProperty('--angle', '0deg')
+            element.style.setProperty('--target-length', `${width}px`)
+            element.style.setProperty('--length', `${width}px`)
+            element.style.setProperty('--progress', '1')
+            chars.forEach(char => char.style.setProperty('--char-opacity', '1'))
+            element.classList.add('is-touch-open', 'is-spent', 'is-complete')
+            return
+          }
           if (suppressNextClick || !element.classList.contains('is-spent')) {
             event.preventDefault()
           }
@@ -818,5 +810,7 @@
         })
       })
     </script>
-  </body>
+  <script type="module" src="/src/balloon-icon.js"></script>
+  <script type="module" src="/src/portfolio-chrome.js"></script>
+</body>
 </html>

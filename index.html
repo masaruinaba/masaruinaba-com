@@ -6,13 +6,13 @@
     <title>Masaru Inaba</title>
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Masaru Inaba" />
-    <meta property="og:description" content="Masaru Inaba — Web Designer. Works, playground experiments, and lab projects." />
-    <meta property="og:image" content="/ogp.png" />
+    <meta property="og:description" content="Masaru Inaba — Web Designer. Selected works and playful experiments." />
+    <meta property="og:image" content="https://www.masaruinaba.com/ogp.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Masaru Inaba" />
-    <meta name="twitter:description" content="Masaru Inaba — Web Designer. Works, playground experiments, and lab projects." />
-    <meta name="twitter:image" content="/ogp.png" />
-    <meta name="description" content="Masaru Inaba — Web Designer. Works, playground experiments, and lab projects." />
+    <meta name="twitter:description" content="Masaru Inaba — Web Designer. Selected works and playful experiments." />
+    <meta name="twitter:image" content="https://www.masaruinaba.com/ogp.png" />
+    <meta name="description" content="Masaru Inaba — Web Designer. Selected works and playful experiments." />
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -457,6 +457,7 @@
         font-family: "IBM Plex Mono", monospace;
       }
 
+      .versions-nav .is-current,
       .versions-nav a,
       .versions-nav button {
         font-family: inherit;
@@ -499,8 +500,17 @@
           display: none !important;
         }
       }
+          .versions-nav .is-current { cursor: default; color: #222222; text-decoration: underline; text-underline-offset: 3px; }
     </style>
-  </head>
+      <link id="character-favicon" rel="icon" type="image/png" sizes="64x64" href="/special/balloon-portfolio/favicons/blue.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/special/balloon-portfolio/favicons/apple-touch-icon.png">
+    <link rel="canonical" href="https://www.masaruinaba.com/">
+    <meta property="og:url" content="https://www.masaruinaba.com/">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1920">
+    <meta property="og:image:height" content="1008">
+    <meta name="twitter:site" content="@im_inaba">
+</head>
   <body>
     <!-- Cursor preview -->
     <div class="cursor-preview" id="cursorPreview">
@@ -549,48 +559,12 @@
         </table>
         </div>
 
-        <div class="studio-section">
-          <h2 class="section-label">Lab.</h2>
-          <table class="works-table studio-table">
-            <thead>
-              <tr>
-                <th></th>
-                <th>Year</th>
-                <th>Type</th>
-                <th>Title</th>
-                <th>File</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="studioTableBody">
-              <!-- Studio works are dynamically added via JavaScript -->
-            </tbody>
-          </table>
-        </div>
 
         <!-- モバイルフッター -->
         <div class="mobile-footer">
-          <a class="app-icon-link" href="https://kids-math-iwua.vercel.app/index.html" target="_blank" rel="noopener">
-            <svg width="24" height="24" viewBox="0 0 281 281" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <g clip-path="url(#mfIconClip0)">
-                <rect width="280.549" height="280.549" rx="64.494" fill="white"/>
-                <rect width="280.549" height="287.197" transform="translate(0 -3.32422)" fill="#FF6B00"/>
-                <g clip-path="url(#mfIconClip2)">
-                  <path d="M36.7344 141.174C36.7344 169.705 59.8632 192.834 88.3941 192.834C116.925 192.834 140.054 169.705 140.054 141.174C140.054 112.643 116.925 89.5145 88.3941 89.5145C59.8632 89.5145 36.7344 112.643 36.7344 141.174Z" fill="#FFF9EE"/>
-                  <path id="mfPupilL" d="M82.3984 165.944C82.3984 176.573 91.0151 185.19 101.644 185.19C112.273 185.19 120.89 176.573 120.89 165.944C120.89 155.315 112.273 146.698 101.644 146.698C91.0151 146.698 82.3984 155.315 82.3984 165.944Z" fill="black"/>
-                  <path d="M141.828 140.921C141.828 112.39 164.957 89.2612 193.488 89.2612C222.019 89.2612 245.148 112.39 245.148 140.921C245.148 169.452 222.019 192.581 193.488 192.581C164.957 192.581 141.828 169.452 141.828 140.921Z" fill="#FFF9EE"/>
-                  <path id="mfPupilR" d="M202.391 129.69C202.391 119.061 211.007 110.444 221.636 110.444C232.266 110.444 240.882 119.061 240.882 129.69C240.882 140.319 232.266 148.936 221.636 148.936C211.007 148.936 202.391 140.319 202.391 129.69Z" fill="black"/>
-                </g>
-              </g>
-              <defs>
-                <clipPath id="mfIconClip0"><rect width="280.549" height="280.549" rx="64.494" fill="white"/></clipPath>
-                <clipPath id="mfIconClip2"><rect width="213.73" height="218.794" fill="white" transform="translate(34.0625 31.5459)"/></clipPath>
-              </defs>
-            </svg>
-          </a>
+          <a class="app-icon-link" href="/special/balloon-portfolio/" aria-label="Balloon Portfolio"></a>
           <nav class="mobile-footer-links">
-            <a href="https://x.com/im_inaba" target="_blank" rel="noopener">@im_inaba</a>
-            <a href="https://x.com/masaruinaba" target="_blank" rel="noopener">@masaruinaba</a>
+            <a href="https://x.com/im_inaba" target="_blank" rel="noopener">X - @masruinaba</a>
           </nav>
         </div>
       </div>
@@ -760,6 +734,31 @@
        * Client works list
        */
       const clientWorks = [
+  {
+    year: '2026',
+    type: 'Design',
+    title: 'Studio.Drop',
+    url: 'https://drop.studio.design/',
+    image: '/works/studio-drop.png',
+    color: '#a5deda',
+  },
+  {
+    year: '2026',
+    type: 'Design',
+    title: 'Studio.Design',
+    url: 'https://studio.design/ja',
+    displayFile: 'studio.design',
+    image: '/works/studio-design-2026.png',
+    color: '#f0f0f0',
+  },
+        {
+          year: '2025',
+          type: 'Design',
+          title: '互色-互縁 goshiki-goen',
+          url: 'https://goshiki-goen.jp/',
+          image: '/works/goshiki-goen.webp',
+          color: '#1a1a18'
+        },
         {
           year: '2025',
           type: 'Design',
@@ -773,16 +772,9 @@
           type: 'Design',
           title: 'Studio',
           url: 'https://studio.design/ja',
+    displayFile: 'studio.design',
           image: '/works/studio.webp',
           color: '#f0f0f0'
-        },
-        {
-          year: '2025',
-          type: 'Design',
-          title: '互色-互縁 goshiki-goen',
-          url: 'https://goshiki-goen.jp/',
-          image: '/works/goshiki-goen.webp',
-          color: '#1a1a18'
         },
         {
           year: '2025',
@@ -868,6 +860,8 @@
           }
         } else {
           cursorPreviewFrame.style.display = 'none';
+          cursorPreviewFrame.removeAttribute('src');
+          delete cursorPreviewFrame.dataset.src;
           cursorPreviewImg.style.display = 'block';
           cursorPreviewImg.src = src;
         }
@@ -905,7 +899,7 @@
           const displayWork = {
             ...work,
             file: work.url,
-            displayFile: work.url.replace('https://', '').replace(/\/$/, '')
+            displayFile: work.displayFile || work.url.replace('https://', '').replace(/\/$/, '')
           };
           const row = createWorkRow(displayWork);
           const detailRow = createDetailRow(displayWork);
@@ -927,8 +921,36 @@
       const works = [
         {
           year: '2026',
+          type: 'Visual',
+          title: 'Balloon Portfolio',
+          displayFile: 'special/balloon-portfolio',
+          file: 'https://www.masaruinaba.com/special/balloon-portfolio/',
+          thumbnail: '/thumbnails/balloon-playground.png',
+          color: '#1685E5',
+        },
+        {
+          year: '2026',
+          type: 'App',
+          title: 'Origin Shapes',
+          displayFile: 'apps/origin',
+          file: 'https://tiny-apps-phi.vercel.app/apps/origin/',
+          thumbnail: '/thumbnails/origin.png',
+          color: '#FF5299',
+        },
+        {
+          year: '2026',
+          type: 'App',
+          title: 'Little Numbers',
+          displayFile: 'apps/little-numbers',
+          file: 'https://kids-math-iwua.vercel.app/index.html',
+          thumbnail: '/thumbnails/kids-123.png',
+          color: '#ff7900',
+        },
+        {
+          year: '2026',
           type: 'App',
           title: 'Open Table',
+          thumbnail: '/thumbnails/open-table.png',
           file: 'https://meeting-board-v1.vercel.app/',
           displayFile: 'apps/open-table',
           color: '#8672E2'
@@ -937,6 +959,7 @@
           year: '2026',
           type: 'Animation',
           title: 'Animation Notes',
+          thumbnail: '/thumbnails/animation-notes.png',
           file: 'https://fable-notes.vercel.app/',
           displayFile: 'apps/fable-notes',
           color: '#CAC2A3'
@@ -945,6 +968,7 @@
           year: '2025',
           type: 'App',
           title: 'Creative Weather',
+          thumbnail: '/thumbnails/creative-weather.png',
           file: 'apps/creative-weather/',
           color: '#57295F'
         },
@@ -952,6 +976,7 @@
           year: '2025',
           type: 'App',
           title: 'Layered Clock',
+          thumbnail: '/thumbnails/layered-clock.png',
           file: 'apps/layered-clock/',
           color: '#CAFF00'
         },
@@ -959,6 +984,7 @@
           year: '2025',
           type: 'Animation',
           title: 'A Letter of Letters',
+          thumbnail: '/thumbnails/letter-morphing.png',
           file: 'playground/letter-morphing/',
           color: '#0b0b0c'
         },
@@ -966,6 +992,7 @@
           year: '2025',
           type: 'Animation',
           title: 'Mosaic Reveal Animation',
+          thumbnail: '/thumbnails/mosaic-reveal.png',
           file: 'playground/mosaic-reveal/',
           color: '#F7F7F7'
         },
@@ -973,6 +1000,7 @@
           year: '2025',
           type: 'Visual',
           title: 'Font Patterns',
+          thumbnail: '/thumbnails/font-patterns.png',
           file: 'playground/font-patterns/',
           color: '#0b0b0c'
         },
@@ -980,6 +1008,7 @@
           year: '2025',
           type: 'Animation',
           title: 'Hover Text Path',
+          thumbnail: '/thumbnails/hover-text-path.png',
           file: 'playground/hover-text-path/',
           color: '#20453B'
         },
@@ -987,6 +1016,7 @@
           year: '2025',
           type: 'Animation',
           title: 'Interactive Eye-Following Card',
+          thumbnail: '/thumbnails/eye-following.png',
           file: 'playground/eye-following/',
           color: '#0062AD'
         },
@@ -994,6 +1024,7 @@
           year: '2025',
           type: 'Animation',
           title: 'Scroll-driven Pinned Text Sequence',
+          thumbnail: '/thumbnails/scroll-text.png',
           file: 'playground/scroll-text/',
           color: '#FF4800'
         },
@@ -1001,32 +1032,12 @@
           year: '2025',
           type: 'App',
           title: 'Easel Pro',
+          thumbnail: '/thumbnails/easel-pro.png',
           file: 'apps/design-board/',
           color: '#fcfcfc'
         }
       ];
 
-      /**
-       * Studio works list (試作品)
-       */
-      const studioWorks = [
-        {
-          year: '2025',
-          type: 'Visual',
-          title: 'Typography Explorer',
-          file: 'apps/typography/',
-          color: '#ffffff',
-          thumbnail: null
-        },
-        {
-          year: '2025',
-          type: 'Experiment',
-          title: '3D Explore',
-          file: 'playground/3d-explore/',
-          color: '#ffffff',
-          thumbnail: null
-        }
-      ];
 
       /**
        * Create accordion detail row (mobile only)
@@ -1045,12 +1056,12 @@
         const content = document.createElement('div');
         content.className = 'work-detail-content';
 
-        // Preview: client works のみ表示
-        if (work.image) {
+        // Static preview for client works and Playground
+        if (work.image || work.thumbnail) {
           const preview = document.createElement('div');
           preview.className = 'work-detail-preview';
           const img = document.createElement('img');
-          img.src = work.image;
+          img.src = work.image || work.thumbnail;
           img.alt = work.title;
           preview.appendChild(img);
           content.appendChild(preview);
@@ -1121,35 +1132,16 @@
         thumbnailCell.style.position = 'relative';
         
         const thumbnail = document.createElement('img');
-        thumbnail.src = work.thumbnail || `thumbnails/${work.file.replace('.html', '.png')}`;
         thumbnail.alt = work.title;
         thumbnail.className = 'thumbnail';
-        
-        thumbnail.onerror = () => {
-          // Fallback to color-based thumbnail using adjusted hover color
-          const canvas = document.createElement('canvas');
-          canvas.width = 8;
-          canvas.height = 8;
-          const ctx = canvas.getContext('2d');
-          
-          // Use adjusted hover color (same as hover background)
-          ctx.fillStyle = adjustedColor;
-          ctx.fillRect(0, 0, 8, 8);
-          
-          thumbnail.src = canvas.toDataURL();
-        };
-        
-        // Set thumbnail color immediately if no image
-        if (!work.thumbnail) {
-          const canvas = document.createElement('canvas');
-          canvas.width = 8;
-          canvas.height = 8;
-          const ctx = canvas.getContext('2d');
-          ctx.fillStyle = adjustedColor;
-          ctx.fillRect(0, 0, 8, 8);
-          thumbnail.src = canvas.toDataURL();
-        }
-        
+        const dotCanvas = document.createElement('canvas');
+        dotCanvas.width = 8;
+        dotCanvas.height = 8;
+        const dotContext = dotCanvas.getContext('2d');
+        dotContext.fillStyle = adjustedColor;
+        dotContext.fillRect(0, 0, 8, 8);
+        thumbnail.src = dotCanvas.toDataURL();
+
         // Place rowBg in first cell and make it cover entire row
         thumbnailCell.appendChild(rowBg);
         thumbnailCell.appendChild(thumbnail);
@@ -1386,28 +1378,7 @@
           row._detailRow = detailRow;
 
           if (window.matchMedia('(hover: hover)').matches) {
-            row.addEventListener('mouseenter', () => showCursorPreview(work.file, 'iframe'));
-            row.addEventListener('mouseleave', hideCursorPreview);
-          }
-
-          tbody.appendChild(row);
-          tbody.appendChild(detailRow);
-        });
-      }
-
-      /**
-       * Render Studio works list
-       */
-      function renderStudioWorks() {
-        const tbody = document.getElementById('studioTableBody');
-
-        studioWorks.forEach(work => {
-          const row = createWorkRow(work);
-          const detailRow = createDetailRow(work);
-          row._detailRow = detailRow;
-
-          if (window.matchMedia('(hover: hover)').matches) {
-            row.addEventListener('mouseenter', () => showCursorPreview(work.file, 'iframe'));
+            row.addEventListener('mouseenter', () => showCursorPreview(work.thumbnail));
             row.addEventListener('mouseleave', hideCursorPreview);
           }
 
@@ -1420,7 +1391,6 @@
       document.addEventListener('DOMContentLoaded', () => {
         renderClientWorks();
         renderWorks();
-        renderStudioWorks();
 
         document.querySelectorAll('.footer-links a, .mobile-footer-links a, .versions-nav a, .versions-nav button').forEach((link) => {
           link.dataset.originalTitle = link.textContent;
@@ -1435,88 +1405,23 @@
         document.querySelector('.table-wrapper').addEventListener('scroll', hideAllPreviews);
         document.addEventListener('mouseleave', hideAllPreviews);
 
-        // App icon eye-following
-        const SVG_SIZE = 281;
-        const leftEye  = { cx: 88.394,  cy: 141.174, px: 101.644, py: 165.944 };
-        const rightEye = { cx: 193.488, cy: 140.921, px: 221.636, py: 129.69  };
-        const maxMove  = 52.57 - 19.25;
-
-        function movePupil(el, eye, svgX, svgY) {
-          const dx = svgX - eye.cx;
-          const dy = svgY - eye.cy;
-          const dist = Math.sqrt(dx * dx + dy * dy) || 0.001;
-          const factor = Math.min(maxMove, dist) / dist;
-          const tx = (eye.cx + dx * factor) - eye.px;
-          const ty = (eye.cy + dy * factor) - eye.py;
-          gsap.to(el, { attr: { transform: `translate(${tx}, ${ty})` }, duration: 0.3, ease: 'power2.out' });
-        }
-
-        function updateEyes(clientX, clientY, link, pL, pR) {
-          if (!link || !pL || !pR) return;
-          const rect = link.getBoundingClientRect();
-          const svgX = (clientX - rect.left) / rect.width  * SVG_SIZE;
-          const svgY = (clientY - rect.top)  / rect.height * SVG_SIZE;
-          movePupil(pL, leftEye,  svgX, svgY);
-          movePupil(pR, rightEye, svgX, svgY);
-        }
-
-        // PC: mousemove → fixed icon
-        const pcLink  = document.querySelector('body > .app-icon-link');
-        const pcPupilL = document.getElementById('appIconPupilL');
-        const pcPupilR = document.getElementById('appIconPupilR');
-        document.addEventListener('mousemove', (e) => {
-          updateEyes(e.clientX, e.clientY, pcLink, pcPupilL, pcPupilR);
-        });
-
       });
     </script>
-    <a class="app-icon-link" href="https://kids-math-iwua.vercel.app/index.html" target="_blank" rel="noopener">
-      <svg width="24" height="24" viewBox="0 0 281 281" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <g clip-path="url(#appIconClip0)">
-          <rect width="280.549" height="280.549" rx="64.494" fill="white"/>
-          <g opacity="0.5">
-            <g clip-path="url(#appIconClip1)">
-              <rect width="280.549" height="280.549" fill="#F8F9FA"/>
-              <path d="M0 193.5H281.856" stroke="#007AFF" stroke-width="0.27525"/>
-              <path d="M0 140.928H281.856" stroke="#007AFF" stroke-width="0.27525"/>
-              <path d="M0 88.355H281.856" stroke="#007AFF" stroke-width="0.27525"/>
-              <path d="M193.5 281.856V0" stroke="#007AFF" stroke-width="0.27525"/>
-              <path d="M140.93 281.856V0" stroke="#007AFF" stroke-width="0.27525"/>
-              <path d="M88.3555 281.856V0" stroke="#007AFF" stroke-width="0.27525"/>
-              <path d="M281.856 281.856L0 0" stroke="#007AFF" stroke-width="0.27525"/>
-              <path d="M0 281.856L281.856 0" stroke="#007AFF" stroke-width="0.27525"/>
-              <rect x="18.3555" y="18.3564" width="243.836" height="243.836" stroke="#007AFF" stroke-width="0.27525"/>
-              <circle cx="139.998" cy="140" r="52.5727" stroke="#007AFF" stroke-width="0.27525"/>
-              <circle cx="139.999" cy="140" r="74.0422" stroke="#007AFF" stroke-width="0.27525"/>
-              <circle cx="140.928" cy="140.928" r="122.486" stroke="#007AFF" stroke-width="0.27525"/>
-            </g>
-            <rect x="0.137625" y="0.137625" width="280.274" height="280.274" stroke="#FF3B30" stroke-width="0.27525"/>
-          </g>
-          <rect width="280.549" height="287.197" transform="translate(0 -3.32422)" fill="#FF6B00"/>
-          <g clip-path="url(#appIconClip2)">
-            <path d="M36.7344 141.174C36.7344 169.705 59.8632 192.834 88.3941 192.834C116.925 192.834 140.054 169.705 140.054 141.174C140.054 112.643 116.925 89.5145 88.3941 89.5145C59.8632 89.5145 36.7344 112.643 36.7344 141.174Z" fill="#FFF9EE"/>
-            <path id="appIconPupilL" d="M82.3984 165.944C82.3984 176.573 91.0151 185.19 101.644 185.19C112.273 185.19 120.89 176.573 120.89 165.944C120.89 155.315 112.273 146.698 101.644 146.698C91.0151 146.698 82.3984 155.315 82.3984 165.944Z" fill="black"/>
-            <path d="M141.828 140.921C141.828 112.39 164.957 89.2612 193.488 89.2612C222.019 89.2612 245.148 112.39 245.148 140.921C245.148 169.452 222.019 192.581 193.488 192.581C164.957 192.581 141.828 169.452 141.828 140.921Z" fill="#FFF9EE"/>
-            <path id="appIconPupilR" d="M202.391 129.69C202.391 119.061 211.007 110.444 221.636 110.444C232.266 110.444 240.882 119.061 240.882 129.69C240.882 140.319 232.266 148.936 221.636 148.936C211.007 148.936 202.391 140.319 202.391 129.69Z" fill="black"/>
-          </g>
-        </g>
-        <defs>
-          <clipPath id="appIconClip0"><rect width="280.549" height="280.549" rx="64.494" fill="white"/></clipPath>
-          <clipPath id="appIconClip1"><rect width="280.549" height="280.549" fill="white"/></clipPath>
-          <clipPath id="appIconClip2"><rect width="213.73" height="218.794" fill="white" transform="translate(34.0625 31.5459)"/></clipPath>
-        </defs>
-      </svg>
-    </a>
+    <a class="app-icon-link" href="/special/balloon-portfolio/" aria-label="Balloon Portfolio"></a>
     <nav class="versions-nav" aria-label="Portfolio versions">
       <div class="version-list">
-        <a href="/versions/liquid-hover/">v01</a>
-        <a href="/versions/drag-reveal/">v02</a>
+        <span class="is-current" aria-current="page">v00</span>
+        <a href="/special/balloon-portfolio/">v01</a>
+        <a href="/versions/liquid-hover/">v02</a>
+        <a href="/versions/drag-reveal/">v03</a>
+        <a href="/versions/v3/">v04</a>
       </div>
       <button type="button">versions</button>
     </nav>
     <nav class="footer-links">
-      <a href="https://x.com/im_inaba" target="_blank" rel="noopener">@im_inaba</a>
-      <a href="https://x.com/masaruinaba" target="_blank" rel="noopener">@masaruinaba</a>
+      <a href="https://x.com/im_inaba" target="_blank" rel="noopener">X - @masruinaba</a>
     </nav>
-  </body>
+  <script type="module" src="/src/balloon-icon.js"></script>
+  <script type="module" src="/src/portfolio-chrome.js"></script>
+</body>
 </html>

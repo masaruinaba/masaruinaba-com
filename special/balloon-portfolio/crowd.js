@@ -1,3 +1,4 @@
+import {projects} from './portfolio-projects.js';
 import {rollGrip,coastGrip,scaleGrip} from './crowd-manipulation.js';
 import {createOpening} from './opening.js';
 import {setupFeedback} from './crowd-feedback.js';
@@ -60,7 +61,7 @@ function makeMonster(i){
   face.update(i*.63,0,'awake',0,true,true);
   const actor={root,body,face,phase:random()*Math.PI*2,angle:(random()-.5)*2.5,size:.48+random()**2*1.90,squeeze:.94+random()*.12,z:random()*.75,kick:0,velocity:0,x:0,y:0};
   if(['round','square','triangle'].includes(kind))actor.size*=.72;
-  actor.projectIndex=i%22;actor.collision=shape.collision;actor.shape=shape;actor.rim=rim;actor.press=0;body.userData.actor=actor;pickables.push(body);face.face.traverse(o=>{if(o.isMesh){o.userData.actor=actor;pickables.push(o);}});actors.push(actor);
+  actor.projectIndex=i%projects.length;actor.collision=shape.collision;actor.shape=shape;actor.rim=rim;actor.press=0;body.userData.actor=actor;pickables.push(body);face.face.traverse(o=>{if(o.isMesh){o.userData.actor=actor;pickables.push(o);}});actors.push(actor);
 }
 function makeItem(i){
   const root=new THREE.Group(),model=models[itemOrder[i%itemOrder.length]].clone(true);
@@ -80,7 +81,7 @@ function rebuild(){
   for(const a of actors){a.face.dispose();scene.remove(a.root);a.body.material.dispose();if(a.isGlyph)a.body.geometry.dispose();if(a.sim){a.body.geometry.dispose();a.rim.geometry.dispose();}}
   for(const a of ornaments){scene.remove(a.root);a.root.traverse(o=>{if(o.isMesh){o.material.dispose();if(a.letter)o.geometry.dispose();}});}
   actors.length=ornaments.length=pickables.length=0;seed=sessionSeed;
-  for(let i=0;i<Math.ceil(columns*rows*1.15);i++)makeMonster(i);
+  for(let i=0;i<Math.max(projects.length,Math.ceil(columns*rows*1.15));i++)makeMonster(i);
   itemOrder=models.map((_,i)=>i);for(let i=itemOrder.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[itemOrder[i],itemOrder[j]]=[itemOrder[j],itemOrder[i]];}
   for(let i=0;i<Math.max(5,Math.ceil(columns*rows*.26));i++)makeItem(i);
   document.body.dataset.letters='';

@@ -1,18 +1,18 @@
 import {frameSurface} from './crowd-frame-surface.js';
 import {frameKinds,frameMask} from './crowd-work-frame.js';
 import {placeWork} from './crowd-work-layout.js';
-import {clientWorks} from './portfolio-data.js';
-import {chooseComment} from './portfolio-comments.js';
-const projects=clientWorks;
+import {projects} from './portfolio-projects.js';
+import {chooseComment,projectKey} from './portfolio-comments.js';
+
 const bubble=document.querySelector('#work-bubble'),image=document.querySelector('#work-image'),link=document.querySelector('#work-link'),hello=document.querySelector('#work-hello');
 const lastComments=new Map();
 let owner=null,animation=null,shownAt=0,speaker=null,frameIndex=-1,frameKey='',lastPlacement=null,lastViewport='',photoSide=1,revealed=false;
 export function showWork(actor,speech,time,reduced){
   const item=projects[actor.projectIndex%projects.length];owner?.face.speak(0);owner=actor;shownAt=performance.now();photoSide=actor.face.mouthPosition().x>0?1:-1;revealed=false;
-  const comment=chooseComment(actor.projectIndex%projects.length,lastComments.get(actor.projectIndex));lastComments.set(actor.projectIndex,comment);hello.textContent=comment;speaker=speech;speaker.say(actor,time,reduced,comment,true);
+  const comment=chooseComment(item,lastComments.get(projectKey(item)));lastComments.set(projectKey(item),comment);hello.textContent=comment;speaker=speech;speaker.say(actor,time,reduced,comment,true);
   link.href=new URL(item.url||item.file,'https://www.masaruinaba.com/').href;
-  image.hidden=!item.image;
-  if(item.image){image.src='./portfolio'+item.image;image.alt=item.titleEn||item.title;}
+  const cover=item.image||item.thumbnail;image.hidden=!cover;
+  if(cover){image.src='./portfolio'+cover;image.alt=item.titleEn||item.title;}
   link.setAttribute('aria-label','View '+(item.titleEn||item.title));
   frameIndex=(frameIndex+1+Math.floor(Math.random()*(frameKinds.length-1)))%frameKinds.length;frameKey='';lastPlacement=null;bubble.dataset.frame=frameKinds[frameIndex];
   bubble.hidden=false;hello.hidden=true;

@@ -95,14 +95,15 @@
   #work-close:active{transform:translateY(2px)}
   #work-close:focus-visible{outline:2px solid #383734;outline-offset:3px}
   @media(prefers-reduced-motion:reduce){#work-close{transition:none}}
+  .portfolio-home{display:flex;align-items:center;gap:16px}.portfolio-home a{color:inherit;text-decoration:none}.portfolio-home a:hover{text-decoration:underline}.portfolio-home details{position:relative}.portfolio-home summary{cursor:pointer;list-style:none}.portfolio-home summary::-webkit-details-marker{display:none}.portfolio-home details div{position:absolute;bottom:24px;left:0;display:flex;gap:12px;padding:10px 12px;background:#fffdf4;border-radius:8px;white-space:nowrap}.portfolio-home [aria-current=page]{text-decoration:underline}@media(max-width:620px){.portfolio-home details div{top:24px;bottom:auto}}
 </style>
-  <script type="module" crossorigin src="/special/balloon-portfolio/assets/index-C6bS2ylP.js"></script>
+  <script type="module" crossorigin src="/special/balloon-portfolio/assets/index-Dp7iWTOU.js"></script>
   <link rel="stylesheet" crossorigin href="/special/balloon-portfolio/assets/index-BhjRz6Ls.css">
 </head>
 <body>
   <canvas id="world" tabindex="0" aria-label="A playful crowd of soft balloon creatures. Drag to move and roll creatures freely. Use the wheel over a creature or pinch with two fingers to resize it; twist two fingers to turn it. Press Space to bounce the crowd."></canvas>
   <div class="play-controls"><span id="sensor-status" role="status" aria-live="polite"></span><button id="camera-toggle" aria-pressed="false">Camera</button><button id="mic-toggle" aria-pressed="false">Blow</button><button id="reload-crowd" type="button" aria-label="Reload with new friends and colors" title="New friends"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 9a8 8 0 1 0 .15 5.7M20 4v5h-5"/></svg></button></div>
-  <a class="portfolio-home" href="https://www.masaruinaba.com/" target="_blank" rel="noopener noreferrer">masaruinaba.com</a>
+  <nav class="portfolio-home" aria-label="Portfolio versions"><details><summary>versions</summary><div><a href="/">v00</a><span aria-current="page">v01</span><a href="/versions/liquid-hover/">v02</a><a href="/versions/drag-reveal/">v03</a><a href="/versions/v3/">v04</a></div></details></nav>
   <div class="color-modes" role="group" aria-label="Color tone"><button type="button" data-color-mode="pop" aria-pressed="true" title="Playful colors">Pop</button><button type="button" data-color-mode="chic" aria-pressed="false" title="Chic — click again to change the accent color">Chic</button></div>
   <div id="camera-window" tabindex="0" aria-label="Camera preview. Drag to a corner. Arrow keys move between corners."><canvas id="camera-friends" hidden aria-label="Little monsters bouncing around your face"></canvas>
   <video id="camera-preview" autoplay muted playsinline hidden aria-label="Your camera preview"></video></div>

@@ -1,0 +1,748 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>V3 - Masaru Inaba</title>
+    <meta name="description" content="Masaru Inaba portfolio version 3." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        color-scheme: light;
+        --paper: #f7f7f7;
+        --ink: #202020;
+        --muted: rgba(32, 32, 32, 0.34);
+        --soft: rgba(32, 32, 32, 0.08);
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      body {
+        background: var(--paper);
+        color: var(--ink);
+        cursor: default;
+        font-family: "IBM Plex Mono", monospace;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .shell {
+        position: relative;
+        width: 100vw;
+        height: 100svh;
+        min-height: 620px;
+        overflow: hidden;
+        background: var(--paper);
+      }
+
+      .field-canvas {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+
+      .nodes {
+        position: fixed;
+        inset: 0;
+        z-index: 10;
+        transform: translate3d(var(--pan-x, 0px), var(--pan-y, 0px), 0);
+        transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .node {
+        position: absolute;
+        left: 0;
+        top: 0;
+        display: grid;
+        min-width: 96px;
+        gap: 4px;
+        transform: translate3d(-50%, 0, 0);
+        border: 0;
+        background: transparent;
+        color: rgba(32, 32, 32, 0.88);
+        font: inherit;
+        text-align: center;
+        cursor: pointer;
+        outline: none;
+        will-change: transform;
+      }
+
+      .node::before {
+        content: "";
+        width: 5px;
+        height: 5px;
+        margin: 0 auto;
+        border-radius: 999px;
+        background: #090909;
+        transition: transform 380ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 220ms ease, box-shadow 380ms ease;
+      }
+
+      .node-title {
+        font-family: "Bricolage Grotesque", sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 1.1;
+        letter-spacing: 0;
+        text-wrap: balance;
+        transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1), opacity 180ms ease;
+      }
+
+      .node-code {
+        color: var(--muted);
+        font-size: 8px;
+        letter-spacing: 0.08em;
+        transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1), opacity 180ms ease;
+      }
+
+      .node:hover::before,
+      .node:focus-visible::before,
+      .node.is-active::before {
+        transform: scale(1.35);
+        box-shadow: 0 0 0 6px rgba(0, 0, 0, 0.04);
+      }
+
+      .node:hover .node-title,
+      .node:focus-visible .node-title,
+      .node.is-active .node-title {
+        transform: translateY(-2px);
+      }
+
+      .node.is-clicked {
+        animation: node-settle 520ms cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      }
+
+      .node.is-clicked::before {
+        animation: dot-pulse 520ms cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      }
+
+      .mini-cover {
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 25;
+        width: 236px;
+        aspect-ratio: 4 / 3;
+        overflow: hidden;
+        transform: translate3d(-50%, calc(-100% - 18px), 0) scale(0.96);
+        border-radius: 7px;
+        background: rgba(32, 32, 32, 0.9);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        cursor: grab;
+        opacity: 0;
+        pointer-events: none;
+        user-select: none;
+        transition: opacity 180ms ease, transform 360ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .mini-cover.is-visible {
+        opacity: 1;
+        transform: translate3d(-50%, calc(-100% - 22px), 0) scale(1);
+        pointer-events: auto;
+      }
+
+      .mini-cover.is-dragging {
+        cursor: grabbing;
+        transition: opacity 120ms ease;
+      }
+
+      .mini-cover img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+      }
+
+      .mini-cover::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom, rgba(247, 247, 247, 0.08), rgba(0, 0, 0, 0.66));
+      }
+
+      .mini-cover.is-empty::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 38%),
+          repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 11px);
+      }
+
+      .mini-title {
+        position: absolute;
+        left: 14px;
+        right: 14px;
+        bottom: 22px;
+        z-index: 2;
+        color: rgba(255, 255, 255, 0.9);
+        font-family: "Bricolage Grotesque", sans-serif;
+        font-size: 15px;
+        font-weight: 600;
+        line-height: 1.05;
+        text-align: center;
+      }
+
+      .mini-meta {
+        position: absolute;
+        left: 14px;
+        right: 14px;
+        bottom: 10px;
+        z-index: 2;
+        color: rgba(255, 255, 255, 0.64);
+        font-size: 8px;
+        line-height: 1;
+        text-align: center;
+      }
+
+      .versions-nav {
+        position: fixed;
+        left: 50%;
+        bottom: 24px;
+        z-index: 50;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        transform: translateX(-50%);
+        font-family: "IBM Plex Mono", monospace;
+      }
+
+      .version-list {
+        display: flex;
+        gap: 12px;
+        opacity: 0;
+        transform: translateY(6px);
+        pointer-events: none;
+        transition: opacity 0.22s ease, transform 0.22s ease;
+      }
+
+      .versions-nav:hover .version-list,
+      .versions-nav:focus-within .version-list {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+
+      .versions-nav .is-current,
+      .versions-nav a,
+      .versions-nav button,
+      .footer-links a {
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: #999999;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 9px;
+        letter-spacing: 0.02em;
+        text-decoration: none;
+      }
+
+      .versions-nav button {
+        cursor: default;
+      }
+
+      .versions-nav a:hover,
+      .versions-nav .is-current,
+      .versions-nav button:hover,
+      .footer-links a:hover {
+        color: #222222;
+      }
+
+      .footer-links {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+        z-index: 50;
+        display: flex;
+        gap: 16px;
+      }
+
+      .app-icon-link {
+        position: fixed;
+        left: 24px;
+        bottom: 24px;
+        z-index: 50;
+        display: block;
+        width: 24px;
+        height: 24px;
+      }
+
+      .app-icon-link img {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      .grain {
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+        opacity: 0.045;
+        pointer-events: none;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      }
+
+      @keyframes node-settle {
+        0% { transform: translate3d(-50%, 0, 0) scale(1); }
+        34% { transform: translate3d(-50%, -4px, 0) scale(0.985); }
+        68% { transform: translate3d(-50%, 1px, 0) scale(1.018); }
+        100% { transform: translate3d(-50%, 0, 0) scale(1); }
+      }
+
+      @keyframes dot-pulse {
+        0% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.1); }
+        42% { box-shadow: 0 0 0 14px rgba(0, 0, 0, 0.035); }
+        100% { box-shadow: 0 0 0 2px rgba(0, 0, 0, 0); }
+      }
+
+      @media (max-width: 760px) {
+        .shell {
+          min-height: 100svh;
+        }
+
+        .nodes {
+          transform: translate3d(calc(var(--pan-x, 0px) * 0.72), calc(var(--pan-y, 0px) * 0.72), 0);
+        }
+
+        .node {
+          min-width: 82px;
+        }
+
+        .node-title {
+          font-size: 10px;
+        }
+
+        .node-code {
+          font-size: 7px;
+        }
+
+        .mini-cover {
+          width: 190px;
+        }
+
+        .footer-links,
+        .app-icon-link,
+        .versions-nav {
+          display: none;
+        }
+      }
+          .versions-nav .is-current { cursor: default; color: #222222; text-decoration: underline; text-underline-offset: 3px; }
+    </style>
+      <link id="character-favicon" rel="icon" type="image/png" sizes="64x64" href="/special/balloon-portfolio/favicons/blue.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/special/balloon-portfolio/favicons/apple-touch-icon.png">
+    <link rel="canonical" href="https://www.masaruinaba.com/versions/v3/">
+    <meta property="og:url" content="https://www.masaruinaba.com/versions/v3/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Masaru Inaba">
+    <meta property="og:description" content="Masaru Inaba — Web Designer. Selected works and playful experiments.">
+    <meta property="og:image" content="https://www.masaruinaba.com/ogp.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://www.masaruinaba.com/ogp.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1920">
+    <meta property="og:image:height" content="1008">
+    <meta name="twitter:site" content="@im_inaba">
+</head>
+  <body>
+    <main class="shell" aria-label="Portfolio node map">
+      <canvas class="field-canvas" id="fieldCanvas" aria-hidden="true"></canvas>
+      <section class="nodes" id="nodes" aria-label="Works"></section>
+      <aside class="mini-cover" id="miniCover" aria-live="polite">
+        <img id="miniImage" src="" alt="" />
+        <div class="mini-title" id="miniTitle"></div>
+        <div class="mini-meta" id="miniMeta"></div>
+      </aside>
+      <div class="grain" aria-hidden="true"></div>
+    </main>
+
+    <nav class="versions-nav" aria-label="Portfolio versions">
+      <div class="version-list">
+        <a href="/">v00</a>
+        <a href="/special/balloon-portfolio/">v01</a>
+        <a href="/versions/liquid-hover/">v02</a>
+        <a href="/versions/drag-reveal/">v03</a>
+        <span class="is-current" aria-current="page">v04</span>
+      </div>
+      <button type="button">versions</button>
+    </nav>
+
+    <nav class="footer-links">
+      <a href="https://x.com/im_inaba" target="_blank" rel="noopener">X - @masruinaba</a>
+    </nav>
+
+    <a class="app-icon-link" href="/special/balloon-portfolio/" aria-label="Balloon Portfolio"></a>
+
+    <script>
+      const works = [
+        { year: "2026", type: "Design", title: "Studio.Drop", url: "https://drop.studio.design/", image: "/works/studio-drop.png", x: -0.48, y: -0.13 },
+        { year: "2026", type: "Design", title: "Studio.Design", url: "https://studio.design/ja", image: "/works/studio-design-2026.png", x: 0.18, y: -0.08 },
+        { year: "2025", type: "Design", title: "goshiki-goen", url: "https://goshiki-goen.jp/", image: "/works/goshiki-goen.webp", x: 0.36, y: -0.19 },
+        { year: "2025", type: "Design", title: "Studio Design Award", url: "https://designaward2025.studio.design/", image: "/works/studio-design-award.webp", x: -0.04, y: -0.2 },
+        { year: "2025", type: "Design", title: "Studio", url: "https://studio.design/ja", image: "/works/studio.webp", x: -0.26, y: -0.02 },
+        { year: "2025", type: "Design", title: "Toyota Shokki", url: "https://gakuen.toyota-shokki.co.jp/", image: "/works/toyota-shokki.png", x: 0.45, y: 0.08 },
+        { year: "2024", type: "Design", title: "UNIPOTA", url: "https://unipota.jp/", image: "/works/unipota.webp", x: -0.42, y: 0.28 },
+        { year: "2023", type: "Design", title: "ecrit architects", url: "https://ecrit.jp/", image: "/works/ecrit.webp", x: 0.12, y: 0.28 },
+        { year: "2023", type: "Design", title: "MIKATA", url: "https://mi-kata.jp/", image: "/works/mikata.webp", x: 0.56, y: -0.31 },
+        { year: "2022", type: "Design", title: "manchinken", url: "https://manchinken.com/", image: "/works/manchinken.webp", x: -0.58, y: -0.28 },
+        { year: "2020", type: "Design", title: "L'as International", url: "https://lasinternational.co.jp/", image: "/works/las-international.webp", x: -0.16, y: -0.38 },
+        { year: "2026", type: "Visual", title: "Balloon Portfolio", url: "https://www.masaruinaba.com/special/balloon-portfolio/", image: "/thumbnails/balloon-playground.png", x: 0.43, y: -0.43 },
+        { year: "2026", type: "App", title: "Origin Shapes", url: "https://tiny-apps-phi.vercel.app/apps/origin/", image: "/thumbnails/origin.png", x: 0.02, y: 0.09 },
+        { year: "2026", type: "App", title: "Little Numbers", url: "https://kids-math-iwua.vercel.app/index.html", image: "/thumbnails/kids-123.png", x: -0.56, y: 0.45 },
+        { year: "2026", type: "App", title: "Open Table", image: "/thumbnails/open-table.png", url: "https://meeting-board-v1.vercel.app/", x: -0.67, y: 0.04 },
+        { year: "2026", type: "Animation", title: "Animation Notes", image: "/thumbnails/animation-notes.png", url: "https://fable-notes.vercel.app/", x: 0.69, y: 0.25 },
+        { year: "2025", type: "App", title: "Creative Weather", image: "/thumbnails/creative-weather.png", url: "/apps/creative-weather/", x: -0.02, y: 0.37 },
+        { year: "2025", type: "App", title: "Layered Clock", image: "/thumbnails/layered-clock.png", url: "/apps/layered-clock/", x: -0.34, y: 0.39 },
+        { year: "2025", type: "Animation", title: "A Letter of Letters", image: "/thumbnails/letter-morphing.png", url: "/playground/letter-morphing/", x: 0.38, y: 0.43 },
+        { year: "2025", type: "Animation", title: "Mosaic Reveal", image: "/thumbnails/mosaic-reveal.png", url: "/playground/mosaic-reveal/", x: 0.18, y: -0.43 },
+        { year: "2025", type: "Visual", title: "Font Patterns", image: "/thumbnails/font-patterns.png", url: "/playground/font-patterns/", x: -0.34, y: -0.44 },
+        { year: "2025", type: "Animation", title: "Hover Text Path", image: "/thumbnails/hover-text-path.png", url: "/playground/hover-text-path/", x: 0.68, y: -0.05 },
+        { year: "2025", type: "Animation", title: "Eye-Following Card", image: "/thumbnails/eye-following.png", url: "/playground/eye-following/", x: -0.72, y: -0.1 },
+        { year: "2025", type: "Animation", title: "Scroll Text", image: "/thumbnails/scroll-text.png", url: "/playground/scroll-text/", x: 0.73, y: 0.43 },
+        { year: "2025", type: "App", title: "Easel Pro", image: "/thumbnails/easel-pro.png", url: "/apps/design-board/", x: -0.73, y: 0.42 }
+      ];
+
+      const canvas = document.getElementById("fieldCanvas");
+      const ctx = canvas.getContext("2d");
+      const nodesLayer = document.getElementById("nodes");
+      const miniCover = document.getElementById("miniCover");
+      const miniImage = document.getElementById("miniImage");
+      const miniTitle = document.getElementById("miniTitle");
+      const miniMeta = document.getElementById("miniMeta");
+      const nodeElements = [];
+      const edges = [];
+
+      let width = 0;
+      let height = 0;
+      let dpr = 1;
+      let panX = 0;
+      let panY = 0;
+      let activeIndex = -1;
+      let openTimer = null;
+      let hideTimer = null;
+      let coverDrag = null;
+      let coverPinned = false;
+      let coverX = 0;
+      let coverY = 0;
+      let latestTime = 0;
+
+      function shortCode(index) {
+        return String(461 + index * 163).padStart(4, "0");
+      }
+
+      function scaleFactor() {
+        return width < 760 ? 0.95 : 0.86;
+      }
+
+      function layoutSpans() {
+        return {
+          x: Math.min(920, width * 0.78),
+          y: Math.min(600, height * 0.7)
+        };
+      }
+
+      function driftFor(work, time) {
+        return {
+          x:
+          Math.sin(time * 0.00042 + work.seed) * 20 +
+          Math.sin(time * 0.00018 + work.seed * 2.7) * 10,
+          y:
+          Math.cos(time * 0.00036 + work.seed * 1.3) * 16 +
+          Math.sin(time * 0.00015 + work.seed * 3.1) * 8
+        };
+      }
+
+      function project(work, time = 0) {
+        const span = layoutSpans();
+        const drift = work.freezeAt ? work.freezeAt.drift : driftFor(work, time);
+        return {
+          x: width / 2 + (work.x * span.x + drift.x) * scaleFactor() + panX,
+          y: height / 2 + (work.y * span.y + drift.y) * scaleFactor() + panY
+        };
+      }
+
+      function moveWorkToScreen(index, x, y, time = latestTime) {
+        const work = works[index];
+        const span = layoutSpans();
+        const drift = driftFor(work, time);
+        const scale = scaleFactor();
+        work.x = Math.min(Math.max(((x - panX - width / 2) / scale - drift.x) / span.x, -0.9), 0.9);
+        work.y = Math.min(Math.max(((y - panY - height / 2) / scale - drift.y) / span.y, -0.62), 0.62);
+      }
+
+      function linePoint(a, b, t) {
+        return {
+          x: a.x + (b.x - a.x) * t,
+          y: a.y + (b.y - a.y) * t
+        };
+      }
+
+      function buildEdges() {
+        edges.length = 0;
+        for (let i = 0; i < works.length; i++) {
+          for (let j = i + 1; j < works.length; j++) {
+            edges.push({
+              a: i,
+              b: j,
+              seed: (i * 91.7 + j * 37.3) % 100,
+              amp: 10 + ((i + j) % 6) * 2.4,
+              speed: 0.00034 + ((i + j) % 5) * 0.000055,
+              particle: ((i * 17 + j * 23) % 100) / 100
+            });
+          }
+        }
+      }
+
+      function resize() {
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = Math.floor(width * dpr);
+        canvas.height = Math.floor(height * dpr);
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        placeNodes(performance.now());
+      }
+
+      function renderNodes() {
+        works.forEach((work, index) => {
+          work.seed = index * 1.816 + 0.4;
+          const button = document.createElement("button");
+          button.className = "node";
+          button.type = "button";
+          button.dataset.index = index;
+          button.innerHTML = `<span class="node-title">${work.title}</span><span class="node-code">[ ${shortCode(index)} ]</span>`;
+          button.addEventListener("mouseenter", () => showMini(index));
+          button.addEventListener("mouseleave", scheduleHideMini);
+          button.addEventListener("focus", () => showMini(index));
+          button.addEventListener("blur", scheduleHideMini);
+          button.addEventListener("click", (event) => clickNode(event, index));
+          nodesLayer.appendChild(button);
+          nodeElements.push(button);
+        });
+      }
+
+      function placeNodes(time) {
+        works.forEach((work, index) => {
+          const p = project(work, time);
+          const node = nodeElements[index];
+          if (!node) return;
+          node.style.left = `${p.x - panX}px`;
+          node.style.top = `${p.y - panY}px`;
+        });
+      }
+
+      function draw(time) {
+        latestTime = time;
+        ctx.clearRect(0, 0, width, height);
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        const positions = works.map((work) => project(work, time));
+
+        edges.forEach((edge) => {
+          const a = positions[edge.a];
+          const b = positions[edge.b];
+
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.strokeStyle = "rgba(20,20,20,0.028)";
+          ctx.lineWidth = 0.45;
+          ctx.stroke();
+
+          const t = (edge.particle + time * (0.00002 + edge.speed * 0.025)) % 1;
+          const p = linePoint(a, b, t);
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 1.05, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(20,20,20,0.15)";
+          ctx.fill();
+        });
+
+        works.forEach((work) => {
+          if (!work.force) return;
+          work.force.x *= 0.9;
+          work.force.y *= 0.9;
+          if (Math.abs(work.force.x) + Math.abs(work.force.y) < 0.05) {
+            work.force.x = 0;
+            work.force.y = 0;
+          }
+        });
+
+        placeNodes(time);
+        if (activeIndex >= 0 && miniCover.classList.contains("is-visible")) {
+          positionMini(activeIndex, time);
+        }
+        requestAnimationFrame(draw);
+      }
+
+      function positionMini(index, time = performance.now()) {
+        if (coverPinned) {
+          miniCover.style.left = `${coverX}px`;
+          miniCover.style.top = `${coverY}px`;
+          return;
+        }
+        const p = project(works[index], time);
+        const x = Math.min(Math.max(p.x, 150), width - 150);
+        const y = Math.min(Math.max(p.y, 140), height - (window.innerWidth <= 768 ? 180 : 60));
+        coverX = x;
+        coverY = y;
+        miniCover.style.left = `${x}px`;
+        miniCover.style.top = `${y}px`;
+      }
+
+      function showMini(index) {
+        window.clearTimeout(hideTimer);
+        activeIndex = index;
+        coverPinned = false;
+        const work = works[index];
+        work.freezeAt = { drift: driftFor(work, latestTime) };
+        nodeElements.forEach((node, nodeIndex) => {
+          node.classList.toggle("is-active", nodeIndex === index);
+        });
+        miniTitle.textContent = work.title;
+        miniMeta.textContent = `${work.type} ${work.year}`;
+        miniCover.classList.toggle("is-empty", !work.image);
+        if (work.image) {
+          miniImage.src = work.image;
+          miniImage.alt = work.title;
+          miniImage.style.display = "block";
+        } else {
+          miniImage.removeAttribute("src");
+          miniImage.alt = "";
+          miniImage.style.display = "none";
+        }
+        positionMini(index);
+        miniCover.classList.add("is-visible");
+      }
+
+      function hideMini() {
+        if (coverDrag) return;
+        if (activeIndex >= 0) {
+          delete works[activeIndex].freezeAt;
+        }
+        activeIndex = -1;
+        coverPinned = false;
+        nodeElements.forEach((node) => node.classList.remove("is-active"));
+        miniCover.classList.remove("is-visible");
+      }
+
+      function scheduleHideMini() {
+        window.clearTimeout(hideTimer);
+        hideTimer = window.setTimeout(hideMini, 140);
+      }
+
+      let mobileSelected = -1;
+      function clickNode(event, index) {
+        event.stopPropagation();
+        if (window.innerWidth <= 768) {
+          if (mobileSelected === index) { window.open(works[index].url, '_blank', 'noopener'); return; }
+          mobileSelected = index;
+          showMini(index);
+          return;
+        }
+        const node = nodeElements[index];
+        const rect = node.getBoundingClientRect();
+        const dx = event.clientX - (rect.left + rect.width / 2);
+        const dy = event.clientY - (rect.top + rect.height / 2);
+        clearTimeout(openTimer);
+        showMini(index);
+        works[index].force = {
+          x: Math.min(Math.max(dx * 2.8, -90), 90),
+          y: Math.min(Math.max(dy * 2.8, -90), 90)
+        };
+        node.classList.remove("is-clicked");
+        void node.offsetWidth;
+        node.classList.add("is-clicked");
+        openTimer = window.setTimeout(() => {
+          node.classList.remove("is-clicked");
+          window.open(works[index].url, "_blank", "noopener");
+        }, 360);
+      }
+
+      function onCoverPointerDown(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        coverPinned = true;
+        coverDrag = {
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          startY: event.clientY,
+          coverX,
+          coverY,
+          lastX: event.clientX,
+          lastY: event.clientY
+        };
+        miniCover.setPointerCapture(event.pointerId);
+        miniCover.classList.add("is-dragging");
+      }
+
+      function onCoverPointerMove(event) {
+        if (!coverDrag || coverDrag.pointerId !== event.pointerId) return;
+        const velocityX = event.clientX - coverDrag.lastX;
+        const velocityY = event.clientY - coverDrag.lastY;
+        coverX = Math.min(Math.max(coverDrag.coverX + event.clientX - coverDrag.startX, 120), width - 120);
+        coverY = Math.min(Math.max(coverDrag.coverY + event.clientY - coverDrag.startY, 120), height - 24);
+        if (activeIndex >= 0) {
+          const work = works[activeIndex];
+          moveWorkToScreen(activeIndex, coverX, coverY);
+          work.freezeAt = { drift: driftFor(work, latestTime) };
+          work.force = {
+            x: Math.min(Math.max(velocityX * 18, -160), 160),
+            y: Math.min(Math.max(velocityY * 18, -160), 160)
+          };
+        }
+        coverDrag.lastX = event.clientX;
+        coverDrag.lastY = event.clientY;
+        miniCover.style.left = `${coverX}px`;
+        miniCover.style.top = `${coverY}px`;
+      }
+
+      function onCoverPointerUp(event) {
+        if (coverDrag && coverDrag.pointerId === event.pointerId) {
+          miniCover.releasePointerCapture(event.pointerId);
+        }
+        coverDrag = null;
+        miniCover.classList.remove("is-dragging");
+      }
+
+      renderNodes();
+      buildEdges();
+      resize();
+      requestAnimationFrame(draw);
+
+      window.addEventListener("resize", resize);
+      miniCover.addEventListener("mouseenter", () => window.clearTimeout(hideTimer));
+      miniCover.addEventListener("mouseleave", scheduleHideMini);
+      miniCover.addEventListener("pointerdown", onCoverPointerDown);
+      miniCover.addEventListener("pointermove", onCoverPointerMove);
+      miniCover.addEventListener("pointerup", onCoverPointerUp);
+      miniCover.addEventListener("pointercancel", onCoverPointerUp);
+    </script>
+  <script type="module" src="/src/balloon-icon.js"></script>
+  <script type="module" src="/src/portfolio-chrome.js"></script>
+</body>
+</html>
