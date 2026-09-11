@@ -1,0 +1,17 @@
+{
+  "id": "/special/balloon-portfolio/",
+  "name": "Masaru Inaba \u2014 Balloons",
+  "short_name": "Balloons",
+  "start_url": "/special/balloon-portfolio/",
+  "scope": "/special/balloon-portfolio/",
+  "display": "standalone",
+  "background_color": "#dcd8d0",
+  "theme_color": "#dcd8d0",
+  "icons": [
+    {
+      "src": "./favicons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

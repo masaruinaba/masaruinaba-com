@@ -16,7 +16,7 @@
 .opening-word>span{display:inline-block;transform:translateY(115%);opacity:0;will-change:transform,opacity}
 .opening-static .opening-character img,.opening-static .opening-logo,.opening-static .opening-word>span{opacity:1}
 .opening-static .opening-word>span{transform:none}
-body[data-opening]:not([data-opening=done]) :is(.play-controls,.color-modes,.portfolio-home){visibility:hidden}
+body[data-opening]:not([data-opening=done]) :is(.play-controls,.portfolio-home,#reload-crowd){visibility:hidden}
 body[data-opening=loading] #status{z-index:21;color:var(--opening-ink)}
 @media(max-aspect-ratio:1/1){
  .opening-character{width:calc(var(--character-size) * 1.7);left:55%;top:47%}

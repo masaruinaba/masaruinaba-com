@@ -47,7 +47,7 @@ export function createOpening() {
   words(root.querySelector('.opening-edition'),['Tiny Apps / N° 001']);
   document.body.dataset.opening='loading';document.body.dataset.openingPattern=pattern.id;
   document.body.append(root);
-  const controls=[...document.querySelectorAll('.play-controls,.color-modes,.portfolio-home,#world')];
+  const controls=[...document.querySelectorAll('.play-controls,.portfolio-home,#reload-crowd,#world')];
   const previousInert=controls.map(el=>el.inert);controls.forEach(el=>el.inert=true);
   const animations=[];
   const animate=(el,frames,options)=>{const a=el.animate(frames,{fill:'both',...options});animations.push(a);return a;};

@@ -172,7 +172,7 @@ function draw(dt){
     draw.metricsAt=time;document.body.dataset.triangles=String(renderer.info.render.triangles);document.body.dataset.drawCalls=String(renderer.info.render.calls);document.body.dataset.time=time.toFixed(2);document.body.dataset.sleeping=String(!awake);document.body.dataset.entry=String(Math.min(...objects.map(a=>a.entry??1)).toFixed(3));document.body.dataset.motion=JSON.stringify({contacts:Math.round(contacts),speed:+objects.reduce((sum,a)=>sum+Math.hypot(a.vx,a.vy),0).toFixed(3),press:+(held?.actor.press||0).toFixed(3),deforming:actors.filter(a=>a.deforming).length});
   }
 }
-function tick(now){raf=0;if(document.hidden)return;if(time>=motionUntil&&!held&&now-last<32){raf=requestAnimationFrame(tick);return;}const dt=Math.min((now-last)/1000||0,.035);last=now;time+=dt;draw(dt);if(!reduced.matches||held||[...actors,...ornaments].some(a=>a.deforming||Math.abs(a.kick)+Math.abs(a.velocity)+Math.hypot(a.vx,a.vy)>.002))raf=requestAnimationFrame(tick);}
+function tick(now){raf=0;if(document.hidden)return;if(!collection?.active&&time>=motionUntil&&!held&&now-last<32){raf=requestAnimationFrame(tick);return;}const dt=Math.min((now-last)/1000||0,.035);last=now;time+=dt;draw(dt);if(!reduced.matches||held||[...actors,...ornaments].some(a=>a.deforming||Math.abs(a.kick)+Math.abs(a.velocity)+Math.hypot(a.vx,a.vy)>.002))raf=requestAnimationFrame(tick);}
 function wake(){if(openingReleased&&!raf&&!document.hidden){last=performance.now();raf=requestAnimationFrame(tick);}}
 function applyWind(dx,dy,strength){
   if(!actors.length||collection?.active)return;

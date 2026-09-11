@@ -24,6 +24,7 @@ export function createCollection({actors,ornaments,scene,camera,renderer,feedbac
   chrome.append(crowdButton,collectionButton);document.querySelector('.play-controls').insertBefore(chrome,document.querySelector('#reload-crowd'));document.body.append(document.querySelector('#reload-crowd'));
   const updateIcon=createCollectionFaceIcon(crowdButton.querySelector('.mode-symbol'));
   const labels=document.createElement('div');labels.className='collection-labels';labels.hidden=true;document.body.append(labels);
+  const numbers=document.createElement('div');numbers.className='collection-numbers';numbers.hidden=true;document.body.append(numbers);
   function clear(){closeWork();speech.clear();selected=null;labels.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed','false'));}
   function select(actor){
     if(!active||actor.projectIndex>=projects.length)return;
@@ -59,10 +60,10 @@ export function createCollection({actors,ornaments,scene,camera,renderer,feedbac
   function resize(){
     if(!active)return;
     renderer.setPixelRatio(Math.min(devicePixelRatio,2.5));
-    layout=collectionLayout(projects.length,innerWidth,innerHeight,seed);
+    layout=collectionLayout(projects.length,labels.clientWidth,innerHeight,seed);
     const oldScroll=labels.scrollTop;
-    labels.replaceChildren();
-    const extent=document.createElement('div');extent.className='collection-extent';extent.style.height=(innerWidth<620?Math.max(innerHeight,...layout.map(s=>s.y+s.cellHeight/2+60)):innerHeight)+'px';labels.append(extent);
+    labels.replaceChildren();numbers.replaceChildren();
+    const extent=document.createElement('div');extent.className='collection-extent';extent.style.height=Math.max(innerHeight,...layout.map(s=>s.y+s.cellHeight/2+110))+'px';labels.append(extent);
     actors.forEach((a,i)=>{a.root.visible=i<projects.length;});ornaments.forEach(a=>a.root.visible=false);
     for(const [index,slot] of layout.entries()){
       const a=actors[slot.projectIndex];
@@ -75,7 +76,7 @@ export function createCollection({actors,ornaments,scene,camera,renderer,feedbac
       const button=document.createElement('button');button.type='button';button.dataset.project=slot.projectIndex;
       button.setAttribute('aria-label',`${index+1}. ${projects[slot.projectIndex].title}`);button.setAttribute('aria-pressed',String(selected===a));
       button.style.cssText=`left:${slot.x}px;top:${slot.y}px;width:${slot.size+14}px;height:${slot.size+20}px`;
-      const number=document.createElement('span');number.textContent=String(index+1);button.append(number);
+      const number=document.createElement('span');number.textContent=String(index+1);number.dataset.project=slot.projectIndex;numbers.append(number);
       let drag=null,suppressClick=false;
       button.addEventListener('pointerdown',e=>{if(e.button!==0)return;delete a.collectionPop;a.root.rotation.copy(a.collectionRotation);drag={x:e.clientX,y:e.clientY,moved:false};suppressClick=false;button.setPointerCapture(e.pointerId);});
       button.addEventListener('pointermove',e=>{
@@ -103,7 +104,7 @@ export function createCollection({actors,ornaments,scene,camera,renderer,feedbac
     const from=new Map([...actors,...ornaments].map(a=>[a,{position:a.root.position.clone(),quaternion:a.root.quaternion.clone(),scale:a.root.visible?a.root.scale.clone():new THREE.Vector3(.001,.001,.001)}]));
     const fromColor=scene.background?.isColor?scene.background.clone():renderer.getClearColor(new THREE.Color());
     transition=null;
-    clear();active=next;document.body.style.setProperty('--collection-footer-opacity','0');document.body.dataset.collection=String(active);document.querySelector('#camera-toggle').inert=active;labels.hidden=!active;
+    clear();active=next;document.body.style.setProperty('--collection-footer-opacity','0');document.body.dataset.collection=String(active);document.querySelector('#camera-toggle').inert=active;labels.hidden=!active;numbers.hidden=!active;
     crowdButton.setAttribute('aria-pressed',String(!active));collectionButton.setAttribute('aria-pressed',String(active));
     onChange(active);
     if(active){
@@ -146,13 +147,14 @@ export function createCollection({actors,ornaments,scene,camera,renderer,feedbac
     scene.background=new THREE.Color().lerpColors(transition.fromColor,transition.toColor,ease);
     // Reveal numbering only once the characters are nearly settled.
     const labelProgress=Math.max(0,Math.min(1,(progress-.8)/.2));
-    labels.style.opacity=String(active?labelProgress*labelProgress*(3-2*labelProgress):0);
+    labels.style.opacity=String(active?labelProgress*labelProgress*(3-2*labelProgress):0);numbers.style.opacity=labels.style.opacity;
     labels.style.pointerEvents=progress<1?'none':'';
-    if(progress===1){transition=null;labels.style.opacity='';labels.style.pointerEvents='';document.body.style.setProperty('--collection-footer-opacity',active?'1':'0');}
+    if(progress===1){transition=null;labels.style.opacity='';numbers.style.opacity='';labels.style.pointerEvents='';document.body.style.setProperty('--collection-footer-opacity',active?'1':'0');}
   }
   function update(time,dt,reduced){
     if(!active)return;
     for(const a of actors.slice(0,projects.length)){
+      positionActor(a);
       if(a.collectionPop!==undefined){
         const age=time-a.collectionPop;
         a.root.rotation.copy(a.collectionRotation);
@@ -167,7 +169,10 @@ export function createCollection({actors,ornaments,scene,camera,renderer,feedbac
     if(!active)return;
     const cloud=speech.bounds(),work=document.querySelector('#work-bubble');
     const obstacles=[cloud,work&&!work.hidden&&work.style.visibility==='visible'?work.getBoundingClientRect():null].filter(Boolean);
-    const states=[...labels.querySelectorAll('button span')].map(number=>{
+    const states=[...numbers.querySelectorAll('span')].map(number=>{
+      const actor=actors[Number(number.dataset.project)],slot=actor.collectionSlot;
+      number.style.left=(slot.x-slot.size/2-7)+'px';
+      number.style.top=(slot.y+slot.size/2-8)+'px';
       const rect=number.getBoundingClientRect();
       return [number,obstacles.some(o=>rect.right>o.left-8&&rect.left<o.right+8&&rect.bottom>o.top-8&&rect.top<o.bottom+8)];
     });
