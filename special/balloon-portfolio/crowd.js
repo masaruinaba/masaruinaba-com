@@ -1,3 +1,4 @@
+import {createCollection} from './crowd-collection.js';
 import {projects} from './portfolio-projects.js';
 import {rollGrip,coastGrip,scaleGrip} from './crowd-manipulation.js';
 import {createOpening} from './opening.js';
@@ -6,7 +7,6 @@ import {createProfile} from './crowd-profile.js';
 import {attachFrost} from './crowd-frost.js';
 import {weldContour} from './crowd-weld.js';
 import {classicPaths} from './crowd-classics.js';
-import {createColorMode} from './crowd-color-mode.js';
 import {crowdShell,relaxCrowdShell} from './crowd-shell.js';
 import {compactItemGeometry} from './crowd-lod.js';
 import * as THREE from 'three';
@@ -43,7 +43,7 @@ const palette=colorSets[sessionSeed%colorSets.length];
 const kinds=['round','heart','triangle','square','star','spark','petal','coil'];
 const shapeMix=['petal','spark','star','coil','heart','petal','triangle','spark','coil','star','round','petal','heart','spark','square','coil'];
 const actors=[],ornaments=[],pickables=[];let itemOrder=[];
-let profiler;
+let profiler,collection;
 let renderer,scene,camera,models,geometries,columns=0,rows=0,viewWidth=12,viewHeight=8,raf=0,last=0,time=0;
 let held=null,renderSkin,speech,entered=false,motionUntil=3;
 let seed=sessionSeed;
@@ -94,6 +94,7 @@ function resize(){
   viewWidth=nextCols*1.90;viewHeight=viewWidth*h/w;
   camera.left=-viewWidth/2;camera.right=viewWidth/2;camera.top=viewHeight/2;camera.bottom=-viewHeight/2;camera.updateProjectionMatrix();
   if(!actors.length){columns=nextCols;rows=nextRows;rebuild();}
+  if(collection?.active){collection.resize();return;}
   seed=(sessionSeed^0x93ae17)>>>0;
   const cell=Math.sqrt(viewWidth*viewHeight/actors.length);
   actors.forEach(a=>{a.baseSize=a.size*cell/1.9;a.radius=a.baseSize*.89;a.x=(random()-.5)*(viewWidth+.7);a.y=(random()-.5)*(viewHeight+.7);});
@@ -156,13 +157,17 @@ function deform(a,dt){
   a.body.geometry.attributes.position.needsUpdate=true;a.body.geometry.computeVertexNormals();a.body.geometry.computeBoundingSphere();if(!a.shape.data.noSeam)updateSeam(a.rim.geometry,out,a.shape.skin.rim);
 }
 function draw(dt){
+  collection?.updateIcon(time,dt,reduced.matches);
+  if(collection?.active){
+    collection.update(time,dt,reduced.matches);collection.blend(time);updateGaze();speech?.update(time,dt,[],camera,reduced.matches,null);updateWork(camera);collection.updateLabels();renderer.render(scene,camera);return;
+  }
   const objects=[...actors,...ornaments];
   if(held){held.elapsed+=dt;held.strength=.08+.92*Math.min(1,held.elapsed/2);}
   const awake=!!held||time<motionUntil;
   const contacts=awake?advancePile(objects,dt,time,held,reduced.matches,viewWidth,viewHeight):0;
   if(!awake)for(const a of objects){a.angle+=a.turn;a.turn=0;a.entry=1;a.entryVelocity=0;a.vx=a.vy=a.omega=a.velocity=a.vz=0;a.kick=0;a.x=a.px;a.y=a.py;}
 
-  for(const a of actors)pose(a,dt,true);for(const a of ornaments)pose(a,dt,false);updateGaze();speech?.update(time,dt,actors,camera,reduced.matches,held);updateWork(camera);profiler?.begin();renderer.render(scene,camera);profiler?.end();
+  for(const a of actors)pose(a,dt,true);for(const a of ornaments)pose(a,dt,false);collection?.blend(time);updateGaze();speech?.update(time,dt,actors,camera,reduced.matches,held);updateWork(camera);profiler?.begin();renderer.render(scene,camera);profiler?.end();
   if(time-(draw.metricsAt||-1)>.25){
     draw.metricsAt=time;document.body.dataset.triangles=String(renderer.info.render.triangles);document.body.dataset.drawCalls=String(renderer.info.render.calls);document.body.dataset.time=time.toFixed(2);document.body.dataset.sleeping=String(!awake);document.body.dataset.entry=String(Math.min(...objects.map(a=>a.entry??1)).toFixed(3));document.body.dataset.motion=JSON.stringify({contacts:Math.round(contacts),speed:+objects.reduce((sum,a)=>sum+Math.hypot(a.vx,a.vy),0).toFixed(3),press:+(held?.actor.press||0).toFixed(3),deforming:actors.filter(a=>a.deforming).length});
   }
@@ -170,7 +175,7 @@ function draw(dt){
 function tick(now){raf=0;if(document.hidden)return;if(time>=motionUntil&&!held&&now-last<32){raf=requestAnimationFrame(tick);return;}const dt=Math.min((now-last)/1000||0,.035);last=now;time+=dt;draw(dt);if(!reduced.matches||held||[...actors,...ornaments].some(a=>a.deforming||Math.abs(a.kick)+Math.abs(a.velocity)+Math.hypot(a.vx,a.vy)>.002))raf=requestAnimationFrame(tick);}
 function wake(){if(openingReleased&&!raf&&!document.hidden){last=performance.now();raf=requestAnimationFrame(tick);}}
 function applyWind(dx,dy,strength){
-  if(!actors.length)return;
+  if(!actors.length||collection?.active)return;
   motionUntil=time+5;
   for(const a of [...actors,...ornaments]){const gain=strength*6/Math.sqrt(Math.max(.5,a.mass));a.vx+=dx*gain;a.vy+=dy*gain;a.omega+=(a.phase/Math.PI-1)*gain*.09;a.face?.touch(dx*.1,dy*.1);}
   document.body.dataset.wind=String(strength.toFixed(3));wake();
@@ -210,6 +215,10 @@ function rebaseGesture(){
 canvas.addEventListener('pointerdown',e=>{
   if(!camera||e.button!==0)return;
   const world=pointerWorld(e);
+  if(collection?.active){
+    const hit=ray.intersectObjects(pickables,false).find(h=>h.object.userData.actor?.root.visible);
+    if(hit)collection.select(hit.object.userData.actor);else collection.clear();wake();return;
+  }
   if(held){
     if(e.pointerType==='touch'&&!held.points.has(e.pointerId)&&held.points.size<2){held.points.set(e.pointerId,world);held.moved=true;rebaseGesture();canvas.setPointerCapture(e.pointerId);}return;
   }
@@ -253,7 +262,7 @@ canvas.addEventListener('pointermove',e=>{
   wake();
 });
 canvas.addEventListener('wheel',e=>{
-  if(!camera)return;
+  if(!camera||collection?.active)return;
   pointerWorld(e);
   const actor=held?.actor||ray.intersectObjects(pickables,false)[0]?.object.userData.actor;
   if(!actor)return;
@@ -279,7 +288,8 @@ function endPointer(e,tap){
 canvas.addEventListener('pointerup',e=>endPointer(e,true));
 for(const event of ['pointercancel','lostpointercapture'])canvas.addEventListener(event,e=>endPointer(e,false));
 window.addEventListener('blur',()=>release(false));
-canvas.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();actors.forEach(a=>bounce(a));}});
+window.addEventListener('pointermove',e=>{if(collection?.active){pointerWorld(e);pointerActive=true;wake();}});
+canvas.addEventListener('keydown',e=>{if(e.code==='Space'&&!collection?.active){e.preventDefault();actors.forEach(a=>bounce(a));}});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(raf);raf=0;}else wake();});
 reduced.addEventListener('change',()=>{draw(0);wake();});
 canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();cancelAnimationFrame(raf);raf=0;status.textContent='Restoring the playground…';status.hidden=false;});
@@ -305,7 +315,10 @@ async function init(){
     const manifest=await fetch('./items/manifest.json');if(!manifest.ok)throw Error('Items load failed');const items=(await manifest.json()).filter(item=>!['bean','pillow','cloud','leaf'].includes(item.id)),loader=new GLTFLoader();
     models=await Promise.all(items.map(async item=>{if(['flower','daisy','spark','star'].includes(item.id))return balloonFlower(item.id);const gltf=await loader.loadAsync('./items/'+item.id+'.glb');gltf.scene.traverse(o=>{if(!o.isMesh)return;for(const a of [o.geometry.attributes.position,o.geometry.attributes.normal]){if(!a)continue;for(let i=0;i<a.count;i++){const y=a.getY(i),z=a.getZ(i);a.setY(i,-z);a.setZ(i,y);}a.needsUpdate=true;}o.geometry.computeBoundingBox();o.geometry.computeBoundingSphere();o.material.side=item.id==='heart'?THREE.DoubleSide:THREE.FrontSide;if(item.id!=='heart'&&!o.material.map){const original=o.geometry;o.geometry=compactItemGeometry(original);if(o.geometry!==original)original.dispose();}});gltf.scene.userData.itemId=item.id;return gltf.scene;}));
     await document.fonts.load('400 80px fatfrank');document.body.dataset.typeface=document.fonts.check('400 80px fatfrank')?'FatFrank':'fallback';
-    speech=createSpeech(scene,(actor,message,phrase)=>feedback.babble({size:actor.userScale||1,message,phrase}),()=>feedback.stopVoice());createWindControls(applyWind);resize();createColorMode(scene,renderer,()=>draw(0));window.addEventListener('resize',resize);await renderer.compileAsync(scene,camera);draw(0);status.hidden=true;document.body.dataset.ready='true';
+    speech=createSpeech(scene,(actor,message,phrase)=>feedback.babble({size:actor.userScale||1,message,phrase}),()=>feedback.stopVoice());createWindControls(applyWind);resize();window.addEventListener('resize',resize);
+    collection=createCollection({actors,ornaments,scene,camera,renderer,feedback,seed:sessionSeed,wake,speech,getTime:()=>time,onChange:active=>{release(false);speech.clear();closeWork();if(!active)resize();}});
+    if(new URLSearchParams(location.search).get('mode')==='collection')collection.setActive(true);
+    await renderer.compileAsync(scene,camera);draw(0);status.hidden=true;document.body.dataset.ready='true';
     await opening.finish(()=>{openingReleased=true;wake();});
   }catch(error){opening.cancel();console.error(error);status.hidden=false;status.textContent='Could not load the playground. Please refresh.';document.body.dataset.error=error.message;}
 }

@@ -840,6 +840,8 @@
 
           const request = ++hoverRequest
           row.setAttribute('aria-busy', 'true')
+          await new Promise(resolve => setTimeout(resolve, 90))
+          if (request !== hoverRequest || compactLayout()) return
           const ready = await liquid?.show(previewImage, row.getBoundingClientRect())
           if (request !== hoverRequest || compactLayout()) return
           row.removeAttribute('aria-busy')
@@ -866,7 +868,7 @@
           if (compactLayout()) return
           if (hasImage) liquid?.setMask(row.getBoundingClientRect())
         })
-        row.addEventListener('mouseleave', () => {
+        const endHover = () => {
           hoverRequest++
           row.removeAttribute('aria-busy')
           if (!hasImage) {
@@ -880,7 +882,9 @@
           row.classList.remove('is-active')
           resetTextShuffle(title)
           if (hasImage) liquid?.hide()
-        })
+        }
+        row.endHover = endHover
+        row.addEventListener('mouseleave', endHover)
         row.addEventListener('click', () => {
           if (compactLayout()) { openMobilePreview(row, work, href); return }
           if (href.startsWith('http')) {
@@ -917,8 +921,20 @@
         item.addEventListener('mouseleave', () => resetTextShuffle(item))
       })
 
-      document.getElementById('scrollArea').addEventListener('scroll', () => liquid?.hide())
-      document.addEventListener('mouseleave', () => liquid?.hide())
+      const clearDesktopHover = () => {
+        document.querySelectorAll('.work-row.is-active, .work-row[aria-busy="true"]').forEach(row => row.endHover())
+        liquid?.hide()
+      }
+      document.getElementById('scrollArea').addEventListener('scroll', () => {
+        const row = document.querySelector('.work-row.is-active')
+        if (!row || compactLayout()) return
+        const rect = row.getBoundingClientRect()
+        if (rect.bottom <= 0 || rect.top >= innerHeight) clearDesktopHover()
+        else liquid?.setMask(rect)
+      })
+      document.addEventListener('mouseleave', clearDesktopHover)
+      window.addEventListener('blur', clearDesktopHover)
+      document.querySelectorAll('.versions-nav, .footer-links, .app-icon-link').forEach(el => el.addEventListener('mouseenter', clearDesktopHover))
     </script>
   <script type="module" src="/src/balloon-icon.js"></script>
   <script type="module" src="/src/portfolio-chrome.js"></script>

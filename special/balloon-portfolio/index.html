@@ -30,7 +30,7 @@
     canvas:active{cursor:grabbing}canvas:focus-visible{outline:2px solid #443653;outline-offset:-5px}
     #status{position:fixed;inset:0;display:grid;place-content:center;font:14px system-ui;color:#684b61;pointer-events:none}
     #status[hidden]{display:none}
-  
+
     button,a{-webkit-tap-highlight-color:transparent}button{font:inherit;color:inherit;cursor:pointer}button:focus-visible,a:focus-visible{outline:2px solid #333;outline-offset:4px}
     .page-nav,.play-controls{position:fixed;z-index:3;left:24px;right:24px;display:flex;align-items:center;justify-content:space-between;font:12px/1.4 ui-monospace,monospace;color:#302d29}
     .page-nav{top:20px}.page-nav a{color:inherit;text-decoration:none}.page-nav button,.play-controls button{border:0;background:#dcd8d0e8;border-radius:24px;padding:10px 16px}.play-controls{bottom:20px;justify-content:flex-end;gap:6px}.play-controls button[aria-pressed=true]{background:#302d29;color:#fffaf1}
@@ -50,34 +50,26 @@
     #camera-window{position:fixed;z-index:4;right:24px;bottom:94px;width:180px;height:135px;border-radius:22px;touch-action:none;cursor:grab;transition:left .3s cubic-bezier(.2,.8,.2,1),top .3s cubic-bezier(.2,.8,.2,1);box-shadow:0 5px 18px #302b2424}#camera-window:has(video[hidden]){display:none}#camera-window[data-dragging=true]{transition:none;cursor:grabbing}#camera-window:focus-visible{outline:2px solid #fff;outline-offset:4px}#camera-window #camera-preview,#camera-window #camera-friends{position:absolute;inset:0;width:100%;height:100%;border-radius:inherit}#camera-window video{pointer-events:none}
     #work-bubble{padding:0;background:transparent;border-radius:21px;box-shadow:none;isolation:isolate}#work-bubble::before{content:"";position:absolute;inset:-9px;z-index:-1;pointer-events:none;border-radius:30px;background:linear-gradient(145deg,#fff 15%,#faf9f5 70%,#e8e6df);box-shadow:0 4px 0 #e1dfd7,0 11px 18px #38322724}#work-image{border-radius:21px;box-shadow:none}
     #speech-caption{position:fixed;z-index:7;pointer-events:none;white-space:pre;text-align:center;font-family:fatfrank,sans-serif;font-weight:400;line-height:1.18;color:#302f2b;-webkit-font-smoothing:antialiased;transform-origin:center}#speech-caption[hidden]{display:none}#work-bubble::before{background:linear-gradient(145deg,#fffdf8 15%,#fbf9f3 70%,#eeece5);box-shadow:0 3px 0 #eae7df,0 10px 18px #38322720}
-  .play-controls #reload-crowd{width:48px;height:48px;flex:0 0 48px;padding:0;border-radius:50%;display:grid;place-items:center}.play-controls #reload-crowd svg{width:23px;height:23px;overflow:visible;transition:transform .24s cubic-bezier(.2,.8,.2,1)}#reload-crowd:hover svg{transform:rotate(28deg)}#reload-crowd[data-reloading=true] svg{transform:rotate(180deg)}@media(prefers-reduced-motion:reduce){.play-controls #reload-crowd,.play-controls #reload-crowd svg{transition:none}}
-  .color-modes{position:fixed;right:22px;bottom:24px;z-index:4;display:flex;gap:5px;padding:5px;border-radius:28px;background:#fffdf0b8;box-shadow:0 3px 0 #b9b09e70;backdrop-filter:blur(8px)}.color-modes button{border:0;border-radius:22px;background:transparent;padding:9px 13px;font:400 13px fatfrank,sans-serif;color:#454039;transition:background .18s,transform .18s}.color-modes button:hover{transform:translateY(-2px)}.color-modes button[aria-pressed=true]{background:#383734;color:#fffdf8}body[data-color-mode=light],body[data-color-mode=dark]{background:#f4f3ef}body[data-color-mode=dark]{background:#191a1c}@media(max-width:620px){.color-modes{right:12px;bottom:84px}.color-modes button{padding:8px 11px}}
-  
+  .play-controls #reload-crowd{width:48px;height:48px;flex:0 0 48px;padding:0;border-radius:50%;display:grid;place-items:center}.play-controls #reload-crowd svg{width:23px;height:23px;overflow:visible;transition:transform .24s cubic-bezier(.2,.8,.2,1)}#reload-crowd:hover svg{transform:rotate(28deg)}#reload-crowd[data-reloading=true] svg{transform:rotate(180deg)}@media(prefers-reduced-motion:reduce){.play-controls #reload-crowd,.play-controls #reload-crowd svg{transition:none}}@media(max-width:620px){}
+
   .play-controls{gap:4px}.play-controls #reload-crowd{margin-left:8px}
-  body[data-color-mode=light]{background:#dcd8d0}body[data-color-mode=dark]{background:#242522}body[data-color-mode=light] .color-modes button[aria-pressed=true],body[data-color-mode=dark] .color-modes button[aria-pressed=true]{background:#ed530d;color:#fff5e9}body[data-color-mode=dark] .color-modes{background:#d8d0c1eb}
-  body[data-color-mode=chic] .color-modes button[aria-pressed=true]{background:#3c3934;color:#fff5e9}
-  .play-controls{gap:8px}.play-controls button{font-size:13px;padding:11px 19px}.play-controls #reload-crowd{width:40px;height:40px;flex-basis:40px;margin-left:4px}.play-controls #reload-crowd svg{width:20px;height:20px}.color-modes{padding:4px;gap:4px}.color-modes button{font-size:12px;padding:7px 11px}
+  .play-controls{gap:8px}.play-controls button{font-size:13px;padding:11px 19px}.play-controls #reload-crowd{width:40px;height:40px;flex-basis:40px;margin-left:4px}.play-controls #reload-crowd svg{width:20px;height:20px}
   #work-image{height:auto;aspect-ratio:auto;object-fit:contain;border-radius:3px}#work-bubble{border-radius:3px}#work-bubble::before{inset:-9px;border-radius:12px}
-  .portfolio-home{position:fixed;left:22px;bottom:29px;z-index:4;color:#454039;font:400 12px/1.3 fatfrank,sans-serif;text-decoration:none;padding:7px 0;text-underline-offset:4px}.portfolio-home:hover{text-decoration:underline}body[data-color-mode=chic] .portfolio-home{color:var(--portfolio-link-color,#454039)}@media(max-width:620px){.portfolio-home{left:12px;bottom:92px;font-size:11px}}
+  .portfolio-home{position:fixed;left:22px;bottom:29px;z-index:4;color:#454039;font:400 12px/1.3 fatfrank,sans-serif;text-decoration:none;padding:7px 0;text-underline-offset:4px}.portfolio-home:hover{text-decoration:underline}@media(max-width:620px){.portfolio-home{left:12px;bottom:92px;font-size:11px}}
   #work-bubble::before{inset:-14px;border-radius:0;background:linear-gradient(145deg,#fffef9 15%,#fffdf7 65%,#eeeae1);box-shadow:none;filter:drop-shadow(0 3px 0 #ded9ce) drop-shadow(0 7px 8px #38322720);--puffy-frame:linear-gradient(#000 0 0) center/calc(100% - 18px) calc(100% - 18px) no-repeat,radial-gradient(circle 9px at 9px 9px,#000 98%,transparent 100%) left top/18px 18px repeat-x,radial-gradient(circle 9px at 9px 9px,#000 98%,transparent 100%) left bottom/18px 18px repeat-x,radial-gradient(circle 9px at 9px 9px,#000 98%,transparent 100%) left top/18px 18px repeat-y,radial-gradient(circle 9px at 9px 9px,#000 98%,transparent 100%) right top/18px 18px repeat-y;-webkit-mask:var(--puffy-frame);mask:var(--puffy-frame)}
   html,body{overscroll-behavior:none}#world{position:fixed;inset:0;width:100%;height:100%;filter:saturate(1.12)}
     @media(max-width:620px){
       .play-controls{bottom:calc(16px + env(safe-area-inset-bottom,0px));gap:8px;max-width:calc(100vw - 24px)}
       .play-controls button{font-size:12px;padding:11px 17px;min-height:40px}
       .play-controls #reload-crowd{width:40px;height:40px;flex-basis:40px;margin-left:4px}
-      .color-modes{right:max(12px,env(safe-area-inset-right,0px));bottom:calc(68px + env(safe-area-inset-bottom,0px));padding:4px}
-      .color-modes button{font-size:11px;line-height:16px;padding:5px 10px}
       .portfolio-home{left:max(12px,env(safe-area-inset-left,0px));bottom:calc(70px + env(safe-area-inset-bottom,0px));font-size:11px;line-height:16px;padding:6px 0;max-width:calc(100vw - 140px)}
       .play-controls #sensor-status{bottom:110px;width:min(270px,calc(100vw - 36px));max-width:none;font-size:11px;line-height:1.35;padding:6px 10px;border-radius:14px;background:#fffdf4ed;color:#454039}
       .play-controls #sensor-status:empty{display:none}
     }
   #work-bubble::before{inset:-32px;-webkit-mask:var(--frame-mask) center/100% 100% no-repeat;mask:var(--frame-mask) center/100% 100% no-repeat}
-  .color-modes{background:linear-gradient(#fffdf5,#eee9d8);backdrop-filter:none}
-  .color-modes button:hover{transform:translateY(-2px) rotate(-3deg)}
   .portfolio-home{transition:transform .2s cubic-bezier(.2,.8,.2,1)}
   .portfolio-home:hover{transform:translateY(-2px) rotate(-3deg)}
   @media(max-width:620px){
-    .color-modes{top:calc(12px + env(safe-area-inset-top,0px));bottom:auto}
     .portfolio-home{top:calc(15px + env(safe-area-inset-top,0px));bottom:auto}
     #camera-window{width:144px;height:108px;border-radius:19px}
   }
@@ -100,9 +92,9 @@
 </head>
 <body>
   <canvas id="world" tabindex="0" aria-label="A playful crowd of soft balloon creatures. Drag to move and roll creatures freely. Use the wheel over a creature or pinch with two fingers to resize it; twist two fingers to turn it. Press Space to bounce the crowd."></canvas>
-  <div class="play-controls"><span id="sensor-status" role="status" aria-live="polite"></span><button id="camera-toggle" aria-pressed="false">Camera</button><button id="mic-toggle" aria-pressed="false">Blow</button><button id="reload-crowd" type="button" aria-label="Reload with new friends and colors" title="New friends"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 9a8 8 0 1 0 .15 5.7M20 4v5h-5"/></svg></button></div>
-  <nav class="portfolio-home" aria-label="Portfolio versions"><details><summary>versions</summary><div><a href="/">v00</a><span aria-current="page">v01</span><a href="/versions/drag-reveal/">v02</a><a href="/versions/v3/">v03</a></div></details></nav>
-  <div class="color-modes" role="group" aria-label="Color tone"><button type="button" data-color-mode="pop" aria-pressed="true" title="Playful colors">Pop</button><button type="button" data-color-mode="chic" aria-pressed="false" title="Chic — click again to change the accent color">Chic</button></div>
+  <div class="play-controls"><span id="sensor-status" role="status" aria-live="polite"></span><button id="camera-toggle" aria-pressed="false" aria-label="Camera"><svg viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="camera-shell" x2="0" y2="1"><stop stop-color="#68696c"/><stop offset="1" stop-color="#27282b"/></linearGradient><radialGradient id="camera-lens"><stop stop-color="#6a737c"/><stop offset=".65" stop-color="#30343b"/><stop offset="1" stop-color="#15171c"/></radialGradient></defs><path d="M11 7.5 13 5h6l2 2.5h4a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-12a4 4 0 0 1 4-4Z" fill="url(#camera-shell)"/><circle cx="16" cy="17" r="7" fill="#e9f2f1"/><circle cx="16" cy="17" r="5.4" fill="url(#camera-lens)"/><ellipse cx="14.5" cy="15" rx="2" ry="1.3" fill="#fff" opacity=".7"/><rect x="23" y="10" width="3" height="2" rx="1" fill="#fff" opacity=".9"/></svg></button><button id="reload-crowd" type="button" aria-label="Refresh with new friends and colors">Refresh</button></div>
+  <nav class="portfolio-home" aria-label="Portfolio versions"><details><summary>Versions</summary><div><a href="/">v00</a><span aria-current="page">v01</span><a href="/versions/drag-reveal/">v02</a><a href="/versions/v3/">v03</a></div></details></nav>
+
   <div id="camera-window" tabindex="0" aria-label="Camera preview. Drag to a corner. Arrow keys move between corners."><canvas id="camera-friends" hidden aria-label="Little monsters bouncing around your face"></canvas>
   <video id="camera-preview" autoplay muted playsinline hidden aria-label="Your camera preview"></video></div>
   <p id="work-hello" hidden role="status"></p>

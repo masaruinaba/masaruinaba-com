@@ -124,6 +124,7 @@ export class LiquidHover {
   private cache = new Map<string, Promise<TexEntry>>()
   private blank!: Texture
   private currentSrc: string | null = null
+  private hideTimer: ReturnType<typeof setTimeout> | undefined
 
   private targetReveal = 0
   private targetFade = 1
@@ -248,6 +249,7 @@ export class LiquidHover {
   }
 
   async show(src: string, rect?: DOMRect) {
+    clearTimeout(this.hideTimer)
     this.currentSrc = src
     let entry: TexEntry
     try { entry = await this.load(src) }
@@ -281,8 +283,9 @@ export class LiquidHover {
   }
 
   hide() {
-    this.targetReveal = 0
     this.currentSrc = null
+    clearTimeout(this.hideTimer)
+    this.hideTimer = setTimeout(() => { this.targetReveal = 0 }, this.contained ? 0 : 160)
   }
 
   private loop = (t: number) => {

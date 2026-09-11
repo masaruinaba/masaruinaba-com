@@ -1,3 +1,4 @@
+import {collectionAnchor} from './collection-layout.js';
 import {voicePhrase,voiceMouth} from './voice-phrase.js';
 import * as THREE from 'three';
 import {MarchingCubes} from 'three/addons/objects/MarchingCubes.js';
@@ -5,9 +6,11 @@ const lines=['psst… over here!','a tiny tap? pretty please.','I have something
 export function createSpeech(scene,onSay=()=>{},onClear=()=>{}){
   const root=new THREE.Group();root.visible=false;scene.add(root);
   const mat=new THREE.MeshBasicMaterial({color:'#fffdf8',toneMapped:false});
+  const cloudLightness={value:0};
   mat.onBeforeCompile=shader=>{
+    shader.uniforms.cloudLightness=cloudLightness;
     shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 balloonNormal;').replace('#include <begin_vertex>','#include <begin_vertex>\nballoonNormal=normalize(normalMatrix*normal);');
-    shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 balloonNormal;').replace('#include <color_fragment>','#include <color_fragment>\ndiffuseColor.rgb*=mix(vec3(.76,.75,.72),vec3(1.0),smoothstep(-.8,.65,balloonNormal.y));');
+    shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 balloonNormal;\nuniform float cloudLightness;').replace('#include <color_fragment>','#include <color_fragment>\ndiffuseColor.rgb*=mix(mix(vec3(.76,.75,.72),vec3(.86,.855,.845),cloudLightness),vec3(1.0),smoothstep(-.8,.65,balloonNormal.y));');
   };
   const caption=document.createElement('div');caption.id='speech-caption';caption.hidden=true;caption.setAttribute('role','status');document.body.append(caption);
   const shapes=new Map();let screenBounds=null,phrase=null;
@@ -40,7 +43,7 @@ export function createSpeech(scene,onSay=()=>{},onClear=()=>{}){
     if(!who?.face)return;actor?.face.speak(0);if(actor)actor.speaking=false;actor=who;actor.speaking=true;start=time;rotation=Math.sin(who.phase*2.7)*.12;persistent=keep;screenBounds=null;anchorSide=who.face.mouthPosition().x>0?-1:1;
       let choice;do{choice=Math.floor(Math.random()*lines.length);}while(choice===last);last=choice;
       const kind=1+(lastShape===1?1:0);lastShape=kind;
-      tail.visible=kind===0;thought.visible=kind!==0;mat.color.set('#fffdf8');
+      tail.visible=kind===0;thought.visible=kind!==0;mat.color.set(actor.collectionSlot?'#ffffff':'#fffdf8');cloudLightness.value=actor.collectionSlot?1:0;
       const message=comment||lines[choice];
       ctx.font='400 76px fatfrank, sans-serif';
       const fullWidth=ctx.measureText(message).width,targetWidth=Math.max(400,Math.min(800,Math.sqrt(fullWidth*470)));
@@ -65,9 +68,15 @@ export function createSpeech(scene,onSay=()=>{},onClear=()=>{}){
     const age=time-start,target=persistent||age<4.2?1:0;
     if(reduced)size=target;else{velocity+=((target-size)*110-velocity*13)*dt;size+=velocity*dt;}
     const pulse=reduced?0:voiceMouth(phrase,age);actor.face.speak(pulse);
-    const fit=Math.min(persistent?.82:.76,(camera.right-camera.left)/(bubbleWidth*2.4+.7)),margin=bubbleWidth*1.14*fit;
+    const fit=Math.min(persistent?.82:.76,(camera.right-camera.left)/(bubbleWidth*2.4+.7),actor.collectionSlot?(innerWidth<620?142:210)*(camera.right-camera.left)/innerWidth/(bubbleWidth*2.6):Infinity),margin=bubbleWidth*1.14*fit;
     const mouth=actor.face.mouthPosition(),side=anchorSide;
     root.position.set(THREE.MathUtils.clamp(mouth.x+side*((bubbleWidth*1.14+.6)*fit),-camera.right+margin,camera.right-margin),THREE.MathUtils.clamp(mouth.y+(.10+Math.sin(time*.85+actor.phase)*.045)*fit,-camera.top+bubbleHeight*1.2*fit,camera.top-bubbleHeight*1.2*fit),Math.min(camera.position.z-1,Math.max(7,mouth.z+1)));
+    if(actor.collectionSlot){
+      const slot=actor.collectionSlot,arrangement=actor.collectionArrangement;
+      const unit=(camera.right-camera.left)/innerWidth,halfW=margin/unit,halfH=bubbleHeight*1.4*fit/unit;
+      const {x,y}=collectionAnchor(slot,arrangement.speechAngle,halfW*2,halfH*2,arrangement.gap);
+      root.position.set(camera.left+x*unit,camera.top-y*unit,10);
+    }
     root.scale.setScalar(Math.max(.001,size)*fit);root.rotation.z=rotation;
     const screen=root.position.clone().project(camera),pixelScale=innerWidth/(camera.right-camera.left)*fit;
     caption.style.left=((screen.x*.5+.5)*innerWidth)+'px';caption.style.top=((-screen.y*.5+.5)*innerHeight)+'px';caption.style.fontSize=(70*.0022*pixelScale)+'px';caption.style.transform='translate(-50%,-50%) rotate('+(-rotation)+'rad) scale('+Math.max(.001,size)+')';

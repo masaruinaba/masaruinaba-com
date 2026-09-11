@@ -18,3 +18,21 @@ export function placeWork(anchor,obstacle,viewport,width=208,height=130,previous
   }
   return previous;
 }
+
+// Plain collection cards must avoid speech and every visible face.
+export function placeCollectionWork(anchor,obstacles,viewport,width,height,previous=null){
+  if(previous){const hw=previous.width/2+12,hh=height*previous.width/width/2+12;
+    if(previous.y-hh>=76&&previous.y+hh<=viewport.height-20&&obstacles.every(o=>previous.x+hw<o.left||previous.x-hw>o.right||previous.y+hh<o.top||previous.y-hh>o.bottom))return previous;
+  }
+  for(const scale of [1,.85,.7]){
+    const w=width*scale,h=height*scale,hw=w/2+12,hh=h/2+12;
+    const candidates=[];
+    for(let y=76+hh;y<=viewport.height-hh-20;y+=12){
+      for(let x=hw+12;x<=viewport.width-hw-12;x+=12){
+        if(obstacles.every(o=>x+hw<o.left||x-hw>o.right||y+hh<o.top||y-hh>o.bottom))candidates.push({x,y,width:w});
+      }
+    }
+    if(candidates.length)return candidates.sort((a,b)=>Math.hypot(a.x-anchor.x,a.y-anchor.y)-Math.hypot(b.x-anchor.x,b.y-anchor.y))[0];
+  }
+  return null;
+}

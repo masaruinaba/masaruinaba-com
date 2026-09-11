@@ -1,3 +1,4 @@
+import {collectionAnchor} from './collection-layout.js';
 import {frameSurface} from './crowd-frame-surface.js';
 import {frameKinds,frameMask} from './crowd-work-frame.js';
 import {placeWork} from './crowd-work-layout.js';
@@ -31,12 +32,19 @@ export function updateWork(camera){
   if(!image.complete||!image.naturalWidth)return;
   const bounds=speaker?.bounds();if(!bounds)return;
   const obstacle=bounds;
-  const placement=placeWork({x:anchorX,y:anchorY-imageHeight/2},obstacle,{width:innerWidth,height:innerHeight},208,imageHeight,lastPlacement);
-  if(!placement)return;
+  let target={x:anchorX,y:anchorY-imageHeight/2},cardWidth=208,cardHeight=imageHeight;
+  if(owner.collectionSlot){
+    const slot=owner.collectionSlot,arrangement=owner.collectionArrangement;
+    cardWidth=Math.min(168,innerWidth*.39);cardHeight=imageHeight*cardWidth/208;
+    target=collectionAnchor(slot,arrangement.workAngle,cardWidth,cardHeight,arrangement.gap);
+
+  }
+  const placement=owner.collectionSlot?{...target,width:cardWidth}:placeWork(target,obstacle,{width:innerWidth,height:innerHeight},cardWidth,cardHeight,lastPlacement);
+  if(!placement){bubble.style.visibility='hidden';return;}
   lastPlacement=placement;
   const nextKey=[placement.width,imageHeight,frameIndex].join(':');
-  if(nextKey!==frameKey){frameKey=nextKey;bubble.style.setProperty('--frame-surface',frameSurface(placement.width,imageHeight*placement.width/208,frameKinds[frameIndex]));}
-  bubble.style.width=placement.width+'px';bubble.style.left=placement.x+'px';bubble.style.top=placement.y+'px';bubble.style.transform='translate(-50%,-50%)';bubble.style.visibility='visible';bubble.style.rotate=(owner.projectIndex%2?7:-7)+'deg';
+  if(!owner.collectionSlot&&nextKey!==frameKey){frameKey=nextKey;bubble.style.setProperty('--frame-surface',frameSurface(placement.width,imageHeight*placement.width/208,frameKinds[frameIndex]));}
+  bubble.style.width=placement.width+'px';bubble.style.left=placement.x+'px';bubble.style.top=placement.y+'px';bubble.style.transform='translate(-50%,-50%)';bubble.style.visibility='visible';bubble.style.rotate=owner.collectionSlot?'0deg':(owner.projectIndex%2?7:-7)+'deg';
   if(!revealed){revealed=true;
   animation=bubble.animate([{opacity:0,transform:'translate(-50%, -50%) scale(.18) rotate(-9deg)'},{opacity:1,transform:'translate(-50%, -50%) scale(1) rotate(0deg)',offset:.7},{opacity:1,transform:'translate(-50%, -50%) scale(1) rotate(0deg)'}],{duration:matchMedia('(prefers-reduced-motion: reduce)').matches?0:480,easing:'cubic-bezier(.18,.8,.3,1)'});
   }

@@ -4,7 +4,7 @@ import {crowdShell} from './crowd-shell.js';
 import {Membrane} from './physics.js';
 import {convexPart,worldParts,shapeContact} from './crowd-collision.js';
 import {initializeMotion,resolveDepth} from './crowd-physics.js';
-import {estimateMotion,breathLevel,cameraGust} from './crowd-wind.js';
+import {estimateMotion,cameraGust} from './crowd-wind.js';
 import {cornerPosition} from './camera-position.js';
 
 test('balloon surface is closed, positive, and has one shared equator',()=>{
@@ -15,12 +15,10 @@ test('independent float stays separated for two minutes without depth jitter',()
  const objects=fixture();resolveDepth(objects);const depths=objects.map(a=>a.z);
  for(let frame=0;frame<1200;frame++){const t=frame*.1;for(const a of objects){a.floatX=Math.sin(t*.43+a.phase)*.115;a.floatY=Math.sin(t*.489+a.phase*1.7)*.17;a.floatAngle=Math.sin(t*.35+a.phase)*.018;a.worldCollision=worldParts(a);}for(let i=0;i<objects.length;i++)for(let j=i+1;j<objects.length;j++)assert.equal(shapeContact(objects[i],objects[j]),null);if(frame%50===0){resolveDepth(objects);assert.deepEqual(objects.map(a=>a.z),depths);}}
 });
-test('still camera and silence create no wind; motion and breath do',()=>{
+test('still camera creates no wind; motion does',()=>{
  const w=80,h=60,p=new Uint8Array(w*h);for(let y=0;y<h;y++)for(let x=0;x<w;x++)p[y*w+x]=(x*37+y*19+x*y*7)%256;
  assert.equal(estimateMotion(p,p,w,h).strength,0);
  const c=new Uint8Array(w*h);for(let y=0;y<h;y++)for(let x=3;x<w;x++)c[y*w+x]=p[y*w+x-3];const motion=estimateMotion(p,c,w,h);assert.ok(motion.strength>.15);assert.ok(motion.x<0);
- assert.equal(breathLevel(new Float32Array(1024),new Float32Array(512).fill(-90),48000),0);
- assert.ok(breathLevel(new Float32Array(1024).fill(.10),new Float32Array(512).fill(-20),48000)>.5);
 });
 test('camera fits all four corners on mobile and desktop',()=>{for(const [w,h] of [[390,844],[1280,720]])for(const corner of ['top-left','top-right','bottom-left','bottom-right']){const p=cornerPosition(corner,180,135,w,h);assert.ok(p.x>=0&&p.y>=0&&p.x+180<=w&&p.y+135<=h);}});
 
