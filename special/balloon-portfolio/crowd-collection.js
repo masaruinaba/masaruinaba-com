@@ -196,6 +196,7 @@ export function createCollection({actors,ornaments,scene,camera,renderer,feedbac
   labels.addEventListener('click',e=>{if(e.target===labels||e.target.classList.contains('collection-extent'))togglePlayback();});
   function setActive(next,{initial=false}={}){
     if(active===next)return;
+    if(next&&!initial)scrollPaused=false;
     finishFloat();scrollImpulse=0;nativeScrollUntil=0;pauseAmbient();nextFloat=getTime()+1.5;lastInteraction=getTime()-3;
     const from=new Map([...actors,...ornaments].map(a=>[a,{position:a.root.position.clone(),quaternion:a.root.quaternion.clone(),scale:a.root.visible?a.root.scale.clone():new THREE.Vector3(.001,.001,.001)}]));
     const fromColor=scene.background?.isColor?scene.background.clone():renderer.getClearColor(new THREE.Color());
