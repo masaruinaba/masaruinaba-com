@@ -5,9 +5,9 @@
 .opening p,.opening h1{position:absolute;margin:0;font:inherit}
 .opening-logo{position:absolute;left:35.5%;top:6.65%;width:29%;aspect-ratio:556.747/74;opacity:0}
 .opening-logo i{position:absolute;display:block;background:currentColor;transform:scaleY(-1);mask-size:100% 100%;mask-repeat:no-repeat}
-.opening-logo-base{left:.52%;top:0;width:98.96%;height:129.17%;mask-image:url('/opening/logo-base.svg')}
-.opening-logo-o{left:51.37%;bottom:-.35%;width:7.4%;height:70.21%;mask-image:url('/opening/logo-o.svg')}
-.opening-logo-u{left:59.72%;bottom:-.35%;width:9.05%;height:70.62%;mask-image:url('/opening/logo-u.svg')}
+.opening-logo-base{left:.52%;top:0;width:98.96%;height:129.17%;mask-image:url('/special/balloon-portfolio/opening/logo-base.svg')}
+.opening-logo-o{left:51.37%;bottom:-.35%;width:7.4%;height:70.21%;mask-image:url('/special/balloon-portfolio/opening/logo-o.svg')}
+.opening-logo-u{left:59.72%;bottom:-.35%;width:9.05%;height:70.62%;mask-image:url('/special/balloon-portfolio/opening/logo-u.svg')}
 .opening .opening-description{top:6.35%;right:4.85%;width:10.8%;font-size:.94vw}
 .opening .opening-copy{left:4.9%;top:39.38%;font-size:2.044vw}
 .opening .opening-title{left:0;right:0;bottom:4.15%;text-align:center;font-size:8.766vw;letter-spacing:-.02em;white-space:nowrap}

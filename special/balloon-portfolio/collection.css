@@ -13,7 +13,7 @@ body[data-collection=true] .portfolio-home{color:#454039!important}
 .collection-labels button:active{cursor:grabbing}
 .collection-labels[hidden]{display:none}
 
-.collection-labels button span{box-sizing:border-box;width:13px;height:13px;padding-top:1px;border:1px solid #777;border-radius:50%;display:flex;align-items:center;justify-content:center;font:600 7.5px/1 Arial,sans-serif;color:#555;text-decoration:none!important}
+.collection-labels button span{box-sizing:border-box;width:15px;height:15px;padding-top:1px;border:1px solid #777;border-radius:50%;display:flex;align-items:center;justify-content:center;font:600 8.5px/1 Arial,sans-serif;color:#555;text-decoration:none!important}
 .collection-labels button[aria-pressed=true] span{border-color:#333;color:#222}
 .collection-extent{width:1px;pointer-events:none}
 @media(max-width:620px){
@@ -134,19 +134,32 @@ body[data-collection=true] .portfolio-home{z-index:9}
 body[data-collection=true]::after{opacity:var(--collection-footer-opacity,0);transition:opacity .4s ease}
 @media(prefers-reduced-motion:reduce){body[data-collection=true]::after{transition:none}}
 
-/* The camera slot closes gradually, so the centered bar resizes continuously. */
-.play-controls #camera-toggle{box-sizing:border-box;min-width:0;transition:width .5s cubic-bezier(.22,1,.36,1),flex-basis .5s cubic-bezier(.22,1,.36,1),margin-right .5s cubic-bezier(.22,1,.36,1),padding .5s cubic-bezier(.22,1,.36,1),opacity .2s ease}
-.play-controls #camera-toggle::after{transition:opacity .2s ease}
-body[data-collection=true] .play-controls #camera-toggle{display:grid;width:0;flex-basis:0;padding:0;margin-right:-4px;opacity:0;pointer-events:none;overflow:hidden}
-body[data-collection=true] .play-controls #camera-toggle::after{opacity:0}
-.play-controls .collection-switch button{transition:background-color .3s ease}
-@media(prefers-reduced-motion:reduce){.play-controls #camera-toggle,.play-controls #camera-toggle::after,.play-controls .collection-switch button{transition:none}}
-
 @media(max-width:620px){.collection-labels button span{width:12px;height:12px;font-size:7px;border-width:1px}}
 
 .collection-labels{overflow-y:auto;overflow-x:hidden;pointer-events:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y}
 
 .collection-numbers{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden}
 .collection-numbers[hidden]{display:none}
-.collection-numbers span{position:absolute;box-sizing:border-box;display:flex;align-items:center;justify-content:center;width:13px;height:13px;padding-top:1px;border:1px solid #777;border-radius:50%;color:#555;font:600 7.5px/1 Arial,sans-serif;font-variant-numeric:tabular-nums}
-@media(max-width:620px){.collection-numbers span{width:12px;height:12px;font-size:7px}}
+.collection-numbers span{position:absolute;box-sizing:border-box;display:flex;align-items:center;justify-content:center;width:15px;height:15px;padding-top:1px;border:1px solid #777;border-radius:50%;color:#555;font:600 8.5px/1 Arial,sans-serif;font-variant-numeric:tabular-nums}
+@media(max-width:620px){.collection-numbers span{width:14px;height:14px;font-size:8px}}
+
+/* Both modes share one fixed utility slot; only the icon crossfades. */
+.play-controls .collection-utility{position:relative;flex:0 0 40px;width:40px;height:36px;margin-right:13px}
+.collection-utility::after{content:'';position:absolute;right:-9px;top:9px;height:18px;width:1px;background:rgba(69,64,57,.14);pointer-events:none}
+.play-controls .collection-utility #camera-toggle,.play-controls .collection-utility #collection-playback{position:absolute;inset:0;display:grid;place-items:center;box-sizing:border-box;width:40px;height:36px;min-height:36px;padding:2px;margin:0;border:0;border-radius:18px;background:transparent;box-shadow:none;color:#454039;transition:opacity .28s ease,transform .42s cubic-bezier(.22,1,.36,1),visibility .42s;transform:translateY(0) scale(1);opacity:1;visibility:visible}
+.play-controls .collection-utility #camera-toggle::after,.play-controls .collection-utility #collection-playback::after{display:none}
+.play-controls .collection-utility #collection-playback{opacity:0;visibility:hidden;transform:translateY(5px) scale(.86);pointer-events:none}
+body[data-collection=true] .play-controls .collection-utility #camera-toggle{opacity:0;visibility:hidden;transform:translateY(-5px) scale(.86);pointer-events:none}
+body[data-collection=true] .play-controls .collection-utility #collection-playback{opacity:1;visibility:visible;transform:translateY(0) scale(1);pointer-events:auto}
+.play-controls #collection-playback svg{width:23px;height:23px}
+.play-controls .collection-utility #collection-playback:hover{background:#efeee9}
+.play-controls #collection-playback:focus-visible{outline:1px solid currentColor;outline-offset:3px}
+.play-controls .collection-switch::before{display:block;inset:0 auto auto 0;width:36px;height:36px;background:#efeee9;border-radius:14px;opacity:1;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;transform:translateX(0);transition:transform .42s cubic-bezier(.22,1,.36,1)}
+body[data-collection=true] .play-controls .collection-switch::before{transform:translateX(40px)}
+.play-controls .collection-switch button[aria-pressed=true]{background:transparent}
+@media(prefers-reduced-motion:reduce){.play-controls .collection-utility #camera-toggle,.play-controls .collection-utility #collection-playback,.play-controls .collection-switch::before{transition:none}}
+
+.collection-labels{scrollbar-width:none;overflow-anchor:none}
+.collection-labels::-webkit-scrollbar{display:none}
+
+.collection-numbers span[data-selected=true]{background:#454039;border-color:#454039;color:#fff}

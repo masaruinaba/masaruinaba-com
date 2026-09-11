@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {collectionLayout} from './collection-layout.js';
+import {collectionLayout,collectionRollY} from './collection-layout.js';
 for(const [width,height] of [[1440,900],[1074,1118],[390,844],[375,667]]){
  test(`collection has 25 separate, addressable slots at ${width}x${height}`,()=>{
   const slots=collectionLayout(25,width,height,2026);
@@ -22,24 +22,35 @@ test('short desktop windows scroll instead of shrinking the collection',()=>{
  assert.ok(Math.max(...short.map(slot=>slot.y+slot.size/2))>400);
 });
 
-test('desktop grid fills the width with equal square cells and half-cell edge spacing',()=>{
+test('desktop grid fills the width with equal square cells',()=>{
  const slots=collectionLayout(25,1440,900,2026);
- const first=slots[0],cols=Math.round(1440/first.cellWidth);
+ const first=slots[0],cols=slots.filter(slot=>slot.y===first.y).length;
  assert.equal(first.x,first.cellWidth/2);
  assert.equal(first.y,first.cellHeight/2);
  assert.equal(first.cellWidth,first.cellHeight);
- assert.equal(1440-slots[cols-1].x,first.x);
+ assert.ok(Math.abs(1440-slots[cols-1].x-first.x)<1e-8);
 });
 
-test('1440px collection keeps small characters across six spacious columns',()=>{
+test('1440px collection keeps small characters across five spacious columns',()=>{
  const slots=collectionLayout(25,1440,900,2026);
- assert.equal(slots.filter(slot=>slot.y===slots[0].y).length,6);
+ assert.equal(slots.filter(slot=>slot.y===slots[0].y).length,5);
  assert.equal(slots[0].size,100);
- assert.equal(slots[1].x-slots[0].x,240);
+ assert.ok(Math.abs(slots[1].x-slots[0].x-288)<1e-8);
 });
 
 test('mobile uses three equal full-width columns',()=>{
  const slots=collectionLayout(25,390,844,2026);
  assert.deepEqual(slots.slice(0,3).map(slot=>slot.x),[65,195,325]);
  assert.equal(slots[0].x,390-slots[2].x);
+});
+
+test('rolling rows keep the same position when the scroll origin wraps',()=>{
+ for(const scroll of [-1801,-1,0,1799,1800,3601]){
+  for(const y of [150,450,1650]){
+   const before=collectionRollY(y,scroll,1800,300);
+   assert.equal(before,collectionRollY(y,scroll+1800,1800,300));
+   assert.ok(before>=-150&&before<1650);
+  }
+ }
+ assert.equal(collectionRollY(150,1799,1800,300)-collectionRollY(150,1800,1800,300),1);
 });

@@ -5,7 +5,7 @@ export function collectionLayout(count,width,height,seed=1){
   const mobile=width<620,margin=0,top=mobile?64:0;
   const usableW=width-margin*2;
   // Height never changes the column count or character size.
-  const cols=mobile?3:Math.max(3,Math.round(usableW/240));
+  const cols=mobile?3:Math.max(3,Math.round(usableW/300));
   const cw=usableW/cols,ch=cw*(mobile?1.45:1);
   const size=mobile?Math.min(cw,ch)*.64:Math.min(100,cw*.56);
   const order=Array.from({length:count},(_,i)=>i);
@@ -23,4 +23,10 @@ export function collectionAnchor(slot,angle,width,height,gap=8){
   const edge=Math.min((width/2)/Math.max(.001,Math.abs(dx)),(height/2)/Math.max(.001,Math.abs(dy)));
   const distance=edge+slot.size*.34+gap;
   return {x:slot.x+dx*distance,y:slot.y+dy*distance};
+}
+
+// Recycle a row only after it is completely above the viewport.
+export function collectionRollY(y,scroll,period,rowHeight){
+  const cutoff=-rowHeight/2;
+  return ((y-scroll-cutoff)%period+period)%period+cutoff;
 }

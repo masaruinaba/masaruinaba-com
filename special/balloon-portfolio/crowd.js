@@ -27,7 +27,10 @@ import {initializeMotion,advancePile} from './crowd-physics.js';
 import {polygonParts,meshParts,convexPart} from './crowd-collision.js';
 
 const canvas=document.querySelector('#world'),status=document.querySelector('#status');
-const opening=createOpening();let openingReleased=false;
+const initialCollection=new URLSearchParams(location.search).get('mode')==='collection';
+const opening=initialCollection?{finish:async release=>{document.body.dataset.opening='done';release();},cancel:()=>{document.body.dataset.opening='done';}}:createOpening();
+if(initialCollection){document.body.dataset.collection='true';document.body.dataset.opening='loading';}
+let openingReleased=false;
 const feedback=setupFeedback();
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const sessionSeed=Number(new URLSearchParams(location.search).get('seed'))||crypto.getRandomValues(new Uint32Array(1))[0];
@@ -122,7 +125,7 @@ function resize(){
   if((!entered||!openingReleased)&&!reduced.matches){
     for(const a of [...actors,...ornaments]){a.px=a.x*.06;a.py=a.y*.06;a.vx=a.x*3.9;a.vy=a.y*3.9;a.turn=(random()-.5)*2.7;a.omega=(random()-.5)*5;a.entry=.07;a.entryVelocity=0;a.delay=random()*.13;}
   }
-  entered=true;draw(0);wake();
+  entered=true;if(!initialCollection||collection)draw(0);wake();
 }
 function pose(a,dt,isMonster){
   coastGrip(a,dt,held?.actor===a);
@@ -317,7 +320,7 @@ async function init(){
     await document.fonts.load('400 80px fatfrank');document.body.dataset.typeface=document.fonts.check('400 80px fatfrank')?'FatFrank':'fallback';
     speech=createSpeech(scene,(actor,message,phrase)=>feedback.babble({size:actor.userScale||1,message,phrase}),()=>feedback.stopVoice());createWindControls(applyWind);resize();window.addEventListener('resize',resize);
     collection=createCollection({actors,ornaments,scene,camera,renderer,feedback,seed:sessionSeed,wake,speech,getTime:()=>time,onChange:active=>{release(false);speech.clear();closeWork();if(!active)resize();}});
-    if(new URLSearchParams(location.search).get('mode')==='collection')collection.setActive(true);
+    if(new URLSearchParams(location.search).get('mode')==='collection')collection.setActive(true,{initial:true});
     await renderer.compileAsync(scene,camera);draw(0);status.hidden=true;document.body.dataset.ready='true';
     await opening.finish(()=>{openingReleased=true;wake();});
   }catch(error){opening.cancel();console.error(error);status.hidden=false;status.textContent='Could not load the playground. Please refresh.';document.body.dataset.error=error.message;}
