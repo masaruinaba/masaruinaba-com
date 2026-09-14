@@ -133,15 +133,6 @@ export const works = [
     color: '#8672E2',
   },
   {
-    year: '2026',
-    type: 'Animation',
-    title: 'Animation Notes',
-    thumbnail: '/thumbnails/animation-notes.png',
-    file: 'https://fable-notes.vercel.app/',
-    displayFile: 'apps/fable-notes',
-    color: '#CAC2A3',
-  },
-  {
     year: '2025',
     type: 'App',
     title: 'Creative Weather',

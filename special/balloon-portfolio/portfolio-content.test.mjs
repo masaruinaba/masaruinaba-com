@@ -4,9 +4,9 @@ import {existsSync,readFileSync} from 'node:fs';
 import {projects} from './portfolio-projects.js';
 import {projectComments,projectKey,chooseComment} from './portfolio-comments.js';
 import {voicePhrase,voiceMouth} from './voice-phrase.js';
-test('all 25 current works have local covers, unique identities and ten non-repeating voiced comments',()=>{
- assert.equal(projects.length,25);
- assert.equal(new Set(projects.map(projectKey)).size,25);
+test('all 24 current works have local covers, unique identities and ten non-repeating voiced comments',()=>{
+ assert.equal(projects.length,24);
+ assert.equal(new Set(projects.map(projectKey)).size,24);
  for(const work of projects){
   assert.ok(existsSync(new URL('./public/portfolio'+(work.image||work.thumbnail),import.meta.url)),work.title);
   const comments=projectComments[projectKey(work)];assert.equal(comments.length,10,work.title);
