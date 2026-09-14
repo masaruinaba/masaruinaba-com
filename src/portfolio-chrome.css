@@ -22,7 +22,14 @@
  .mobile-preview-row>td{padding:0!important;white-space:normal!important;width:auto!important;font-size:12px!important}
  .mobile-liquid-surface{position:relative;width:100%;aspect-ratio:4/3;overflow:hidden;touch-action:pan-y;background:#efefef}
  .mobile-liquid-surface img{display:block;width:100%;height:100%;object-fit:cover}
- .mobile-preview-link{display:flex;align-items:center;justify-content:space-between;min-height:44px;color:#222;text-decoration:none;font:11px "IBM Plex Mono",monospace}
+ .mobile-preview-link{display:block;color:#222;text-decoration:none;font:10px "IBM Plex Mono",monospace;-webkit-tap-highlight-color:transparent}
+ .mobile-preview-link:focus-visible{outline:1px solid #777;outline-offset:4px}
+ .mobile-preview-caption{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:44px;padding-top:4px;color:#888}
+ .mobile-preview-caption>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .mobile-preview-caption>span:last-child{flex-shrink:0;color:#333}
+ .work-row[aria-expanded="true"]>td{border-bottom-color:transparent}
+ .work-row>td:last-child::after{content:'+';display:block;color:#999;font:14px "IBM Plex Mono",monospace;text-align:center}
+ .work-row[aria-expanded="true"]>td:last-child::after{content:'−';color:#333}
  .mobile-preview-row[hidden]{display:none}
  .node{min-height:44px}
  .mini-cover{max-width:calc(100vw - 32px)}
@@ -30,4 +37,4 @@
 @media(prefers-reduced-motion:reduce){.versions-nav .version-list{transition:none}}
 
 .mobile-preview-clip{overflow:hidden;overflow-anchor:none;height:0;opacity:0}
-.mobile-preview-content{padding:0 16px 20px}
+.mobile-preview-content{padding:12px 16px 20px}

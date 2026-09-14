@@ -85,6 +85,7 @@
       }
 
       .table-wrapper {
+        overflow-anchor: none;
         flex: 1;
         width: 100%;
         overflow-x: hidden;
@@ -679,7 +680,14 @@
       mobileClip.className = 'mobile-preview-clip'
       const mobileContent = document.createElement('div')
       mobileContent.className = 'mobile-preview-content'
-      mobileContent.append(mobileSurface, mobileLink)
+      const mobileCaption = document.createElement('span')
+      mobileCaption.className = 'mobile-preview-caption'
+      const mobileDestination = document.createElement('span')
+      const mobileVisit = document.createElement('span')
+      mobileVisit.textContent = 'Visit ↗'
+      mobileCaption.append(mobileDestination, mobileVisit)
+      mobileLink.append(mobileSurface, mobileCaption)
+      mobileContent.append(mobileLink)
       mobileClip.append(mobileContent)
       mobileCell.append(mobileClip)
       mobilePreview.append(mobileCell)
@@ -737,7 +745,8 @@
         mobileImage.src = work.image || work.thumbnail
         mobileImage.alt = work.title
         mobileLink.href = href
-        mobileLink.textContent = `${work.title} ↗`
+        mobileDestination.textContent = itemLabel(work)
+        mobileLink.setAttribute('aria-label', `${work.title} — サイトを開く（新しいタブ）`)
         mobilePreview.hidden = false
         mobileClip.style.height = '0px'
         mobileClip.style.opacity = '0'
@@ -749,6 +758,52 @@
         }
         await animateMobileHeight(mobileContent.getBoundingClientRect().height, true)
         if (request === previewRequest) mobileClip.style.height = 'auto'
+      }
+
+      let desktopLayoutMoving = false
+      let desktopLayoutFrame = 0
+      let desktopPointer = null
+      let desktopInputDuringMotion = false
+      document.addEventListener('mousemove', event => {
+        desktopPointer = { x: event.clientX, y: event.clientY }
+        if (desktopLayoutMoving) desktopInputDuringMotion = true
+      })
+      document.getElementById('scrollArea').addEventListener('wheel', event => {
+        desktopPointer = { x: event.clientX, y: event.clientY }
+        if (desktopLayoutMoving) desktopInputDuringMotion = true
+      }, { passive: true })
+      // Keep the chosen row under the pointer while the previous row contracts.
+      // Layout-generated mouseenter/mouseleave events must not choose another row.
+      function changeDesktopLayout(anchor, change) {
+        cancelAnimationFrame(desktopLayoutFrame)
+        desktopLayoutMoving = true
+        desktopInputDuringMotion = false
+        const area = document.getElementById('scrollArea')
+        let top = anchor?.getBoundingClientRect().top
+        let scroll = area.scrollTop
+        const started = performance.now()
+        change()
+        const update = () => {
+          if (anchor) {
+            // Preserve real scrolling while compensating only for layout movement.
+            top -= area.scrollTop - scroll
+            area.scrollTop += anchor.getBoundingClientRect().top - top
+            top = anchor.getBoundingClientRect().top
+            scroll = area.scrollTop
+            liquid?.setMask(anchor.getBoundingClientRect())
+          }
+          if (performance.now() - started < 460) {
+            desktopLayoutFrame = requestAnimationFrame(update)
+          } else {
+            desktopLayoutMoving = false
+            if (desktopInputDuringMotion && desktopPointer) {
+              const next = document.elementFromPoint(desktopPointer.x, desktopPointer.y)?.closest('.work-row')
+              if (next && !next.classList.contains('is-active')) next.startHover()
+              else if (!next) clearDesktopHover()
+            }
+          }
+        }
+        desktopLayoutFrame = requestAnimationFrame(update)
       }
 
       function createRow(work) {
@@ -827,9 +882,12 @@
         }
 
         let hoverRequest = 0
-        row.addEventListener('mouseenter', async () => {
-          if (compactLayout()) return
+        const startHover = async () => {
+          if (compactLayout() || desktopLayoutMoving) return
           if (!hasImage) {
+            changeDesktopLayout(row, () => {
+              document.querySelectorAll('.work-row.is-active').forEach(other => { if (other !== row) other.endHover() })
+            })
             row.classList.add('is-active')
             animateTextShuffle(title)
             updateRowBgPosition()
@@ -846,15 +904,11 @@
           if (request !== hoverRequest || compactLayout()) return
           row.removeAttribute('aria-busy')
           if (!ready) return
-          const scrollArea = document.getElementById('scrollArea')
-          const beforeHeight = row.getBoundingClientRect().height
-          row.classList.add('is-active')
-          animateTextShuffle(title)
-          requestAnimationFrame(() => {
-            const afterHeight = row.getBoundingClientRect().height
-            const delta = Math.max(0, afterHeight - beforeHeight) * 0.5
-            if (scrollArea && delta > 0) scrollArea.scrollTop += delta
+          changeDesktopLayout(row, () => {
+            document.querySelectorAll('.work-row.is-active').forEach(other => { if (other !== row) other.endHover() })
+            row.classList.add('is-active')
           })
+          animateTextShuffle(title)
           if (hasImage) {
             const updateMask = () => liquid?.setMask(row.getBoundingClientRect())
             requestAnimationFrame(updateMask)
@@ -863,7 +917,9 @@
           } else {
             liquid?.hide()
           }
-        })
+        }
+        row.startHover = startHover
+        row.addEventListener('mouseenter', startHover)
         row.addEventListener('mousemove', () => {
           if (compactLayout()) return
           if (hasImage) liquid?.setMask(row.getBoundingClientRect())
@@ -881,10 +937,21 @@
 
           row.classList.remove('is-active')
           resetTextShuffle(title)
-          if (hasImage) liquid?.hide()
+          if (hasImage && !desktopLayoutMoving) liquid?.hide()
         }
         row.endHover = endHover
-        row.addEventListener('mouseleave', endHover)
+        row.addEventListener('mouseleave', event => {
+          if (desktopLayoutMoving) return
+          // The next row owns the handoff; do not collapse before it is selected.
+          const next = event.relatedTarget instanceof Element ? event.relatedTarget.closest('.work-row') : null
+          if (next) {
+            hoverRequest++
+            row.removeAttribute('aria-busy')
+            return
+          }
+          changeDesktopLayout(null, endHover)
+          liquid?.hide()
+        })
         row.addEventListener('click', () => {
           if (compactLayout()) { openMobilePreview(row, work, href); return }
           if (href.startsWith('http')) {
@@ -922,6 +989,9 @@
       })
 
       const clearDesktopHover = () => {
+        cancelAnimationFrame(desktopLayoutFrame)
+        desktopLayoutMoving = false
+        desktopInputDuringMotion = false
         document.querySelectorAll('.work-row.is-active, .work-row[aria-busy="true"]').forEach(row => row.endHover())
         liquid?.hide()
       }
