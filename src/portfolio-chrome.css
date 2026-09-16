@@ -22,7 +22,7 @@
  .mobile-preview-row>td{padding:0!important;white-space:normal!important;width:auto!important;font-size:12px!important}
  .mobile-liquid-surface{position:relative;width:100%;aspect-ratio:4/3;overflow:hidden;touch-action:pan-y;background:#efefef}
  .mobile-liquid-surface img{display:block;width:100%;height:100%;object-fit:cover}
- .mobile-preview-link{display:block;color:#222;text-decoration:none;font:10px "IBM Plex Mono",monospace;-webkit-tap-highlight-color:transparent}
+ .mobile-preview-link{display:block;color:#1E1E21;text-decoration:none;font:10px "IBM Plex Mono",monospace;-webkit-tap-highlight-color:transparent}
  .mobile-preview-link:focus-visible{outline:1px solid #777;outline-offset:4px}
  .mobile-preview-caption{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:44px;padding-top:4px;color:#888}
  .mobile-preview-caption>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

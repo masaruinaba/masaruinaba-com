@@ -3,12 +3,12 @@ import {createCrowdedFace} from '../special/balloon-portfolio/crowd-face.js';
 
 const colors=['#0079F2','#FF6500','#FFD000','#EE1686','#7924D8','#00AD80'];
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-for(const link of document.querySelectorAll('.app-icon-link')){
+for(const link of document.querySelectorAll('.app-icon-link, [data-balloon-icon]')){
   link.replaceChildren();
-  Object.assign(link.style,{width:'30px',height:'30px'});
-  link.href='/special/balloon-portfolio/';
-  link.removeAttribute('target');
-  link.setAttribute('aria-label','Balloon Portfolio');
+  const iconColors=link.classList.contains('current-section-icon')?['#1E1E21']:colors;
+  const hoverHost=link.closest('.gather-link');
+  if(!hoverHost&&!link.classList.contains('current-section-icon')) Object.assign(link.style,{width:'30px',height:'30px'});
+  if(link.matches('a')){link.href='/special/balloon-portfolio/';link.removeAttribute('target');link.setAttribute('aria-label','Balloon Portfolio');}
   const canvas=document.createElement('canvas');
   canvas.setAttribute('aria-hidden','true');
   Object.assign(canvas.style,{width:'100%',height:'100%',display:'block',borderRadius:'34%'});
@@ -19,7 +19,7 @@ for(const link of document.querySelectorAll('.app-icon-link')){
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure=1.3;
   const scene=new THREE.Scene();
-  scene.background=new THREE.Color(colors[0]);
+  scene.background=new THREE.Color(iconColors[0]);
   scene.add(new THREE.HemisphereLight('#fffaf1','#61546e',2.6));
   const light=new THREE.DirectionalLight('#ffffff',3.2);light.position.set(-2,3,5);scene.add(light);
   const fill=new THREE.DirectionalLight('#b9d6ff',.6);fill.position.set(2,-1,3);scene.add(fill);
@@ -27,7 +27,7 @@ for(const link of document.querySelectorAll('.app-icon-link')){
   camera.position.set(0,.215,3);camera.lookAt(0,.215,0);
   const root=new THREE.Group();scene.add(root);
   // Keep the body saturated; bright face lighting must not wash out its color.
-  const material=new THREE.MeshBasicMaterial({color:colors[0],vertexColors:true,toneMapped:false});
+  const material=new THREE.MeshBasicMaterial({color:iconColors[0],vertexColors:true,toneMapped:false});
   const geometry=new THREE.SphereGeometry(1,40,32);
   geometry.scale(.55,.55,.21);geometry.translate(0,.215,0);
   const shades=[];
@@ -46,13 +46,14 @@ for(const link of document.querySelectorAll('.app-icon-link')){
   const resize=new ResizeObserver(()=>{const r=link.getBoundingClientRect();if(r.width&&r.height)renderer.setSize(r.width,r.height,false);});resize.observe(link);
   const observer=new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;resume();});observer.observe(link);
   function draw(now){
-    frame=0;if(!visible||document.hidden)return;
+    frame=0;if(!visible||document.hidden||(hoverHost&&!hoverHost.matches(':hover,:focus-visible')))return;
     if(now-last>=1000/30){
       const dt=Math.min((now-last)/1000,.05);last=now;
-      if(colorIndex<0||(!reduced.matches&&now>=nextColor)){
-        colorIndex=(colorIndex+1)%colors.length;nextColor=now+3000;
-        material.color.set(colors[colorIndex]);scene.background.set(colors[colorIndex]);
-        canvas.dataset.color=colors[colorIndex];
+      if(colorIndex<0||(iconColors.length>1&&!reduced.matches&&now>=nextColor)){
+        colorIndex=(colorIndex+1)%iconColors.length;nextColor=now+3000;
+        material.color.set(iconColors[colorIndex]);scene.background.set(iconColors[colorIndex]);
+        canvas.dataset.color=iconColors[colorIndex];
+
       }
       face.update(now/1000,dt,'awake',0,false,reduced.matches);
       renderer.render(scene,camera);
@@ -63,6 +64,46 @@ for(const link of document.querySelectorAll('.app-icon-link')){
   function look(event){const r=link.getBoundingClientRect();if(!r.width||!visible)return;face.look((event.clientX-r.left-r.width/2)/Math.max(r.width,180),.30-(event.clientY-r.top-r.height/2)/Math.max(r.height,180));}
   document.addEventListener('pointermove',look,{passive:true});
   link.addEventListener('pointerenter',()=>face.touch());
+  if(hoverHost){
+    let relocationTimer;
+    let active=false;
+    const place=()=>{
+      hoverHost.style.setProperty('--icon-x',`${15+Math.random()*70}%`);
+      hoverHost.style.setProperty('--icon-y',`${22+Math.random()*38}%`);
+      hoverHost.style.setProperty('--icon-angle',`${-22+Math.random()*44}deg`);
+    };
+    const schedule=()=>{
+      if(!active||reduced.matches||document.hidden)return;
+      relocationTimer=setTimeout(()=>{
+        link.classList.add('is-relocating');
+        relocationTimer=setTimeout(()=>{
+          if(!active)return;
+          place();
+          link.classList.remove('is-relocating');
+          schedule();
+        },480);
+      },2200+Math.random()*900);
+    };
+    const show=()=>{
+      if(active)return;
+      active=true;clearTimeout(relocationTimer);
+      place();link.classList.remove('is-relocating');
+      face.touch();resume();schedule();
+    };
+    const hide=()=>{
+      if(hoverHost.matches(':hover,:focus-visible'))return;
+      active=false;clearTimeout(relocationTimer);link.classList.remove('is-relocating');
+    };
+    hoverHost.addEventListener('pointerenter',show);
+    hoverHost.addEventListener('focus',show);
+    hoverHost.addEventListener('pointerleave',hide);
+    hoverHost.addEventListener('blur',hide);
+    document.addEventListener('visibilitychange',()=>{
+      clearTimeout(relocationTimer);
+      if(!document.hidden&&active){link.classList.remove('is-relocating');schedule();}
+    });
+    window.addEventListener('pagehide',()=>clearTimeout(relocationTimer));
+  }
   document.addEventListener('visibilitychange',resume);
   window.addEventListener('pageshow',resume);
   window.addEventListener('pagehide',()=>cancelAnimationFrame(frame));

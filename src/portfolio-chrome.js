@@ -1,5 +1,5 @@
 import {startFavicon} from '../special/balloon-portfolio/favicon.js';
-import './portfolio-chrome.css';
+if(!document.querySelector('link[data-portfolio-chrome]')) import('./portfolio-chrome.css');
 const nav=document.querySelector('.versions-nav');
 const button=nav?.querySelector('button');
 if(button){
@@ -11,4 +11,7 @@ if(button){
  document.addEventListener('keydown',event=>{if(event.key==='Escape'){close();button.blur();}});
 }
 
-startFavicon('blue','/special/balloon-portfolio/');
+const favicon=document.querySelector('#character-favicon');
+if(favicon?.dataset.logo==='true'){
+  favicon.href='/favicons/logo/06.svg';
+}else startFavicon('blue','/special/balloon-portfolio/');

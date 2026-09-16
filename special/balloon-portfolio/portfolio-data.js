@@ -212,14 +212,6 @@ export const portfolioVersions = [
   {
     year: '2026',
     type: 'Version',
-    title: 'Spatial Nodes',
-    file: 'versions/v3/',
-    displayFile: 'portfolio/versions/v3',
-    color: '#222222',
-  },
-  {
-    year: '2026',
-    type: 'Version',
     title: 'Drag Reveal',
     file: 'versions/drag-reveal/',
     displayFile: 'portfolio/versions/drag-reveal',

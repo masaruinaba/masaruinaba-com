@@ -10,9 +10,9 @@ export default defineConfig({
         // Prototype
         "liquid-hover": resolve(__dirname, "prototype/index.html"),
         // Versions
+        "versions/logo-study": resolve(__dirname, "versions/logo-study/index.html"),
         "versions/liquid-hover": resolve(__dirname, "versions/liquid-hover/index.html"),
         "versions/drag-reveal": resolve(__dirname, "versions/drag-reveal/index.html"),
-        "versions/v3": resolve(__dirname, "versions/v3/index.html"),
         // Playground
         "mosaic-reveal": resolve(__dirname, "playground/mosaic-reveal/index.html"),
         "eye-following": resolve(__dirname, "playground/eye-following/index.html"),
