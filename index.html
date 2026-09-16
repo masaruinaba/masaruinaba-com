@@ -694,7 +694,10 @@
       async function updateMobilePreview() {
         if (!compactLayout() || document.body.classList.contains('profile-is-open')) return
         const area = document.getElementById('scrollArea')
-        const focusY = innerHeight * .55
+        // Keep the first work reachable even when the list starts above mid-screen.
+        const firstRect = mobileRows[0]?.row.getBoundingClientRect()
+        const firstCenter = firstRect ? firstRect.top + area.scrollTop + firstRect.height / 2 : innerHeight * .55
+        const focusY = Math.min(innerHeight * .55, firstCenter)
         const candidate = area.scrollTop > 1 ? mobileRows.find(item => {
           const rect = item.row.getBoundingClientRect()
           return rect.top <= focusY && rect.bottom > focusY

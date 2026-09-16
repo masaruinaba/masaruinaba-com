@@ -436,7 +436,7 @@ body{--header-top:max(12px,calc(var(--gutter) - 8px))}
 /* On phones the character scene itself is the native link hit area. */
 @media(max-width:768px){
  .monster-gathering .gather-link{inset:-40vw 0 0;width:100%;height:auto;touch-action:pan-y pinch-zoom}
- .gather-link .gather-wordmark{left:2%;width:96%;bottom:calc(32px + 3.73vw)}
+ .gather-link .gather-wordmark{left:2%;width:96%;bottom:calc(12px + 3.73vw)}
 }
 
 /* Touch: scroll selects the fullscreen image; the list keeps its compact height. */
