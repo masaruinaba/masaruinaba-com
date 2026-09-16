@@ -138,7 +138,7 @@ body .works-table tbody tr:first-child td{border-top:1px solid var(--row-line,rg
 .profile-toggle{top:var(--gutter);right:var(--gutter);display:flex;align-items:center;justify-content:space-between}
 .profile-open-mark{flex:none;color:currentColor;font:11px/1 var(--portfolio-mono)}
 .profile-panel{margin-top:calc(46 * var(--u) + 16px)}
-body:has(.work-row.is-active) .profile-toggle{color:#fff}
+body:has(.work-row.is-active):not(.profile-is-open) .profile-toggle{color:#fff}
 @media(max-width:768px){.profile-panel{margin-top:calc(42 * var(--u) + 16px)}}
 
 /* Compact profile typography. */
@@ -197,7 +197,7 @@ body.logo-over-characters:not(.profile-is-open) .profile-toggle img{filter:brigh
 
 .current-section{position:fixed;top:var(--gutter);left:var(--gutter);z-index:60;color:#1E1E21;opacity:.5;font:10px/1.5 var(--portfolio-mono);pointer-events:none}
 body .section-label{position:absolute;width:1px;height:1px;padding:0;margin:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-body:has(.work-row.is-active) .current-section,body.index-over-characters .current-section{color:#fff}
+body:has(.work-row.is-active):not(.profile-is-open) .current-section,body.index-over-characters:not(.profile-is-open) .current-section{color:#fff}
 body.profile-is-open .current-section{color:#1E1E21}
 
 /* Keep the color marker at the outer edge of each row. */

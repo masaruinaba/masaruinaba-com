@@ -470,9 +470,6 @@
     let marqueeStart = null;
     let dragGroup = null; // { ids:[], startById: Map }
 
-    // NOTE: This key is stored locally (localStorage). Avoid committing real keys to public repos.
-    const DEFAULT_PAGESPEED_KEY = 'AIzaSyDNUzMq7msC6ZbrIER68wu1qDQlteKeQFE';
-
     function applyViewportCursor() {
         viewport.classList.remove('tool-select','tool-pan','tool-pencil','tool-text');
         const toolClass = (spaceDown && state.tool !== 'text') ? 'tool-pan' : `tool-${state.tool}`;
@@ -587,19 +584,17 @@
         if (!inside) centerOnObjectId(id);
     }
 
+    try { localStorage.removeItem('easel_pagespeed_key'); } catch (e) {}
+
     function getPageSpeedKey() {
         try {
-            const cur = (localStorage.getItem('easel_pagespeed_key') || '').trim();
+            const cur = (localStorage.getItem('easel_pagespeed_key_v2') || '').trim();
             if (cur) return cur;
-            if (DEFAULT_PAGESPEED_KEY && DEFAULT_PAGESPEED_KEY.trim()) {
-                localStorage.setItem('easel_pagespeed_key', DEFAULT_PAGESPEED_KEY.trim());
-                return DEFAULT_PAGESPEED_KEY.trim();
-            }
             return '';
         } catch (e) { return ''; }
     }
     function setPageSpeedKey(key) {
-        try { localStorage.setItem('easel_pagespeed_key', (key || '').trim()); } catch (e) {}
+        try { localStorage.setItem('easel_pagespeed_key_v2', (key || '').trim()); } catch (e) {}
     }
     async function fetchPageSpeedScreenshot(url) {
         const key = getPageSpeedKey();
