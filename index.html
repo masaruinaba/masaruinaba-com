@@ -115,27 +115,12 @@
         background: transparent;
       }
 
-      .works-table thead {
-        position: static;
-        background: transparent;
-      }
-
-      .works-table th {
-        padding: 10px 12px;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-        color: #1E1E21;
-        font-size: 9px;
-        font-weight: 500;
-        letter-spacing: 0.01em;
-        text-align: left;
-      }
-
-      .works-table th:nth-child(1) { width: 32px; }
-      .works-table th:nth-child(2) { width: 64px; }
-      .works-table th:nth-child(3) { width: 110px; }
-      .works-table th:nth-child(4) { width: auto; }
-      .works-table th:nth-child(5) { width: 28%; }
-      .works-table th:nth-child(6) { width: 56px; }
+      .works-table tbody tr:first-child td:nth-child(1) { width: 32px; }
+      .works-table tbody tr:first-child td:nth-child(2) { width: 64px; }
+      .works-table tbody tr:first-child td:nth-child(3) { width: 110px; }
+      .works-table tbody tr:first-child td:nth-child(4) { width: auto; }
+      .works-table tbody tr:first-child td:nth-child(5) { width: 28%; }
+      .works-table tbody tr:first-child td:nth-child(6) { width: 56px; }
 
       .work-row {
         position: relative;
@@ -418,11 +403,11 @@
           padding-bottom: 10px;
         }
 
-        .works-table th:nth-child(2),
+        .works-table tbody tr:first-child td:nth-child(2),
         .works-table td:nth-child(2),
-        .works-table th:nth-child(3),
+        .works-table tbody tr:first-child td:nth-child(3),
         .works-table td:nth-child(3),
-        .works-table th:nth-child(5),
+        .works-table tbody tr:first-child td:nth-child(5),
         .works-table td:nth-child(5) {
           width: 0 !important;
           padding: 0 !important;
@@ -432,9 +417,9 @@
           white-space: nowrap;
         }
 
-        .works-table th:nth-child(1) { width: 24px; }
-        .works-table th:nth-child(4) { width: auto; font-size: 0; }
-        .works-table th:nth-child(6) { width: 40px; text-align: center; }
+        .works-table tbody tr:first-child td:nth-child(1) { width: 24px; }
+        .works-table tbody tr:first-child td:nth-child(4) { width: auto; }
+        .works-table tbody tr:first-child td:nth-child(6) { width: 40px; text-align: center; }
         .title { font-size: 14px; }
         .arrow-icon { display: none; }
         .app-icon-link,
@@ -493,16 +478,6 @@
         <section class="portfolio-section">
           <h2 class="section-label">Works</h2>
           <table class="works-table">
-            <thead>
-              <tr>
-                <th></th>
-                <th>Year</th>
-                <th>Type</th>
-                <th>Title</th>
-                <th>URL</th>
-                <th></th>
-              </tr>
-            </thead>
             <tbody id="clientWorksBody"></tbody>
           </table>
         </section>
@@ -510,16 +485,6 @@
         <section class="portfolio-section">
           <h2 class="section-label">Playground</h2>
           <table class="works-table">
-            <thead>
-              <tr>
-                <th></th>
-                <th>Year</th>
-                <th>Type</th>
-                <th>Title</th>
-                <th>File</th>
-                <th></th>
-              </tr>
-            </thead>
             <tbody id="worksBody"></tbody>
           </table>
         </section>

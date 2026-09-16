@@ -25,7 +25,6 @@ body:has(.work-row.is-active) .profile-toggle img{filter:brightness(0) invert(1)
 .home-caption{display:flex;justify-content:space-between;gap:16px;margin-top:9px;max-width:240px;color:#999;font:9px/1.5 var(--portfolio-mono);letter-spacing:0}
 .profile-toggle:focus-visible,.profile-social a:focus-visible{outline:1px solid #777;outline-offset:6px}
 body .section-label{font-family:var(--portfolio-mono);font-weight:400;font-size:12px;line-height:1.5;margin-bottom:14px}
-body .works-table thead{visibility:collapse}
 body>.versions-nav{top:16px;right:16px;bottom:auto;left:auto;transform:none;align-items:flex-end;font-family:var(--portfolio-mono)}
 body>.versions-nav .version-list{order:2}
 .portfolio-outro{padding-top:105svh;overflow:clip}
@@ -85,12 +84,12 @@ body{--u:calc(100vw / 1440);--gutter:calc(16 * var(--u) + 16px);--column:calc((1
 body .section-label{font-size:12px;padding:calc(40 * var(--u)) var(--gutter) 0;margin-bottom:calc(14 * var(--u))}
 .portfolio-section{margin-bottom:calc(60 * var(--u))}
 body .works-table{width:calc(100% - 2 * var(--gutter));margin-inline:var(--gutter)}
-body .works-table th:nth-child(1){width:calc(1 * var(--column))}
-body .works-table th:nth-child(2){width:calc(2 * var(--column))}
-body .works-table th:nth-child(3){width:calc(4 * var(--column))}
-body .works-table th:nth-child(4){width:calc(25 * var(--column))}
-body .works-table th:nth-child(5){width:calc(14 * var(--column))}
-body .works-table th:nth-child(6){width:calc(2 * var(--column))}
+body .works-table tbody tr:first-child td:nth-child(1){width:calc(1 * var(--column))}
+body .works-table tbody tr:first-child td:nth-child(2){width:calc(2 * var(--column))}
+body .works-table tbody tr:first-child td:nth-child(3){width:calc(4 * var(--column))}
+body .works-table tbody tr:first-child td:nth-child(4){width:calc(25 * var(--column))}
+body .works-table tbody tr:first-child td:nth-child(5){width:calc(14 * var(--column))}
+body .works-table tbody tr:first-child td:nth-child(6){width:calc(2 * var(--column))}
 body .work-row{height:calc(48 * var(--u))}
 body .works-table tbody td{padding:calc(16 * var(--u)) 0;font-size:13px;line-height:16px}
 body .works-table tbody td:first-child{padding-left:0}
@@ -118,9 +117,9 @@ body>.app-icon-link{left:var(--gutter);bottom:var(--gutter);width:calc(24 * var(
  .profile-grid{grid-template-columns:calc(3 * var(--column)) minmax(0,1fr)}
  .profile-toggle{left:var(--gutter);right:auto}
  .profile-panel{margin-top:calc(42 * var(--u))}
- body .works-table th:nth-child(1){width:calc(1 * var(--column))}
- body .works-table th:nth-child(4){width:calc(10 * var(--column))}
- body .works-table th:nth-child(6){width:calc(1 * var(--column))}
+ body .works-table tbody tr:first-child td:nth-child(1){width:calc(1 * var(--column))}
+ body .works-table tbody tr:first-child td:nth-child(4){width:calc(10 * var(--column))}
+ body .works-table tbody tr:first-child td:nth-child(6){width:calc(1 * var(--column))}
  body .work-row:not(.normal-row).is-active td{padding-top:calc(16 * var(--u));padding-bottom:calc(16 * var(--u))}
 }
 
@@ -205,16 +204,16 @@ body .works-table tbody td:last-child .thumbnail{position:absolute;right:0;top:5
 body .works-table tbody td:last-child .arrow-icon{margin-right:var(--column)}
 /* Full-width rules, with row contents anchored to the shared grid. */
 body .works-table{width:100%;margin-inline:0}
-body .works-table th:nth-child(1){width:var(--gutter)}
-body .works-table th:nth-child(2){width:calc(3 * var(--column))}
-body .works-table th:nth-child(6){width:calc(2 * var(--column) + var(--gutter))}
+body .works-table tbody tr:first-child td:nth-child(1){width:var(--gutter)}
+body .works-table tbody tr:first-child td:nth-child(2){width:calc(3 * var(--column))}
+body .works-table tbody tr:first-child td:nth-child(6){width:calc(2 * var(--column) + var(--gutter))}
 body .works-table tbody td:last-child .thumbnail{right:var(--gutter);transition:opacity .18s ease}
 body .works-table tbody td:last-child .arrow-icon{position:absolute;right:var(--gutter);top:50%;margin:0;line-height:1;transform:translateY(-50%)}
 body .works-table tbody tr.is-active td:last-child .thumbnail{opacity:0}
 @media(max-width:768px){
- body .works-table th:nth-child(1){width:var(--gutter)}
- body .works-table th:nth-child(4){width:calc(10 * var(--column))}
- body .works-table th:nth-child(6){width:calc(2 * var(--column) + var(--gutter))}
+ body .works-table tbody tr:first-child td:nth-child(1){width:var(--gutter)}
+ body .works-table tbody tr:first-child td:nth-child(4){width:calc(10 * var(--column))}
+ body .works-table tbody tr:first-child td:nth-child(6){width:calc(2 * var(--column) + var(--gutter))}
  body .works-table tbody td.title{padding-left:0}
 }
 /* Collapsed headings must not add their former cell padding to column widths. */
@@ -232,20 +231,20 @@ body:has(.work-row.is-active):not(.profile-is-open) .current-section{opacity:1}
 .profile-toggle img{width:calc(5 * var(--column))}
 .profile-open-mark{align-self:flex-start}
 .profile-panel{right:calc(var(--gutter) + var(--column))}
-body .works-table th:nth-child(4){width:calc(24 * var(--column))}
-body .works-table th:nth-child(5){width:calc(15 * var(--column))}
+body .works-table tbody tr:first-child td:nth-child(4){width:calc(24 * var(--column))}
+body .works-table tbody tr:first-child td:nth-child(5){width:calc(15 * var(--column))}
 @media(max-width:768px){
  .profile-toggle{left:var(--gutter)}
  .profile-panel{right:var(--gutter)}
- body .works-table th:nth-child(4){width:calc(10 * var(--column))}
+ body .works-table tbody tr:first-child td:nth-child(4){width:calc(10 * var(--column))}
 }
 .profile-toggle{flex-direction:column;align-items:flex-start;gap:8px}
 .profile-open-mark{align-self:flex-start}
 .profile-toggle{right:var(--gutter);flex-direction:row;align-items:flex-end;justify-content:space-between}
 .profile-open-mark{align-self:flex-end}
 @media(min-width:769px){
- body .works-table th:nth-child(2){width:calc(2 * var(--column))}
- body .works-table th:nth-child(3){width:calc(5 * var(--column))}
+ body .works-table tbody tr:first-child td:nth-child(2){width:calc(2 * var(--column))}
+ body .works-table tbody tr:first-child td:nth-child(3){width:calc(5 * var(--column))}
 }
 
 /* The whole gathering is the link; keep the wordmark below the faces. */
@@ -264,12 +263,12 @@ body .works-table th:nth-child(5){width:calc(15 * var(--column))}
 .profile-toggle{left:calc(var(--gutter) + 30 * var(--column))}
 .profile-toggle img{width:calc(6 * var(--column))}
 .profile-panel{right:calc(var(--gutter) + 2 * var(--column))}
-body .works-table th:nth-child(4){width:calc(23 * var(--column))}
-body .works-table th:nth-child(5){width:calc(16 * var(--column))}
+body .works-table tbody tr:first-child td:nth-child(4){width:calc(23 * var(--column))}
+body .works-table tbody tr:first-child td:nth-child(5){width:calc(16 * var(--column))}
 @media(max-width:768px){
  .profile-toggle{left:var(--gutter)}
  .profile-panel{right:var(--gutter)}
- body .works-table th:nth-child(4){width:calc(10 * var(--column))}
+ body .works-table tbody tr:first-child td:nth-child(4){width:calc(10 * var(--column))}
 }
 /* Preserve the left anchors and extend the content column to the outer grid. */
 .profile-panel{right:var(--gutter);width:calc(18 * var(--column))}
@@ -284,8 +283,8 @@ body .works-table th:nth-child(5){width:calc(16 * var(--column))}
  .profile-toggle{left:calc(var(--gutter) + 31 * var(--column))}
  .profile-panel{width:calc(17 * var(--column))}
  .profile-grid{grid-template-columns:calc(5 * var(--column)) calc(10 * var(--column));column-gap:calc(2 * var(--column))}
- body .works-table th:nth-child(4){width:calc(24 * var(--column))}
- body .works-table th:nth-child(5){width:calc(15 * var(--column))}
+ body .works-table tbody tr:first-child td:nth-child(4){width:calc(24 * var(--column))}
+ body .works-table tbody tr:first-child td:nth-child(5){width:calc(15 * var(--column))}
 }
 
 /* Quiet opening: the first rule sits at the lower edge, then scrolls normally. */
@@ -306,10 +305,10 @@ body .works-table th:nth-child(5){width:calc(16 * var(--column))}
 .portfolio-intro.intro-finished{height:clamp(180px,32svh,320px)}
 @media(prefers-reduced-motion:reduce){.portfolio-intro{height:clamp(180px,32svh,320px)}}
 
-/* Fixed 70% entry line; reveal by clipping, never by opacity. */
+/* Position the first list row at 40% of the viewport. */
 .portfolio-intro{min-height:0;height:clamp(180px,32svh,320px)}
 
-.portfolio-intro,.portfolio-intro.intro-finished{min-height:0;height:70svh}
+.portfolio-intro,.portfolio-intro.intro-finished{min-height:0;height:40svh}
 
 .profile-logo{display:block;width:calc(6 * var(--column));height:auto;overflow:visible;fill:currentColor}
 
@@ -319,8 +318,8 @@ body.list-scroll-started .initial-list-shade,body:has(.work-row.is-active) .init
 @media(prefers-reduced-motion:reduce){.initial-list-shade{transition:none}}
 /* Keep metadata and project names closer, preserving the URL grid anchor. */
 @media(min-width:769px){
- body .works-table th:nth-child(3){width:calc(3 * var(--column))}
- body .works-table th:nth-child(4){width:calc(26 * var(--column))}
+ body .works-table tbody tr:first-child td:nth-child(3){width:calc(3 * var(--column))}
+ body .works-table tbody tr:first-child td:nth-child(4){width:calc(26 * var(--column))}
 }
 
 body{--ink:#1E1E21}
