@@ -1,22 +1,36 @@
 <!doctype html>
 <html lang="ja">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Masaru Inaba</title>
+<meta charset="UTF-8" />
+<!-- SEO:start -->
+<title>Masaru Inaba — Portfolio</title>
 <link rel="canonical" href="https://www.masaruinaba.com/">
-<meta property="og:url" content="https://www.masaruinaba.com/">
+<link rel="describedby" href="/llms.txt" type="text/plain">
+<meta name="description" content="名古屋を拠点に活動するフリーランスデザイナー、Masaru Inabaのポートフォリオ。Webデザイン・コミュニケーションデザインの制作実績と、アニメーションやインタラクションの実験を紹介しています。">
+<meta name="author" content="Masaru Inaba">
+<meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Masaru Inaba">
-<meta property="og:description" content="Masaru Inaba — Web Designer. Selected works and playful experiments.">
+<meta property="og:site_name" content="Masaru Inaba — Portfolio">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:url" content="https://www.masaruinaba.com/">
+<meta property="og:title" content="Masaru Inaba — Portfolio">
+<meta property="og:description" content="名古屋を拠点に活動するフリーランスデザイナー、Masaru Inabaのポートフォリオ。Webデザイン・コミュニケーションデザインの制作実績と、アニメーションやインタラクションの実験を紹介しています。">
 <meta property="og:image" content="https://www.masaruinaba.com/portfolio-og-478b4fee0e1b.png">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://www.masaruinaba.com/portfolio-og-478b4fee0e1b.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1920">
 <meta property="og:image:height" content="1008">
+<meta property="og:image:alt" content="Masaru Inaba — Portfolio">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@im_inaba">
-<meta name="twitter:image:alt" content="Masaru Inaba — Web Designer Portfolio">
+<meta name="twitter:title" content="Masaru Inaba — Portfolio">
+<meta name="twitter:description" content="名古屋を拠点に活動するフリーランスデザイナー、Masaru Inabaのポートフォリオ。Webデザイン・コミュニケーションデザインの制作実績と、アニメーションやインタラクションの実験を紹介しています。">
+<meta name="twitter:image" content="https://www.masaruinaba.com/portfolio-og-478b4fee0e1b.png">
+<meta name="twitter:image:alt" content="Masaru Inaba — Portfolio">
+<meta name="keywords" content="Masaru Inaba, ポートフォリオ, Portfolio, Webデザイン, コミュニケーションデザイン, フリーランスデザイナー, 名古屋, インタラクション, アニメーション">
+<link rel="alternate" type="text/markdown" href="/portfolio.md" title="Portfolio overview">
+<script type="application/ld+json" id="portfolio-structured-data">{"@context":"https://schema.org","@graph":[{"@type":"Person","@id":"https://www.masaruinaba.com/#person","name":"Masaru Inaba","url":"https://www.masaruinaba.com/","jobTitle":"Freelance Designer","homeLocation":{"@type":"Place","name":"Nagoya, Japan"},"knowsAbout":["Web Design","Communication Design"],"sameAs":["https://x.com/im_inaba","https://www.wantedly.com/id/masaruinaba"]},{"@type":"WebSite","@id":"https://www.masaruinaba.com/#website","url":"https://www.masaruinaba.com/","name":"Masaru Inaba — Portfolio","description":"名古屋を拠点に活動するフリーランスデザイナー、Masaru Inabaのポートフォリオ。Webデザイン・コミュニケーションデザインの制作実績と、アニメーションやインタラクションの実験を紹介しています。","inLanguage":"ja","creator":{"@id":"https://www.masaruinaba.com/#person"}},{"@type":"ProfilePage","@id":"https://www.masaruinaba.com/#profile","url":"https://www.masaruinaba.com/","name":"Masaru Inaba — Portfolio","mainEntity":{"@id":"https://www.masaruinaba.com/#person"},"isPartOf":{"@id":"https://www.masaruinaba.com/#website"}}]}</script>
+<!-- SEO:end -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -955,7 +969,7 @@
         row.endHover = endHover
         row.addEventListener('mouseleave', event => {
           if (desktopLayoutMoving || document.body.dataset.workHoverBlocked) return
-          if (event.relatedTarget instanceof Element && event.relatedTarget.closest('.profile-toggle,.profile-panel,.portfolio-intro')) return
+          if (event.relatedTarget instanceof Element && event.relatedTarget.closest('.profile-toggle,.profile-panel')) return
           // The next row owns the handoff; do not collapse before it is selected.
           const next = event.relatedTarget instanceof Element ? event.relatedTarget.closest('.work-row') : null
           if (next) {
@@ -1010,12 +1024,22 @@
         document.querySelectorAll('.work-row.is-active, .work-row[aria-busy="true"]').forEach(row => row.endHover())
         liquid?.hide()
       }
-      document.getElementById('scrollArea').addEventListener('scroll', () => {
+      const desktopScrollArea = document.getElementById('scrollArea')
+      desktopScrollArea.addEventListener('scroll', () => {
+        if (desktopScrollArea.scrollTop <= 1) { clearDesktopHover(); return }
         const row = document.querySelector('.work-row.is-active')
         if (!row || compactLayout()) return
         const rect = row.getBoundingClientRect()
         if (rect.bottom <= 0 || rect.top >= innerHeight) clearDesktopHover()
         else liquid?.setMask(rect)
+      })
+      // Reaching the scroll boundary may emit wheel input without a scroll event.
+      desktopScrollArea.addEventListener('wheel', event => {
+        if (event.deltaY < 0 && desktopScrollArea.scrollTop <= 1) clearDesktopHover()
+      }, { passive: true })
+      document.addEventListener('mousemove', event => {
+        if (!(event.target instanceof Element)) return
+        if (event.target.closest('.portfolio-intro') && !event.target.closest('.profile-toggle,.profile-panel')) clearDesktopHover()
       })
       document.addEventListener('mouseleave', clearDesktopHover)
       window.addEventListener('blur', clearDesktopHover)

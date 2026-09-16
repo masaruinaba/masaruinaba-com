@@ -1,0 +1,31 @@
+# Masaru Inaba — Portfolio
+
+> Portfolio of Masaru Inaba, a freelance designer based in Nagoya, Japan, specializing in web design and communication design.
+
+For prospective clients, collaborators, and people exploring interactive design. The site presents selected client work and a Playground of animations, visual experiments, and apps. Client project links and some apps lead to external websites.
+
+## Overview
+
+- [Portfolio overview](https://www.masaruinaba.com/portfolio.md): Profile, selected work, and Playground links in Markdown.
+
+## Main pages
+
+- [Masaru Inaba — Portfolio](https://www.masaruinaba.com/): 名古屋を拠点に活動するフリーランスデザイナー、Masaru Inabaのポートフォリオ。Webデザイン・コミュニケーションデザインの制作実績と、アニメーションやインタラクションの実験を紹介しています。
+- [Creative Weather — Masaru Inaba](https://www.masaruinaba.com/apps/creative-weather/): Masaru Inabaによる天気をテーマにしたWebアプリの実験、Creative Weather。
+- [Layered Clock — Masaru Inaba](https://www.masaruinaba.com/apps/layered-clock/): Masaru Inabaによる時計のビジュアル表現を探るWebアプリ、Layered Clock。
+- [Easel Pro — Masaru Inaba](https://www.masaruinaba.com/apps/design-board/): 画像やテキスト、Webサイトのリンクをキャンバスに配置するデザインボード、Easel Pro。Masaru InabaによるWebアプリ。
+- [Typography Explorer — Masaru Inaba](https://www.masaruinaba.com/apps/typography/): Masaru Inabaによる文字の表現を探るWebアプリ、Typography Explorer。
+- [Mosaic Reveal — Masaru Inaba](https://www.masaruinaba.com/playground/mosaic-reveal/): モザイクを使った画像のリビールアニメーション。Masaru Inabaによるモーションとインタラクションの実験。
+- [Eye-Following Card — Masaru Inaba](https://www.masaruinaba.com/playground/eye-following/): ポインターを目で追うキャラクターカード。Masaru Inabaによるインタラクションの実験。
+- [Scroll Text Sequence — Masaru Inaba](https://www.masaruinaba.com/playground/scroll-text/): スクロールに連動するテキストアニメーション。Masaru Inabaによるモーションの実験。
+- [A Letter of Letters — Masaru Inaba](https://www.masaruinaba.com/playground/letter-morphing/): 文字の形が変化するアニメーション。Masaru Inabaによるタイポグラフィとモーションの実験。
+- [Hover Text Path — Masaru Inaba](https://www.masaruinaba.com/playground/hover-text-path/): ホバーに反応するテキストの動き。Masaru Inabaによるタイポグラフィとインタラクションの実験。
+- [Font Patterns — Masaru Inaba](https://www.masaruinaba.com/playground/font-patterns/): 文字から生まれるパターンの表現。Masaru Inabaによるタイポグラフィの実験。
+- [3D Explore — Masaru Inaba](https://www.masaruinaba.com/playground/3d-explore/): Masaru Inabaによるブラウザ上の3Dビジュアル表現の実験、3D Explore。
+- [Balloon Portfolio — Masaru Inaba](https://www.masaruinaba.com/special/balloon-portfolio/): カラフルなバルーンキャラクターで作品を紹介する、Masaru Inabaのインタラクティブなポートフォリオ。
+- [Drag Reveal — Masaru Inaba](https://www.masaruinaba.com/versions/drag-reveal/): ドラッグ操作で作品を見せるポートフォリオ。Masaru Inabaによるインタラクションとレイアウトの実験。
+
+## Elsewhere
+
+- [X](https://x.com/im_inaba): Public social profile.
+- [Wantedly](https://www.wantedly.com/id/masaruinaba): Professional profile.

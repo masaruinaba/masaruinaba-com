@@ -1,0 +1,104 @@
+[
+  {
+    "path": "/",
+    "title": "Masaru Inaba — Portfolio",
+    "description": "名古屋を拠点に活動するフリーランスデザイナー、Masaru Inabaのポートフォリオ。Webデザイン・コミュニケーションデザインの制作実績と、アニメーションやインタラクションの実験を紹介しています。",
+    "indexable": true
+  },
+  {
+    "path": "/apps/creative-weather/",
+    "title": "Creative Weather — Masaru Inaba",
+    "description": "Masaru Inabaによる天気をテーマにしたWebアプリの実験、Creative Weather。",
+    "indexable": true
+  },
+  {
+    "path": "/apps/layered-clock/",
+    "title": "Layered Clock — Masaru Inaba",
+    "description": "Masaru Inabaによる時計のビジュアル表現を探るWebアプリ、Layered Clock。",
+    "indexable": true
+  },
+  {
+    "path": "/apps/design-board/",
+    "title": "Easel Pro — Masaru Inaba",
+    "description": "画像やテキスト、Webサイトのリンクをキャンバスに配置するデザインボード、Easel Pro。Masaru InabaによるWebアプリ。",
+    "indexable": true
+  },
+  {
+    "path": "/apps/typography/",
+    "title": "Typography Explorer — Masaru Inaba",
+    "description": "Masaru Inabaによる文字の表現を探るWebアプリ、Typography Explorer。",
+    "indexable": true
+  },
+  {
+    "path": "/playground/mosaic-reveal/",
+    "title": "Mosaic Reveal — Masaru Inaba",
+    "description": "モザイクを使った画像のリビールアニメーション。Masaru Inabaによるモーションとインタラクションの実験。",
+    "indexable": true
+  },
+  {
+    "path": "/playground/eye-following/",
+    "title": "Eye-Following Card — Masaru Inaba",
+    "description": "ポインターを目で追うキャラクターカード。Masaru Inabaによるインタラクションの実験。",
+    "indexable": true
+  },
+  {
+    "path": "/playground/scroll-text/",
+    "title": "Scroll Text Sequence — Masaru Inaba",
+    "description": "スクロールに連動するテキストアニメーション。Masaru Inabaによるモーションの実験。",
+    "indexable": true
+  },
+  {
+    "path": "/playground/letter-morphing/",
+    "title": "A Letter of Letters — Masaru Inaba",
+    "description": "文字の形が変化するアニメーション。Masaru Inabaによるタイポグラフィとモーションの実験。",
+    "indexable": true
+  },
+  {
+    "path": "/playground/hover-text-path/",
+    "title": "Hover Text Path — Masaru Inaba",
+    "description": "ホバーに反応するテキストの動き。Masaru Inabaによるタイポグラフィとインタラクションの実験。",
+    "indexable": true
+  },
+  {
+    "path": "/playground/font-patterns/",
+    "title": "Font Patterns — Masaru Inaba",
+    "description": "文字から生まれるパターンの表現。Masaru Inabaによるタイポグラフィの実験。",
+    "indexable": true
+  },
+  {
+    "path": "/playground/3d-explore/",
+    "title": "3D Explore — Masaru Inaba",
+    "description": "Masaru Inabaによるブラウザ上の3Dビジュアル表現の実験、3D Explore。",
+    "indexable": true
+  },
+  {
+    "path": "/special/balloon-portfolio/",
+    "title": "Balloon Portfolio — Masaru Inaba",
+    "description": "カラフルなバルーンキャラクターで作品を紹介する、Masaru Inabaのインタラクティブなポートフォリオ。",
+    "indexable": true
+  },
+  {
+    "path": "/versions/drag-reveal/",
+    "title": "Drag Reveal — Masaru Inaba",
+    "description": "ドラッグ操作で作品を見せるポートフォリオ。Masaru Inabaによるインタラクションとレイアウトの実験。",
+    "indexable": true
+  },
+  {
+    "path": "/versions/logo-study/",
+    "title": "Logo Study — Masaru Inaba",
+    "description": "Masaru Inabaのロゴとモーションの試作ページ。",
+    "indexable": false
+  },
+  {
+    "path": "/versions/liquid-hover/",
+    "title": "Liquid Hover — Masaru Inaba",
+    "description": "Masaru Inabaによる液体のようなホバー表現のポートフォリオ試作。",
+    "indexable": false
+  },
+  {
+    "path": "/prototype/",
+    "title": "Liquid Hover Prototype — Masaru Inaba",
+    "description": "Masaru Inabaによる液体のようなホバー表現のプロトタイプ。",
+    "indexable": false
+  }
+]

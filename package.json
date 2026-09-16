@@ -8,7 +8,10 @@
     "build": "npm --prefix special/balloon-portfolio run build && tsc && vite build",
     "preview": "vite preview",
     "check:secrets": "node scripts/check-secrets.mjs",
-    "prebuild": "npm run check:secrets && npm ci --prefix special/balloon-portfolio --no-audit --no-fund"
+    "seo:generate": "node scripts/generate-seo.mjs",
+    "check:seo": "node scripts/generate-seo.mjs --check && node scripts/check-seo.mjs",
+    "postbuild": "npm run check:seo && node scripts/check-secrets.mjs --built",
+    "prebuild": "npm run seo:generate && npm run check:secrets && npm ci --prefix special/balloon-portfolio --no-audit --no-fund"
   },
   "devDependencies": {
     "typescript": "~5.9.3",
