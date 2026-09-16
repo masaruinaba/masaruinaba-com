@@ -680,101 +680,39 @@
       }
 
       const compactLayout = () => window.innerWidth <= 768 || !matchMedia('(hover: hover)').matches
-      const mobilePreview = document.createElement('tr')
-      mobilePreview.className = 'mobile-preview-row'
-      mobilePreview.hidden = true
-      const mobileCell = document.createElement('td')
-      mobileCell.colSpan = 6
-      const mobileSurface = document.createElement('div')
-      mobileSurface.className = 'mobile-liquid-surface'
-      const mobileImage = document.createElement('img')
-      mobileSurface.append(mobileImage)
-      const mobileLink = document.createElement('a')
-      mobileLink.className = 'mobile-preview-link'
-      mobileLink.target = '_blank'
-      mobileLink.rel = 'noopener'
-      const mobileClip = document.createElement('div')
-      mobileClip.className = 'mobile-preview-clip'
-      const mobileContent = document.createElement('div')
-      mobileContent.className = 'mobile-preview-content'
-      const mobileCaption = document.createElement('span')
-      mobileCaption.className = 'mobile-preview-caption'
-      const mobileDestination = document.createElement('span')
-      const mobileVisit = document.createElement('span')
-      mobileVisit.textContent = '（↗）'
-      mobileCaption.append(mobileDestination, mobileVisit)
-      mobileLink.append(mobileSurface, mobileCaption)
-      mobileContent.append(mobileLink)
-      mobileClip.append(mobileContent)
-      mobileCell.append(mobileClip)
-      mobilePreview.append(mobileCell)
-      let mobileLiquid = null
-      let activeMobileRow = null
-      let previewMotion = null
-      let previewRequest = 0
-      let requestedMobileRow = null
-      const reducePreviewMotion = matchMedia('(prefers-reduced-motion: reduce)')
-      async function animateMobileHeight(height, opening, anchor) {
-        const from = mobileClip.getBoundingClientRect().height
-        previewMotion?.cancel()
-        mobileClip.style.height = `${from}px`
-        const scrollArea = document.getElementById('scrollArea')
-        let anchorTop = anchor?.getBoundingClientRect().top
-        let frame = 0
-        const keepAnchor = () => {
-          if (anchor && anchorTop !== undefined) {
-            const delta = anchor.getBoundingClientRect().top - anchorTop
-            scrollArea.scrollTop += delta
-            anchorTop = anchor.getBoundingClientRect().top
-          }
-          frame = requestAnimationFrame(keepAnchor)
-        }
-        if (anchor) frame = requestAnimationFrame(keepAnchor)
-        const motion = mobileClip.animate([
-          { height: `${from}px`, opacity: getComputedStyle(mobileClip).opacity },
-          { height: `${height}px`, opacity: opening ? 1 : 0 }
-        ], { duration: reducePreviewMotion.matches ? 0 : opening ? 380 : 220,
-          easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' })
-        previewMotion = motion
-        try {
-          await motion.finished
-          mobileClip.style.height = `${height}px`
-          mobileClip.style.opacity = opening ? '1' : '0'
-          motion.cancel()
-        } catch {} finally { cancelAnimationFrame(frame) }
+      const mobileRows = []
+      let selectedMobileRow = null
+      let mobileRequest = 0
+      let mobileScrollFrame = 0
+      function clearMobilePreview() {
+        mobileRequest++
+        selectedMobileRow = null
+        document.querySelectorAll('.is-mobile-active').forEach(row => row.classList.remove('is-mobile-active'))
+        document.body.classList.remove('mobile-preview-active')
+        liquid?.hide()
       }
-      async function openMobilePreview(row, work, href) {
-        const request = ++previewRequest
-        const close = requestedMobileRow === row
-        requestedMobileRow = close ? null : row
-        if (activeMobileRow) activeMobileRow.setAttribute('aria-expanded', 'false')
-        if (!mobilePreview.hidden) {
-          await animateMobileHeight(0, false, activeMobileRow !== row ? row : null)
-          if (request !== previewRequest) return
-          mobileLiquid?.hide()
-          mobilePreview.hidden = true
-        }
-        activeMobileRow = null
-        if (close) return
-        activeMobileRow = row
-        row.setAttribute('aria-expanded', 'true')
-        row.after(mobilePreview)
-        mobileImage.src = work.image || work.thumbnail
-        mobileImage.alt = work.title
-        mobileLink.href = href
-        mobileDestination.textContent = itemLabel(work)
-        mobileLink.setAttribute('aria-label', `${work.title} — サイトを開く（新しいタブ）`)
-        mobilePreview.hidden = false
-        mobileClip.style.height = '0px'
-        mobileClip.style.opacity = '0'
-        if (!reducePreviewMotion.matches) {
-          try {
-            mobileLiquid ||= new LiquidHover(mobileSurface, true)
-            mobileLiquid.show(mobileImage.src)
-          } catch (error) { console.warn('Mobile liquid preview unavailable', error) }
-        }
-        await animateMobileHeight(mobileContent.getBoundingClientRect().height, true)
-        if (request === previewRequest) mobileClip.style.height = 'auto'
+      async function updateMobilePreview() {
+        if (!compactLayout() || document.body.classList.contains('profile-is-open')) return
+        const area = document.getElementById('scrollArea')
+        const focusY = innerHeight * .55
+        const candidate = area.scrollTop > 1 ? mobileRows.find(item => {
+          const rect = item.row.getBoundingClientRect()
+          return rect.top <= focusY && rect.bottom > focusY
+        }) : null
+        if (!candidate) { if (selectedMobileRow) clearMobilePreview(); return }
+        if (candidate.row === selectedMobileRow) return
+        const request = ++mobileRequest
+        selectedMobileRow = candidate.row
+        const ready = await liquid?.show(candidate.image, candidate.row.getBoundingClientRect())
+        if (request !== mobileRequest || !compactLayout()) return
+        if (!ready) { clearMobilePreview(); return }
+        document.querySelectorAll('.is-mobile-active').forEach(row => row.classList.remove('is-mobile-active'))
+        candidate.row.classList.add('is-mobile-active')
+        document.body.classList.add('mobile-preview-active')
+      }
+      function scheduleMobilePreview() {
+        cancelAnimationFrame(mobileScrollFrame)
+        mobileScrollFrame = requestAnimationFrame(updateMobilePreview)
       }
 
       let desktopLayoutMoving = false
@@ -834,6 +772,7 @@
         row.className = 'work-row'
         if (!hasImage) row.classList.add('normal-row')
         row.dataset.hasImage = String(hasImage)
+        if (hasImage) mobileRows.push({ row, image: previewImage })
         row.dataset.tone = hasImage && isLightColor(adjustedColor) ? 'dark' : 'light'
 
         const thumbCell = document.createElement('td')
@@ -981,7 +920,6 @@
           liquid?.hide()
         })
         row.addEventListener('click', () => {
-          if (compactLayout()) { openMobilePreview(row, work, href); return }
           if (href.startsWith('http')) {
             window.open(href, '_blank')
           } else {
@@ -1002,7 +940,7 @@
       renderRows('clientWorksBody', clientWorks)
       renderRows('worksBody', works)
 
-      if (window.matchMedia('(hover: hover)').matches) {
+      {
         try {
           liquid = new LiquidHover(document.getElementById('gl'))
           window.liquid = liquid
@@ -1026,6 +964,7 @@
       }
       const desktopScrollArea = document.getElementById('scrollArea')
       desktopScrollArea.addEventListener('scroll', () => {
+        if (compactLayout()) { scheduleMobilePreview(); return }
         if (desktopScrollArea.scrollTop <= 1) { clearDesktopHover(); return }
         const row = document.querySelector('.work-row.is-active')
         if (!row || compactLayout()) return
@@ -1041,8 +980,14 @@
         if (!(event.target instanceof Element)) return
         if (event.target.closest('.portfolio-intro') && !event.target.closest('.profile-toggle,.profile-panel')) clearDesktopHover()
       })
-      document.addEventListener('mouseleave', clearDesktopHover)
-      window.addEventListener('blur', clearDesktopHover)
+      window.addEventListener('resize', () => {
+        clearMobilePreview()
+        clearDesktopHover()
+        scheduleMobilePreview()
+      })
+      scheduleMobilePreview()
+      document.addEventListener('mouseleave', () => { if (!compactLayout()) clearDesktopHover() })
+      window.addEventListener('blur', () => { if (!compactLayout()) clearDesktopHover() })
       document.querySelectorAll('.versions-nav, .footer-links, .app-icon-link').forEach(el => el.addEventListener('mouseenter', clearDesktopHover))
     </script>
   <script type="module" src="/src/balloon-icon.js"></script>
