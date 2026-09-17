@@ -1,5 +1,8 @@
 import { Renderer, Triangle, Program, Mesh, Texture } from 'ogl'
 
+// Selected photographs in the supplied 01–05 order.
+const photos = ['01', '02', '03', '04', '05']
+
 // One continuous photographic strip, refracted through the two edges.
 export function mountHomeGlass(host: HTMLElement) {
  const still = host.querySelector<HTMLImageElement>('img')!
@@ -24,8 +27,8 @@ export function mountHomeGlass(host: HTMLElement) {
    varying vec2 vUv;
    vec3 photograph(vec2 p,float tile){
     // Refraction stays inside its own photograph, including RGB separation.
-    float x=mod(tile,3.)+clamp(p.x-tile,.002,.998);
-    return texture2D(tPhotos,vec2(x/3.,clamp(p.y,.002,.998))).rgb;
+    float x=mod(tile,${photos.length}.)+clamp(p.x-tile,.002,.998);
+    return texture2D(tPhotos,vec2(x/${photos.length}.,clamp(p.y,.002,.998))).rgb;
    }
    void main(){
     vec2 p=vUv;
@@ -141,15 +144,18 @@ export function mountHomeGlass(host: HTMLElement) {
  visibility.observe(host)
  document.addEventListener('visibilitychange',resume)
  reduced.addEventListener('change',resume)
- Promise.all(['living','dining','light'].map(async name=>{
+ Promise.all(photos.map(async name=>{
   const image=new Image();image.src=`/images/home/${name}.webp`;await image.decode();return image
  })).then(images=>{
   if(disposed)return
-  const atlas=document.createElement('canvas');atlas.width=1440;atlas.height=320
+  // Fit the complete strip within the device's texture limit, including mobile GPUs.
+  const tileWidth=Math.min(480,Math.floor(gl.getParameter(gl.MAX_TEXTURE_SIZE)/images.length))
+  const tileHeight=Math.round(tileWidth*2/3)
+  const atlas=document.createElement('canvas');atlas.width=tileWidth*images.length;atlas.height=tileHeight
   const ctx=atlas.getContext('2d')!
   images.forEach((image,i)=>{
-   const scale=Math.max(480/image.width,320/image.height),w=480/scale,h=320/scale
-   ctx.drawImage(image,(image.width-w)/2,(image.height-h)/2,w,h,i*480,0,480,320)
+   const scale=Math.max(tileWidth/image.width,tileHeight/image.height),w=tileWidth/scale,h=tileHeight/scale
+   ctx.drawImage(image,(image.width-w)/2,(image.height-h)/2,w,h,i*tileWidth,0,tileWidth,tileHeight)
   })
   texture.image=atlas;texture.needsUpdate=true
   host.append(canvas);still.style.visibility='hidden';ready=true
