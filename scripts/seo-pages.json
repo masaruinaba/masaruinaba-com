@@ -75,7 +75,9 @@
     "path": "/special/balloon-portfolio/",
     "title": "Balloon Portfolio — Masaru Inaba",
     "description": "カラフルなバルーンキャラクターで作品を紹介する、Masaru Inabaのインタラクティブなポートフォリオ。",
-    "indexable": true
+    "indexable": true,
+    "image": "/special/balloon-portfolio/balloon-og.png",
+    "imageAlt": "Blue balloon monster — Playground, Made for Fun."
   },
   {
     "path": "/versions/drag-reveal/",

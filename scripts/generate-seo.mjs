@@ -17,17 +17,19 @@ function save(file, value) {
 
 for (const page of pages) {
   const url = origin + page.path
+  const pageImage = page.image ? origin + page.image : image
+  const imageAlt = page.imageAlt || pages[0].title
   const meta = {
     description: page.description,
     author: 'Masaru Inaba',
     robots: page.indexable ? 'index, follow, max-image-preview:large' : 'noindex, follow',
     'og:type': 'website', 'og:site_name': pages[0].title, 'og:locale': 'ja_JP',
     'og:url': url, 'og:title': page.title, 'og:description': page.description,
-    'og:image': image, 'og:image:type': 'image/png', 'og:image:width': '1920', 'og:image:height': '1008',
-    'og:image:alt': pages[0].title,
+    'og:image': pageImage, 'og:image:type': 'image/png', 'og:image:width': '1920', 'og:image:height': '1008',
+    'og:image:alt': imageAlt,
     'twitter:card': 'summary_large_image', 'twitter:site': '@im_inaba',
     'twitter:title': page.title, 'twitter:description': page.description,
-    'twitter:image': image, 'twitter:image:alt': pages[0].title,
+    'twitter:image': pageImage, 'twitter:image:alt': imageAlt,
   }
   if (page.path === '/') meta.keywords = 'Masaru Inaba, ポートフォリオ, Portfolio, Webデザイン, コミュニケーションデザイン, フリーランスデザイナー, 名古屋, インタラクション, アニメーション'
   let block = `<title>${escape(page.title)}</title>\n<link rel="canonical" href="${url}">\n<link rel="describedby" href="/llms.txt" type="text/plain">\n`

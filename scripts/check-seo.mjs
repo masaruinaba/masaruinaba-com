@@ -37,6 +37,7 @@ for (const page of pages) {
   assert.equal([...source.matchAll(/<link\b[^>]*rel="canonical"[^>]*>/g)].length, 1)
   assert(source.includes(`rel="canonical" href="${origin + page.path}"`))
   assert.equal(metadata.get('robots').startsWith('noindex'), !page.indexable)
+  if (page.image) assert.equal(metadata.get('og:image'), origin + page.image)
   checkLocal(metadata.get('og:image'))
   assert.equal(metadata.get('twitter:image'), metadata.get('og:image'))
   checkLocal(origin + page.path)
