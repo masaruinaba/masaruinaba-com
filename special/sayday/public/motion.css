@@ -95,11 +95,9 @@ body:not(.privacy) .page-bottom{margin-top:-24px}
 .floating-store .store-button img{width:16px;height:22px}
 .floating-store .store-button span{gap:3px}.floating-store .store-button small{font-size:7px}.floating-store .store-button strong{font-size:12px}
 .photo-track .photo-card .photo-friend{rotate:none;transform-origin:50% 75%}
-.feature-stack{isolation:isolate}.feature-5 .feature-tilt{transform:none!important}
+.feature-stack{isolation:isolate;z-index:4}.feature-5 .feature-tilt{transform:none!important}
 /* Let entering, rotated cards clear the stack boundary; each card keeps its own rounded clipping. */
 @media(min-width:761px){.feature-stack{overflow:visible}}
-/* Keep the blue character's top contour inside the first card at every desktop width. */
-@media(min-width:761px){.feature-1 .feature-stage>div>div:first-child{top:calc(50% + 125px)!important;scale:.72}}
 @media(max-width:760px){.policy-header .palette:has(.color-rail[data-expanded=true]){width:212px}.color-rail{width:212px}.color-rail[data-expanded=true] button{transform:translateX(calc(var(--slot)*-24px - 10px))}.floating-store{padding:0;right:12px;bottom:12px}}
 
 /* Recorded simulator walkthrough; native island is already in the video. */

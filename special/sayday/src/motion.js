@@ -45,8 +45,8 @@ media.add('(prefers-reduced-motion: no-preference)',()=>{
  const visibleDevice=mobile?root.querySelector('.mobile-feature-device'):device;
  if(visibleDevice)timeline.fromTo(visibleDevice,{y:110,rotation:5,opacity:0},{y:0,rotation:0,opacity:1,duration:1.25,ease:'power3.out'},.3);
  });
- let heroPlayed=false;
- function heroEnter(){if(heroPlayed||(document.body.dataset.opening&&document.body.dataset.opening!=='done'))return;heroPlayed=true;const balloons=document.querySelectorAll('.hero-art .design-stage>div>div');gsap.fromTo(balloons,{y:-65,rotation:i=>i%2?5:-5},{y:0,rotation:0,duration:.68,stagger:{each:.045,from:'random'},ease:'back.out(1.35)'});gsap.fromTo('.hero-copy>*',{y:32,opacity:0},{y:0,opacity:1,duration:.65,stagger:.075,ease:'power3.out'});gsap.fromTo('.hero-device',{y:80,opacity:0},{y:0,opacity:1,duration:.8,delay:.12,ease:'power3.out'});}
- const observer=new MutationObserver(()=>{if(document.body.dataset.opening==='done')heroEnter();});observer.observe(document.body,{attributes:true,attributeFilter:['data-opening']});setTimeout(()=>{if(!document.querySelector('.opening'))heroEnter();},350);
- document.fonts.ready.then(()=>ScrollTrigger.refresh());return()=>{observer.disconnect();gsap.ticker.remove(tick);lenis.destroy();};
+ let heroPlayed=Boolean(document.body.dataset.opening);
+ function heroEnter(){if(heroPlayed)return;if(document.body.dataset.opening){heroPlayed=true;return;}heroPlayed=true;const balloons=document.querySelectorAll('.hero-art .design-stage>div>div');gsap.fromTo(balloons,{y:-65,rotation:i=>i%2?5:-5},{y:0,rotation:0,duration:.68,stagger:{each:.045,from:'random'},ease:'back.out(1.35)'});gsap.fromTo('.hero-copy>*',{y:32,opacity:0},{y:0,opacity:1,duration:.65,stagger:.075,ease:'power3.out'});gsap.fromTo('.hero-device',{y:80,opacity:0},{y:0,opacity:1,duration:.8,delay:.12,ease:'power3.out'});}
+ setTimeout(heroEnter,350);
+ document.fonts.ready.then(()=>ScrollTrigger.refresh());return()=>{gsap.ticker.remove(tick);lenis.destroy();};
 });

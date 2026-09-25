@@ -11,6 +11,7 @@ dialog?.addEventListener('click',event=>{if(event.target===dialog){const r=dialo
 if(!document.body.classList.contains('privacy')){
  let seen=false;try{seen=sessionStorage.getItem('sayday-intro')==='seen';}catch{}
  if(!seen&&!reduced.matches){
+  document.body.dataset.opening='loading';
   import('/opening.js').then(async({createOpening})=>{const opening=createOpening();const failsafe=setTimeout(()=>opening.cancel(),9000);await opening.finish(()=>{});clearTimeout(failsafe);try{sessionStorage.setItem('sayday-intro','seen');}catch{}}).catch(()=>{document.body.dataset.opening='done';document.querySelectorAll('[inert]').forEach(el=>el.inert=false);});
  }
 }
