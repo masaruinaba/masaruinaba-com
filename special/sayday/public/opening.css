@@ -36,6 +36,6 @@ body[data-opening=loading] #status{z-index:21;color:var(--opening-ink)}
  .opening-footer .opening-word{vertical-align:baseline;overflow:visible;padding:0;margin:0;clip-path:inset(-.1em 0 -.16em 0)}
 }
 
-.opening{font-family:Geist,Arial,sans-serif;z-index:40}.opening-logo{aspect-ratio:5.2}.opening-logo-base{left:0;top:0;width:100%;height:100%;transform:none;mask-image:url("/assets/fa411e48-5489-45a9-9d00-14c92b080bd6.svg")}.opening .opening-title{font-family:Singela,sans-serif;word-spacing:-.18em}.opening .opening-description{line-height:1.4}
+.opening{font-family:Geist,Arial,sans-serif;z-index:40}.opening-logo{aspect-ratio:5.2}.opening-logo-base{left:0;top:0;width:100%;height:100%;transform:none;mask-image:url("/assets/fa411e48-5489-45a9-9d00-14c92b080bd6.svg")}.opening .opening-title{font-family:Geist,Arial,sans-serif;word-spacing:normal}.opening .opening-description{line-height:1.4}
 
 .opening .opening-logo .opening-logo-base{transform:none}
