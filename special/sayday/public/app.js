@@ -8,12 +8,11 @@ dialog?.querySelectorAll('.dialog-close,.dialog-done').forEach(button=>button.ad
 dialog?.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();}});
 
 // The original portfolio opening, with only SAYDAY's mark and copy substituted.
-if(!document.body.classList.contains('privacy')){
- let seen=false;try{seen=sessionStorage.getItem('sayday-intro')==='seen';}catch{}
- if(!seen&&!reduced.matches){
-  document.body.dataset.opening='loading';
-  import('/opening.js').then(async({createOpening})=>{const opening=createOpening();const failsafe=setTimeout(()=>opening.cancel(),9000);await opening.finish(()=>{});clearTimeout(failsafe);try{sessionStorage.setItem('sayday-intro','seen');}catch{}}).catch(()=>{document.body.dataset.opening='done';document.querySelectorAll('[inert]').forEach(el=>el.inert=false);});
- }
+// The inline script at the top of <body> sets the same flag before the FV can paint.
+let seen=false;try{seen=sessionStorage.getItem('sayday-intro')==='seen';}catch{}
+if(!document.body.classList.contains('privacy')&&!seen&&!reduced.matches){
+ document.body.dataset.opening='loading';
+ import('/opening.js').then(async({createOpening})=>{const opening=createOpening();const failsafe=setTimeout(()=>opening.cancel(),9000);await opening.finish(()=>{});clearTimeout(failsafe);try{sessionStorage.setItem('sayday-intro','seen');}catch{}}).catch(()=>{document.body.dataset.opening='done';document.querySelectorAll('[inert]').forEach(el=>el.inert=false);});
 }
 
 // Match Figma's 16.5-second conversational expression sequence.
