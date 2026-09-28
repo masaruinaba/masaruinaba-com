@@ -43,3 +43,73 @@ if(rail){let saved=0;try{saved=Number(localStorage.getItem('sayday-design-color-
  rail.addEventListener('pointerleave',()=>rail.querySelectorAll('button').forEach(b=>b.style.setProperty('--hover-scale',1)));
  document.addEventListener('pointerdown',e=>{if(!e.target.closest('.palette'))expandRail(false);});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&rail.dataset.expanded==='true'){expandRail(false);paletteToggle.focus();}});
 }
+
+// Concept movie: the card morphs into the player and back (after Studio.Drop's film card).
+const filmCard=document.querySelector('.film-card'),filmDialog=document.querySelector('.film-dialog');
+if(filmCard&&filmDialog){
+ const panel=filmDialog.querySelector('.film-dialog__panel'),media=filmDialog.querySelector('.film-dialog__media'),backdrop=filmDialog.querySelector('.film-dialog__backdrop'),closeButton=filmDialog.querySelector('.film-dialog__close');
+ const player=media.querySelector('video'),preview=filmCard.querySelector('video'),playButton=filmDialog.querySelector('.film-play'),muteButton=filmDialog.querySelector('.film-mute'),seek=filmDialog.querySelector('.film-controls input'),clock=filmDialog.querySelector('.film-controls time');
+ const radius=()=>innerWidth<=760?14:24;
+ const inOut=p=>p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;
+ let running=[],controlsTimer,closing=false;
+ const playPreview=()=>{if(!reduced.matches&&!filmDialog.open)preview.play().catch(()=>{});};
+ if(reduced.matches)preview.pause();else playPreview();reduced.addEventListener('change',()=>reduced.matches?preview.pause():playPreview());
+ const time=s=>Number.isFinite(s)?`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`:'0:00';
+ function syncControls(){
+  playButton.dataset.playing=String(!player.paused);playButton.setAttribute('aria-label',player.paused?'Play':'Pause');
+  muteButton.dataset.muted=String(player.muted);muteButton.setAttribute('aria-label',player.muted?'Unmute':'Mute');
+  if(player.duration)seek.value=String(Math.round(player.currentTime/player.duration*1000));
+  clock.textContent=`${time(player.currentTime)} / ${time(player.duration)}`;
+ }
+ function showControls(){clearTimeout(controlsTimer);media.classList.add('is-controls-visible');if(!player.paused)controlsTimer=setTimeout(()=>media.classList.remove('is-controls-visible'),1600);}
+ ['play','pause','timeupdate','durationchange','volumechange','ended'].forEach(type=>player.addEventListener(type,()=>{syncControls();if(type!=='timeupdate')showControls();}));
+ const togglePlay=()=>player.paused||player.ended?player.play().catch(()=>{}):player.pause();
+ player.addEventListener('click',togglePlay);playButton.addEventListener('click',togglePlay);
+ muteButton.addEventListener('click',()=>{player.muted=!player.muted;});
+ seek.addEventListener('input',()=>{if(player.duration)player.currentTime=seek.value/1000*player.duration;});
+ media.addEventListener('pointermove',showControls);media.addEventListener('focusin',showControls);
+ // Sampled keyframes keep the corner radius constant on screen while the panel scales.
+ function morph(open){
+  running.forEach(a=>a.cancel());running=[];
+  const source=filmCard.getBoundingClientRect(),target=panel.getBoundingClientRect();
+  const dx=source.left+source.width/2-(target.left+target.width/2),dy=source.top+source.height/2-(target.top+target.height/2);
+  const scale=source.width/target.width,clipY=Math.max(0,(target.height-source.height/scale)/2),r=radius(),cardRadius=parseFloat(getComputedStyle(filmCard).borderTopLeftRadius)||0;
+  const transform=[],clip=[];
+  for(let i=0;i<=30;i++){const e=inOut(i/30),k=open?1-e:e,s=scale+(1-scale)*(1-k);transform.push({transform:`translate(${dx*k}px,${dy*k}px) scale(${s})`});clip.push({clipPath:`inset(${clipY*k}px 0px round ${(r+(cardRadius-r)*k)/s}px)`});}
+  const run=(el,frames,options)=>{const a=el.animate(frames,{fill:'both',...options});running.push(a);return a;};
+  if(open){
+   run(panel,transform,{duration:820});run(media,clip,{duration:820});
+   run(backdrop,[{opacity:0},{opacity:1}],{duration:480,easing:'cubic-bezier(.33,1,.68,1)'});
+   run(closeButton,[{opacity:0,transform:'translateY(42px)'},{opacity:1,transform:'none'}],{delay:580,duration:300,easing:'cubic-bezier(.215,.61,.355,1)'});
+   run(filmCard,[{opacity:0},{opacity:0}],{duration:1});
+   return running.at(-1).finished.catch(()=>{});
+  }
+  run(closeButton,[{opacity:1,transform:'none'},{opacity:0,transform:'translateY(42px)'}],{duration:200,easing:'cubic-bezier(.55,.085,.68,.53)'});
+  run(panel,transform,{delay:80,duration:720});run(media,clip,{delay:80,duration:720});
+  run(backdrop,[{opacity:1},{opacity:0}],{delay:80,duration:420,easing:'cubic-bezier(.55,.085,.68,.53)'});
+  run(filmCard,[{opacity:0},{opacity:1}],{delay:620,duration:140,easing:'cubic-bezier(.33,1,.68,1)'});
+  return run(media,[{opacity:1},{opacity:0}],{delay:640,duration:120,easing:'ease-in'}).finished;
+ }
+ function openFilm(){
+  if(filmDialog.open)return;
+  closing=false;preview.pause();filmDialog.showModal();document.documentElement.style.overflow='hidden';
+  player.muted=false;player.play().catch(()=>{});syncControls();showControls();
+  if(reduced.matches)filmCard.style.opacity='0';else morph(true);
+ }
+ async function closeFilm(){
+  if(!filmDialog.open||closing)return;
+  closing=true;player.pause();
+  if(!reduced.matches)await morph(false).catch(()=>{});
+  if(!closing)return;
+  closing=false;filmDialog.close();running.forEach(a=>a.cancel());running=[];filmCard.style.opacity='';
+  document.documentElement.style.overflow='';filmCard.focus({preventScroll:true});playPreview();
+ }
+ filmCard.addEventListener('click',openFilm);
+ filmDialog.querySelectorAll('[data-film-close]').forEach(button=>button.addEventListener('click',closeFilm));
+ filmDialog.addEventListener('cancel',event=>{event.preventDefault();closeFilm();});
+ player.addEventListener('ended',()=>{player.currentTime=0;});
+ if(pageBottom)new IntersectionObserver(entries=>filmCard.classList.toggle('is-away',entries[0].isIntersecting),{threshold:0}).observe(pageBottom);
+ // Sit just left of the floating App Store button; on phones that button is hidden and CSS takes over.
+ const placeFilm=()=>{const r=floatingStore?.getBoundingClientRect();if(r?.width)filmCard.style.setProperty('--film-right',`${Math.round(document.documentElement.clientWidth-r.left+8)}px`);};
+ placeFilm();addEventListener('resize',placeFilm,{passive:true});if(floatingStore)new ResizeObserver(placeFilm).observe(floatingStore);document.fonts?.ready.then(placeFilm);
+}

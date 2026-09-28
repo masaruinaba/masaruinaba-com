@@ -224,3 +224,41 @@ body:not(.privacy) .download-copy{color:#fff}
 @media(prefers-reduced-motion:reduce){.hero-sound[aria-pressed=true] .hero-sound-wave{animation:none}}
 /* The phone is drawn at .59 scale on small screens: keep a finger-sized target. */
 @media(max-width:760px){.hero-sound{right:14.5px;top:23.6px;width:54px;height:54px;padding:13px}.hero-sound svg{width:28px;height:28px}}
+
+/* Concept movie: a small video window beside the floating App Store button; it morphs into the player. */
+.floating-store .store-button{gap:11px;padding:13px 18px;border-radius:13px}
+.floating-store .store-button img{width:22px;height:30px}
+.floating-store .store-button small{font-size:9.5px}
+.floating-store .store-button strong{font-size:17px}
+.film-card{position:fixed;right:var(--film-right,16px);bottom:16px;z-index:10;display:block;width:103px;height:58px;padding:0;border:0;border-radius:13px;overflow:hidden;background:#111;box-shadow:0 5px 15px #00000012;-webkit-tap-highlight-color:transparent;transition:opacity .42s cubic-bezier(.22,1,.36,1),transform .45s cubic-bezier(.22,1,.36,1),box-shadow .45s,visibility 0s}
+.film-card__thumb,.film-card__thumb video{display:block;width:100%;height:100%}
+.film-card__thumb video{object-fit:cover;transition:transform .5s cubic-bezier(.22,1,.36,1)}
+.film-card__play{position:absolute;right:6px;bottom:6px;display:grid;place-items:center;width:20px;height:20px;padding-left:1px;border-radius:50%;background:#1111114d;color:#fff;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);transition:transform .3s cubic-bezier(.22,1,.36,1),background-color .2s,color .2s}
+.film-card__play svg{width:8px;height:8px;fill:currentColor}
+@media(hover:hover){.film-card:hover{transform:translateY(-4px) rotate(-2deg);box-shadow:0 18px 36px #0002}.film-card:hover .film-card__thumb video{transform:scale(1.06)}.film-card:hover .film-card__play{background:#fff;color:#111;transform:scale(1.12)}}
+.film-card:active{transform:scale(.96)}
+.film-card:focus-visible{outline:2px solid #111;outline-offset:3px}
+body[data-opening]:not([data-opening=done]) .film-card,.film-card.is-away{opacity:0;transform:translateY(16px);visibility:hidden;pointer-events:none;transition:opacity .42s cubic-bezier(.22,1,.36,1),transform .42s cubic-bezier(.22,1,.36,1),visibility 0s .42s}
+@media(max-width:760px){.film-card{right:12px;bottom:12px;width:112px;height:63px;border-radius:10px}}
+
+.film-dialog{position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:16px;border:0;background:none;color:#fff;overflow:hidden}
+.film-dialog[open]{display:grid;place-items:center}
+.film-dialog::backdrop{background:transparent}
+.film-dialog__backdrop{position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;border-radius:0;background:#2226;box-shadow:none;cursor:default}
+.film-dialog__panel{position:relative;width:min(1240px,calc(100vw - 32px),calc((100svh - 120px) * 16 / 9));transform-origin:50% 50%;outline:0}
+.film-dialog__media{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:24px;background:#090909}
+.film-dialog__media video{display:block;width:100%;height:100%;object-fit:contain;cursor:pointer}
+.film-dialog__close{position:absolute;top:-44px;right:-4px;display:grid;place-items:center;width:36px;height:36px;padding:0;border:0;border-radius:0;background:none;box-shadow:none;color:#fff;transition:opacity .2s}
+.film-dialog__close svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round}
+@media(hover:hover){.film-dialog__close:hover{opacity:.58}}
+.film-controls{position:absolute;right:14px;bottom:14px;left:14px;display:grid;grid-template-columns:auto minmax(80px,1fr) auto auto;gap:18px;align-items:center;min-height:48px;padding:0 14px;border:1px solid #ffffff2e;border-radius:16px;background:#09090933;backdrop-filter:blur(16px) saturate(.9);-webkit-backdrop-filter:blur(16px) saturate(.9);opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .24s,transform .32s cubic-bezier(.22,1,.36,1)}
+.film-dialog__media.is-controls-visible .film-controls{opacity:1;transform:none;pointer-events:auto}
+.film-controls button{display:grid;place-items:center;width:22px;height:22px;padding:0;border:0;border-radius:0;background:none;box-shadow:none;color:#fff}
+.film-controls svg{width:17px;height:17px}
+.film-controls .icon-play,.film-controls .icon-pause{fill:currentColor}
+.film-controls .icon-sound,.film-controls .icon-muted{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.film-controls .icon-pause,.film-controls .icon-muted,.film-controls [data-playing=true] .icon-play,.film-controls [data-muted=true] .icon-sound{display:none}
+.film-controls [data-playing=true] .icon-pause,.film-controls [data-muted=true] .icon-muted{display:block}
+.film-controls input{width:100%;height:2px;accent-color:#fff;cursor:pointer}
+.film-controls time{font:400 12px/1 Geist,Arial,sans-serif;font-variant-numeric:tabular-nums;opacity:.65}
+@media(max-width:760px){.film-dialog__media{border-radius:14px}.film-controls{right:8px;bottom:8px;left:8px;gap:12px;min-height:40px;padding:0 10px;border-radius:10px}.film-controls time{font-size:11px}}

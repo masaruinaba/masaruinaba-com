@@ -44,7 +44,7 @@ export function createOpening() {
   words(root.querySelector('.opening-edition'),['SAYDAY / N° 001']);
   document.body.dataset.opening='loading';document.body.dataset.openingPattern=pattern.id;
   document.body.append(root);
-  const controls=[...document.querySelectorAll('main,.floating-store,.skip')];
+  const controls=[...document.querySelectorAll('main,.floating-store,.film-card,.skip')];
   const previousInert=controls.map(el=>el.inert);controls.forEach(el=>el.inert=true);
   const animations=[];
   const animate=(el,frames,options)=>{const a=el.animate(frames,{fill:'both',...options});animations.push(a);return a;};
