@@ -262,3 +262,8 @@ body[data-opening]:not([data-opening=done]) .film-card,.film-card.is-away{opacit
 .film-controls input{width:100%;height:2px;accent-color:#fff;cursor:pointer}
 .film-controls time{font:400 12px/1 Geist,Arial,sans-serif;font-variant-numeric:tabular-nums;opacity:.65}
 @media(max-width:760px){.film-dialog__media{border-radius:14px}.film-controls{right:8px;bottom:8px;left:8px;gap:12px;min-height:40px;padding:0 10px;border-radius:10px}.film-controls time{font-size:11px}}
+
+/* Palette: an ink-tinted ring keeps the swatch matching the current page color visible. */
+.color-rail span,.color-rail button[aria-pressed=true] span{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--page-ink) 24%,transparent)}
+@media(max-width:760px){.palette-toggle[aria-expanded=false] svg{opacity:.55;visibility:visible}}
+@media(max-width:760px){.policy-header .palette:not(:has(.color-rail[data-expanded=true])){transform:translateX(calc(50% - 2.5px))}}

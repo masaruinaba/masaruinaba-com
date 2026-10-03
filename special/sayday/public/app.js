@@ -2,10 +2,6 @@ function resizeStages(){document.documentElement.style.setProperty('--scale',Str
 resizeStages();window.addEventListener('resize',resizeStages,{passive:true});
 
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-const dialog=document.querySelector('.store-dialog');
-document.querySelectorAll('[data-store]').forEach(button=>button.addEventListener('click',()=>dialog.showModal()));
-dialog?.querySelectorAll('.dialog-close,.dialog-done').forEach(button=>button.addEventListener('click',()=>dialog.close()));
-dialog?.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();}});
 
 // The original portfolio opening, with only SAYDAY's mark and copy substituted.
 // The inline script at the top of <body> sets the same flag before the FV can paint.
