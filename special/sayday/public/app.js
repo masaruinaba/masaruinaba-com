@@ -23,6 +23,8 @@ function requestMotion(){if(!queued){queued=true;requestAnimationFrame(scrollMot
 addEventListener('scroll',requestMotion,{passive:true});addEventListener('resize',requestMotion,{passive:true});reduced.addEventListener('change',()=>{if(reduced.matches)features.forEach(el=>el.firstElementChild.style.transform='none');else requestMotion();});requestMotion();
 
 const pageBottom=document.querySelector('.page-bottom'),floatingStore=document.querySelector('.floating-store');
+const floatingX=document.querySelector('.floating-x');
+if(pageBottom&&floatingX)new IntersectionObserver(entries=>floatingX.classList.toggle('is-away',entries[0].isIntersecting),{threshold:0}).observe(pageBottom);
 if(pageBottom&&floatingStore)new IntersectionObserver(entries=>{floatingStore.hidden=entries[0].isIntersecting;},{threshold:0}).observe(pageBottom);
 
 // Exact background / foreground / CTA overlay pairs from Figma 2136:7246.

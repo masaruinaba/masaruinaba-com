@@ -267,3 +267,14 @@ body[data-opening]:not([data-opening=done]) .film-card,.film-card.is-away{opacit
 .color-rail span,.color-rail button[aria-pressed=true] span{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--page-ink) 24%,transparent)}
 @media(max-width:760px){.palette-toggle[aria-expanded=false] svg{opacity:.55;visibility:visible}}
 @media(max-width:760px){.policy-header .palette:not(:has(.color-rail[data-expanded=true])){transform:translateX(calc(50% - 2.5px))}}
+
+/* X: footer link beside the privacy policy, and a floating button bottom-left matching the App Store button. */
+.footer-x{display:inline-block;color:inherit;transition:rotate .28s cubic-bezier(.22,1,.36,1)}
+.footer-x:hover,.footer-x:focus-visible{rotate:-4deg}
+.mobile-footer-links{display:flex;flex-direction:column;align-items:flex-end;gap:5px;line-height:1}
+.floating-x{position:fixed;left:14px;bottom:14px;z-index:10;display:block;padding:10px;color:#fff;mix-blend-mode:difference;font:600 11px/1 Geist,Arial,sans-serif;letter-spacing:-.11px;white-space:nowrap;-webkit-tap-highlight-color:transparent;transition:opacity .42s cubic-bezier(.22,1,.36,1),transform .45s cubic-bezier(.22,1,.36,1),rotate .28s cubic-bezier(.22,1,.36,1),visibility 0s}
+@media(hover:hover){.floating-x:hover{rotate:-4deg}}
+.floating-x:focus-visible{outline:1.5px solid #fff;outline-offset:0}
+body[data-opening]:not([data-opening=done]) .floating-x,.floating-x.is-away{opacity:0;transform:translateY(16px);visibility:hidden;pointer-events:none;transition:opacity .42s cubic-bezier(.22,1,.36,1),transform .42s cubic-bezier(.22,1,.36,1),visibility 0s .42s}
+@media(max-width:760px){.floating-x{left:14px;bottom:10px}}
+.footer-art .footer-links [data-node-id="2089:17109"]{translate:none!important}

@@ -12,6 +12,6 @@ document.querySelectorAll('.feature-stage>div').forEach(root=>{
 });
 document.querySelectorAll('.footer-art').forEach(footer=>{
  const nav=document.createElement('div');nav.className='mobile-footer-meta';
- nav.innerHTML='<a class="mobile-credit" href="https://www.masaruinaba.com/" aria-label="Masaru Inaba"><img src="/assets/95591bfa-5a6e-4740-9042-a0def881542b.svg" alt="Masaru Inaba"></a><div><span>© 2026 SAYDAY</span><a href="/privacy/">PRIVACY POLICY</a></div>';
+ nav.innerHTML='<a class="mobile-credit" href="https://www.masaruinaba.com/" aria-label="Masaru Inaba"><img src="/assets/95591bfa-5a6e-4740-9042-a0def881542b.svg" alt="Masaru Inaba"></a><div><span>© 2026 SAYDAY</span><span class="mobile-footer-links"><a href="/privacy/">PRIVACY POLICY</a><a class="footer-x" href="https://x.com/SaydayApp" target="_blank" rel="noopener" aria-label="SAYDAY on X (@SaydayApp)">@SaydayApp</a></span></div>';
  footer.append(nav);
 });
