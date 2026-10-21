@@ -59,7 +59,7 @@ html.lenis,html.lenis body{height:auto}.lenis.lenis-smooth{scroll-behavior:auto!
 .feature-5{height:65vw}
 .feature-5 .feature-stage,.feature-5 .feature-stage>div{height:936px!important}
 .feature-5 .feature-stage>div>div:first-child{top:274.53px!important}
-.feature-5 .feature-stage>div>[data-name="Device"]{top:120px!important;bottom:auto!important;height:780px!important}
+.feature-5 .feature-stage>div>[data-name="Device"]{top:140px!important;bottom:auto!important;height:780px!important}
 .feature-5 .feature-stage>div>p{bottom:auto!important;top:665px!important;translate:none!important}
 }
 body:not(.privacy) .page-bottom{margin-top:-32px}
