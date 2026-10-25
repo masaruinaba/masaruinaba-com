@@ -16,6 +16,7 @@ const description = 'その日の写真といっしょに、今日のひとこ�
 const replacements = [
   // Head
   ['<html lang="en">', '<html lang="ja">'],
+  ['</head>', '<link rel="stylesheet" href="/ja.css?v=20261025a"></head>'],
   [`<link rel="canonical" href="${SITE}/">`, `<link rel="canonical" href="${SITE}/ja/">`],
   ['<meta property="og:locale" content="en_US">', '<meta property="og:locale" content="ja_JP">'],
   [`<meta property="og:url" content="${SITE}/">`, `<meta property="og:url" content="${SITE}/ja/">`],
@@ -39,8 +40,10 @@ const replacements = [
   // Language switch: the flag and the footer link go back to English; privacy goes to the Japanese policy.
   [/<a class="floating-flag" href="\/ja\/" hreflang="ja" lang="ja" aria-label="日本語で見る">.*?<\/svg><\/a>/s,
     `<a class="floating-flag" href="/" hreflang="en" lang="en" aria-label="View in English">${US_FLAG}</a>`],
-  ['href="/ja/" hreflang="ja">JAPANESE</a>', 'href="/" hreflang="en" lang="en">ENGLISH</a>'],
+  [/<a class="footer-flag" href="\/ja\/" hreflang="ja" lang="ja" aria-label="日本語で見る">.*?<\/svg><\/a>/s,
+    `<a class="footer-flag" href="/" hreflang="en" lang="en" aria-label="View in English">${US_FLAG.replace(/flag-us/g, 'flag-us-foot')}</a>`],
   ['href="/privacy/">PRIVACY POLICY</a>', 'href="/ja/privacy/">PRIVACY POLICY</a>'],
+  // The phone footer (mobile-layout.js) reads its links from this footer, so it follows along.
 ];
 
 for (const [from, to, times = 1] of replacements) {

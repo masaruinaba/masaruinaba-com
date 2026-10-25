@@ -1,0 +1,17 @@
+/* Japanese pages only (/ja/, /ja/privacy/). Japanese text uses the app's Japanese font, Zen Kaku Gothic New Medium
+   (the app draws 400/500 with Medium), limited to Japanese characters so Latin stays Geist. The file is a subset made by
+   scripts/subset-ja-font.py. Japanese reads larger than Geist, so each Japanese text size is .5px under the English one
+   (owner 2026-10-25). */
+@font-face{font-family:ZenKaku;src:url('/fonts/zen-kaku-medium-ja.woff2') format('woff2');font-weight:100 900;font-display:swap;unicode-range:U+3000-303F,U+3040-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF}
+html[lang=ja] .hero-copy p,html[lang=ja] .feature-stage>div>p,html[lang=ja] .policy-content{font-family:Geist,ZenKaku,sans-serif!important;font-synthesis:none}
+html[lang=ja] .hero-copy p{font-size:14.5px}
+html[lang=ja] .feature-stage>div>p{font-size:14.5px!important}
+html[lang=ja] .policy-content{font-size:15.5px}
+html[lang=ja] .policy h2{font-size:23.5px}
+@media(min-width:761px){html[lang=ja] .hero-copy p{font-size:calc(clamp(13px,1.0417vw,18px) - .5px)}}
+@media(max-width:760px){
+  html[lang=ja] .hero-copy p{font-size:13.5px}
+  html[lang=ja] .feature-stage>div>p{font-size:14.5px!important}
+  html[lang=ja] .policy-content{font-size:14.5px}
+  html[lang=ja] .policy h2{font-size:20.5px}
+}

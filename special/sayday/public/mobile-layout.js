@@ -12,6 +12,9 @@ document.querySelectorAll('.feature-stage>div').forEach(root=>{
 });
 document.querySelectorAll('.footer-art').forEach(footer=>{
  const nav=document.createElement('div');nav.className='mobile-footer-meta';
- nav.innerHTML='<a class="mobile-credit" href="https://www.masaruinaba.com/" aria-label="Masaru Inaba"><img src="/assets/95591bfa-5a6e-4740-9042-a0def881542b.svg" alt="Masaru Inaba"></a><div><span>© 2026 SAYDAY</span><span class="mobile-footer-links"><a href="/privacy/">PRIVACY POLICY</a><a class="footer-x" href="https://x.com/SaydayApp" target="_blank" rel="noopener" aria-label="SAYDAY on X (@SaydayApp)">@SaydayApp</a></span></div>';
+ // Account and language flag at the left (where the floating account sits), privacy and © at the right; the links
+ // come from the desktop footer, so each language's page keeps its own.
+ const privacy=footer.querySelector('[data-node-id="2089:17109"]')?.getAttribute('href')||'/privacy/',flag=footer.querySelector('.footer-flag')?.outerHTML||'';
+ nav.innerHTML=`<a class="mobile-credit" href="https://www.masaruinaba.com/" aria-label="Masaru Inaba"><img src="/assets/95591bfa-5a6e-4740-9042-a0def881542b.svg" alt="Masaru Inaba"></a><div><span class="mobile-footer-account"><a class="footer-x" href="https://x.com/SaydayApp" target="_blank" rel="noopener" aria-label="SAYDAY on X (@SaydayApp)">@SaydayApp</a>${flag}</span><span class="mobile-footer-links"><a href="${privacy}">PRIVACY POLICY</a><span>© 2026 SAYDAY</span></span></div>`;
  footer.append(nav);
 });
