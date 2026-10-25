@@ -16,7 +16,7 @@ const description = 'その日の写真といっしょに、今日のひとこ�
 const replacements = [
   // Head
   ['<html lang="en">', '<html lang="ja">'],
-  ['</head>', '<link rel="stylesheet" href="/ja.css?v=20261025a"></head>'],
+  ['</head>', '<link rel="stylesheet" href="/ja.css?v=20261025b"></head>'],
   [`<link rel="canonical" href="${SITE}/">`, `<link rel="canonical" href="${SITE}/ja/">`],
   ['<meta property="og:locale" content="en_US">', '<meta property="og:locale" content="ja_JP">'],
   [`<meta property="og:url" content="${SITE}/">`, `<meta property="og:url" content="${SITE}/ja/">`],
