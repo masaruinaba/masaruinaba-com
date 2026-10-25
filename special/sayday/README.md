@@ -1,6 +1,8 @@
 # SAYDAY landing page
 
-English SAYDAY landing page and privacy policy for https://sayday.masaruinaba.com.
+SAYDAY landing page and privacy policy for https://sayday.masaruinaba.com, in English (`/`, `/privacy/`) and Japanese (`/ja/`, `/ja/privacy/`). The floating flag beside @SaydayApp and the footer link next to PRIVACY POLICY switch languages.
+
+`public/ja/index.html` is generated: edit `public/index.html`, then run `node special/sayday/scripts/build-ja.mjs` from the portfolio root. The two privacy pages are edited by hand; keep them in step.
 
 This is a standalone static Vercel project in the portfolio repository. Set the Vercel root directory to `special/sayday`, framework to Other, output directory to `public`, and leave build/install commands empty. The main portfolio build is independent.
 
