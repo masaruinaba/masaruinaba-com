@@ -816,6 +816,8 @@ html.own #menu .own{display:revert!important}
 #gridBtn:hover,body.grid #gridBtn{opacity:1}
 #gridBtn svg{width:100%;height:100%;display:block}
 #gridBtn{width:calc(var(--fs)*.8)!important;height:calc(var(--fs)*.8)!important}
+#label .ill figcaption{display:flex!important;justify-content:space-between;align-items:baseline;gap:1em;width:var(--rw,100%)!important;align-self:stretch}
+#label .ill figcaption .by{white-space:nowrap}
 
 /* ---------- the owner's desk: the same wall, the same blue lettering, set as a narrow column ---------- */
 #desk,#toast{--hair:color-mix(in srgb,var(--blue) 18%,transparent);--soft:color-mix(in srgb,var(--blue) 60%,transparent);font-family:Graphik,"Hiragino Sans",system-ui,sans-serif;font-size:12px;color:var(--blue);-webkit-font-smoothing:antialiased}
@@ -1944,7 +1946,7 @@ let fdT=0;const fdLater=()=>{clearTimeout(fdT);fdT=setTimeout(fillDesc,180)};add
 const _sl=window.setLang;if(_sl)window.setLang=function(){const r=_sl.apply(this,arguments);setTimeout(fillDesc,50);try{renderLedger()}catch(e){}return r};
 // a reel of the works that move
 const REEL=[['chaos1.mp4','Chaos Cam','2026'],['cm1.mp4','Sayday','2026'],['teep1.mp4','Teep','2026'],['slip1.mp4','Slip','2026'],['lab1.mp4','Camera Lab','2026'],['new1.mp4','Sayday','2026'],['chaos2.mp4','Chaos Cam','2026'],['teep2.mp4','Teep','2026'],['cm2.mp4','Sayday','2026'],['origin2.mp4','Origin Shapes','2026'],['slip2.mp4','Slip','2026'],['lab2.mp4','Camera Lab','2026'],['con1.mp4','Sayday','2026'],['teep3.mp4','Teep','2026'],['chaos3.mp4','Chaos Cam','2026'],['balloon2.mp4','Balloon Portfolio','2026'],['new2.mp4','Sayday','2026'],['slip3.mp4','Slip','2026'],['lab3.mp4','Camera Lab','2026'],['cm3.mp4','Sayday','2026'],['teep4.mp4','Teep','2026'],['con2.mp4','Sayday','2026'],['new3.mp4','Sayday','2026']];let reelI=0;
-(function(){const v=$('reel'),c=$('reelcap');if(!v)return;const play=()=>{const w=REEL[reelI%REEL.length];v.src='works/'+w[0];c.textContent=w[1]+', '+w[2];v.play().catch(()=>{})};
+(function(){const v=$('reel'),c=$('reelcap');if(!v)return;const play=()=>{const w=REEL[reelI%REEL.length];v.src='works/'+w[0];c.textContent='';const l=document.createElement('span');l.textContent=w[1]+', '+w[2];const r=document.createElement('span');r.className='by';r.textContent='Masaru Inaba';c.append(l,r);v.play().catch(()=>{})};
   const next=()=>{reelI++;play()};v.addEventListener('ended',next);v.addEventListener('canplay',()=>{v.play().catch(()=>{})});document.addEventListener('visibilitychange',()=>{if(!document.hidden)v.play().catch(()=>{})});addEventListener('pointerdown',()=>v.play().catch(()=>{}),{once:true});v.addEventListener('playing',()=>{v.playbackRate=1.25});setInterval(()=>{if(!document.hidden)next()},2600);play()})();
 $('readon').addEventListener('click',e=>{e.stopPropagation();setLab(true)});
 // the reel is printed in the wall's blue as 1-bit: the screen never settles. every half second or so the grain jumps
