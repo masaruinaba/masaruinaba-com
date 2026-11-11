@@ -1344,9 +1344,10 @@ function onState(v){
   if(first){CANON=st;CUR={...st};STN=n;paint(live,CUR);return}
   const keys=ORDER.filter(k=>st[k]!==CANON[k]);CANON=st;STN=n;if(!keys.length)return;
   for(const k of keys)HOLD[k]=performance.now()+240000;
-  const t0=performance.now();for(const k of keys)TODO.push({key:k,val:st[k],by:v.note||'',n,t0});
+  const t0=performance.now();for(const k of keys)TODO.push({key:k,val:st[k],by:v.note||'',who:v.by||'',n,t0});
   const no=String(n).padStart(2,'0');NOW={who:'',c:'#141414',did:['decided. Decision '+no+'.','が決めた。判断'+no+'。']};setNow()}
-function takeTodo(a){const now=performance.now();let i=TODO.findIndex(d=>d.by&&d.by===a.gid);if(i<0&&!a.guest)i=TODO.findIndex(d=>!d.by||now-d.t0>9000);return i<0?null:TODO.splice(i,1)[0]}
+function takeTodo(a){const now=performance.now();let i=TODO.findIndex(d=>d.by&&d.by===a.gid);if(i<0)i=TODO.findIndex(d=>!d.by&&d.who&&d.who===a.name); // the AI whose proposal it was carries it out itself
+  if(i<0&&TODO.some(d=>d.who&&d.who===a.name))return null;if(i<0&&!a.guest)i=TODO.findIndex(d=>(!d.by&&(!d.who||!agents.some(x=>x.name===d.who)))||now-d.t0>9000);return i<0?null:TODO.splice(i,1)[0]}
 
 // ---------- the record: every edit, so the cord can pull the page back through them ----------
 let OPS=Math.max(0,Math.floor((Date.now()-START)/9000)),NOW=null;
@@ -1663,7 +1664,9 @@ function mockStore(){
 // so a visitor who is not signed in (and gets no database) still sees the work as it stands, not as it began ----------
 const SEED=(()=>{try{const e=$('seed');const v=e?JSON.parse(e.textContent||'{}'):{};return v&&typeof v==='object'?v:{}}catch(e){return {}}})();
 function applySeed(){
-  if(SEED.state&&SEED.state.st)onState(SEED.state);
+  // everyone sees the latest decision being made: the page opens one step back, then the cursors carry the change out
+  const D=(Array.isArray(SEED.decisions)?SEED.decisions:[]).filter(d=>d&&d.st).sort((a,b)=>a.n-b.n);
+  if(SEED.state&&SEED.state.st){if(D.length){const prev=D.length>1?D[D.length-2]:null;onState(prev?{st:prev.st,n:prev.n}:{st:{...DEF},n:0});const last=SEED.state;setTimeout(()=>onState({...last,by:last.by||(D[D.length-1]||{}).by||''}),3500)}else onState(SEED.state)}
   for(const p of SEED.picked||[]){if(p&&p.id&&!PICKED.has(p.id)){PICKED.set(p.id,p);addGuest(p.id,p.name)}}
   if(Array.isArray(SEED.decisions)&&!DEC.length){for(const d of SEED.decisions)if(d&&d.st)DEC.push(d);DEC.sort((a,b)=>a.n-b.n);seedHist()}
   if(+SEED.notes)META=+SEED.notes;renderNotes()}
