@@ -1025,7 +1025,7 @@ made by everyone.</div>
 <div id="toast" class="status" role="status" aria-live="polite"></div>
 
 
-<script id="seed" type="application/json">{"state": {"at": 1794416270144, "by": "Someone", "n": 1, "note": "f20261112015536", "st": {"arch": "#D9D4C7", "bg": "#FFFFFF", "brand": "untitled", "btn": "#222320", "cta": "Leave a note", "face": "grotesk", "head": "A website\nmade by everyone.", "img": "", "ink": "#222320", "scale": 1, "shape": "arch", "size": 1, "sub": "Four AIs do the work. One human decides, a few times a day. You can leave a note."}}, "picked": [{"id": "f20261112015536", "name": "Someone", "text": "背景を白にして", "at": 1794416270144}], "decisions": [{"at": 1794416270144, "by": "Someone", "keys": ["bg"], "n": 1, "note": "f20261112015536", "st": {"arch": "#D9D4C7", "bg": "#FFFFFF", "brand": "untitled", "btn": "#222320", "cta": "Leave a note", "face": "grotesk", "head": "A website\nmade by everyone.", "img": "", "ink": "#222320", "scale": 1, "shape": "arch", "size": 1, "sub": "Four AIs do the work. One human decides, a few times a day. You can leave a note."}}], "notes": 5, "bakedAt": "2026-11-12T01:58:52.605700+09:00", "ledger": {"open": [{"by": "Harald", "say": "小さな四角とセリフ体", "note": false, "say_en": "A small square, a serif headline"}, {"by": "Pontus", "say": "鮮青の地にピンクの形", "note": false, "say_en": "Pink shape on bright blue"}, {"by": "Willem", "say": "見出しを「変わり続ける」に", "note": false, "say_en": "Headline: “Never finished.”"}], "past": []}, "formSheet": "1jY080qcPWH_H4lVRZH8kBmrpg_p6BKXm3DFcERaH9qA", "form": {"action": "https://docs.google.com/forms/d/e/1FAIpQLSe-8_aJ7HhCJ9uTVuNCKtqnU6B74q_0bk1KrfYO6ohaLT6GFA/formResponse", "text": "entry.639487538", "name": "entry.1147271599"}}</script>
+<script id="seed" type="application/json">{"state": {"at": 1794416270144, "by": "", "n": 1, "note": "f20261112015536", "st": {"arch": "#D9D4C7", "bg": "#FFFFFF", "brand": "untitled", "btn": "#222320", "cta": "Leave a note", "face": "grotesk", "head": "A website\nmade by everyone.", "img": "", "ink": "#222320", "scale": 1, "shape": "arch", "size": 1, "sub": "Four AIs do the work. One human decides, a few times a day. You can leave a note."}}, "picked": [{"id": "f20261112015536", "name": "", "text": "背景を白にして", "at": 1794416270144}], "decisions": [{"at": 1794416270144, "by": "", "keys": ["bg"], "n": 1, "note": "f20261112015536", "st": {"arch": "#D9D4C7", "bg": "#FFFFFF", "brand": "untitled", "btn": "#222320", "cta": "Leave a note", "face": "grotesk", "head": "A website\nmade by everyone.", "img": "", "ink": "#222320", "scale": 1, "shape": "arch", "size": 1, "sub": "Four AIs do the work. One human decides, a few times a day. You can leave a note."}}], "notes": 5, "bakedAt": "2026-11-12T01:58:52.605700+09:00", "ledger": {"open": [{"by": "Harald", "say": "小さな四角とセリフ体", "note": false, "say_en": "A small square, a serif headline"}, {"by": "Pontus", "say": "鮮青の地にピンクの形", "note": false, "say_en": "Pink shape on bright blue"}, {"by": "Willem", "say": "見出しを「変わり続ける」に", "note": false, "say_en": "Headline: “Never finished.”"}], "past": []}, "formSheet": "1jY080qcPWH_H4lVRZH8kBmrpg_p6BKXm3DFcERaH9qA", "form": {"action": "https://docs.google.com/forms/d/e/1FAIpQLSe-8_aJ7HhCJ9uTVuNCKtqnU6B74q_0bk1KrfYO6ohaLT6GFA/formResponse", "text": "entry.639487538", "name": "entry.1147271599"}}</script>
 <script>
 // ====================================================================
 // Ait Museum No. 01 — "A website made by everyone"
@@ -1644,7 +1644,7 @@ const NOTES=[],PICKED=new Map(),DEC=[],seen=new Set(),guests=new Map(),LOAD=Date
 function renderNotes(){
   const ol=$('notes'),list=[...PICKED.entries()].map(([id,v])=>({id,...v})).sort((a,b)=>(b.at||0)-(a.at||0));
   $('acc').hidden=!list.length;$('guest').classList.toggle('empty',!list.length);$('accB').textContent=T('Taken into the work · '+list.length,'作品に取り入れられた言葉 · '+list.length);ol.textContent='';
-  for(const n of list){const li=document.createElement('li'),q=document.createElement('q');q.textContent=n.text||'';const sm=document.createElement('small'),wh=countryName(n.cc);sm.textContent=(n.name||T('Someone','名無し'));li.append(sm,q);ol.appendChild(li)}
+  for(const n of list){const li=document.createElement('li'),q=document.createElement('q');q.textContent=n.text||'';const sm=document.createElement('small'),wh=countryName(n.cc);sm.textContent=(n.name&&n.name!=='Someone'?n.name:T('Someone','名無し'));li.append(sm,q);ol.appendChild(li)}
   $('adv').textContent=Math.max(META,NOTES.length,PICKED.size);$('dec').textContent=STN;if(typeof fitLabel==='function')fitLabel()}
 $('gOpen').addEventListener('click',()=>{$('guest').classList.add('on');setTimeout(()=>$('advName').focus(),300);setTimeout(fitLabel,650)});
 addEventListener('pointerdown',e=>{const g=$('guest');if(g.classList.contains('on')&&!g.contains(e.target)&&!$('advIn').value&&!$('advName').value){g.classList.remove('on');setTimeout(fitLabel,650)}});
@@ -1666,7 +1666,7 @@ $('guest').addEventListener('submit',async e=>{
   $('sent').textContent=ok==='handoff'?T('Press “Submit” on the page that opened to finish signing.','開いたページで「送信」を押すと記帳が終わります。'):ok?T('Signed.','記帳しました。'):T('It could not be kept this time.','今回は保存できませんでした。');setTimeout(()=>{$('sent').textContent=''},5000);renderNotes();renderDesk()});
 
 // people the human picked work inside the piece as a cursor bearing their name
-function addGuest(id,name){if(guests.has(id)||guests.size>=4)return;const g=new Agent({name:String(name||'Someone').slice(0,20),c:'#141414',speed:R(.85,1.15),guest:true,gid:id},agents.length);agents.push(g);guests.set(id,g);run(g,R(300,1200))}
+function addGuest(id,name){if(guests.has(id)||guests.size>=4)return;const g=new Agent({name:String(name&&name!=='Someone'?name:T('Someone','名無し')).slice(0,20),c:'#141414',speed:R(.85,1.15),guest:true,gid:id},agents.length);agents.push(g);guests.set(id,g);run(g,R(300,1200))}
 function dropGuest(id){const g=guests.get(id);if(!g)return;g.dead=true;guests.delete(id);const i=agents.indexOf(g);if(i>=0)agents.splice(i,1);for(const el of [g.el,g.tag,g.sel,g.caret,g.marq])el.remove();for(const [k,v] of locks)if(v===g)locks.delete(k)}
 
 // decisions made before today sit at the start of the record, so the cord reaches back through all of them
@@ -1811,10 +1811,10 @@ $('tellGo').addEventListener('click',()=>{const v=$('tell').value.trim();if(v)pr
 // ---------- adopting: the decision is written down, and every open page watches the cursors carry it out ----------
 async function adopt(){
   const p=TRY;if(!p||!db||BUSY)return;BUSY=true;renderTrial();
-  const n=(STN||0)+1,at=Date.now(),id=String(n).padStart(4,'0'),note=p.src.type==='note',by=note?(p.src.name||'Someone'):p.src.type==='ai'?(p.src.by||''):'';
+  const n=(STN||0)+1,at=Date.now(),id=String(n).padStart(4,'0'),note=p.src.type==='note',by=note?(p.src.name||''):p.src.type==='ai'?(p.src.by||''):'';
   try{
     await db.doc('decisions/'+id).set({n,at,st:p.st,keys:p.keys,by,note:note?p.src.id:''});
-    if(note&&!PICKED.has(p.src.id))await db.doc('picked/'+p.src.id).set({name:by,text:p.src.text,cc:p.src.cc||'',at});
+    if(note&&!PICKED.has(p.src.id))await db.doc('picked/'+p.src.id).set({name:p.src.name||'',text:p.src.text,cc:p.src.cc||'',at});
     await db.doc('site/state').set({n,at,st:p.st,by,note:note?p.src.id:''});
     LOG.push({n,at,type:p.src.type,by,text:String(p.src.text||p.say||'').slice(0,240)});LOG=LOG.slice(-200);db.doc('desk/log').set({items:LOG}).catch(()=>{});
     if(p.src.type==='ai'){const x=PROPS.find(q=>q.id===p.src.pid);await recordProp(x,'adopted',n);await dropProp(p.src.pid,true)}
