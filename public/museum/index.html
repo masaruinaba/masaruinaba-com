@@ -135,9 +135,9 @@ html[lang=ja] .ti{font-family:"Shippori Mincho","Hiragino Mincho ProN","Yu Minch
 
 #guest{overflow:visible!important;left:var(--gl);top:calc(var(--mt) + var(--rh));width:calc(2*var(--c) + var(--g));transition:opacity .6s ease;display:flex;flex-direction:column;overflow:hidden;margin:0}
 #guest .lead{font-size:calc(var(--t)*11);line-height:1.6;margin:calc(var(--t)*8) 0 calc(var(--t)*8)}
-#guest input{display:block;width:100%;box-sizing:border-box;border:0;border-bottom:1px solid color-mix(in srgb,var(--blue) 35%,transparent);border-radius:0;background:transparent;padding:calc(var(--t)*6) 0;font:400 calc(var(--t)*11.5) Graphik,"Hiragino Sans",system-ui,sans-serif;color:var(--blue);outline:none}
-#guest input::placeholder{color:color-mix(in srgb,var(--blue) 50%,transparent)}
-#guest input:focus{border-bottom-color:var(--blue)}
+#guest :is(input,textarea){display:block;width:100%;box-sizing:border-box;border:0;border-bottom:1px solid color-mix(in srgb,var(--blue) 35%,transparent);border-radius:0;background:transparent;padding:calc(var(--t)*6) 0;font:400 calc(var(--t)*11.5) Graphik,"Hiragino Sans",system-ui,sans-serif;color:var(--blue);outline:none}
+#guest :is(input,textarea)::placeholder{color:color-mix(in srgb,var(--blue) 50%,transparent)}
+#guest :is(input,textarea):focus{border-bottom-color:var(--blue)}
 #guest .send{margin-top:calc(var(--t)*12);font-size:calc(var(--t)*11.5);align-self:flex-start}
 #sent{margin-left:calc(var(--t)*10);font-size:calc(var(--t)*10);opacity:.7}
 #acc{margin-top:calc(var(--t)*16);border-top:1px solid color-mix(in srgb,var(--blue) 25%,transparent);display:flex;flex-direction:column;min-height:0}
@@ -195,7 +195,7 @@ body.compact #mark{left:24px;top:20px}body.compact #more{right:24px;top:14px}bod
 }
 
 /* Japanese lettering on the wall is set in mincho throughout */
-html[lang=ja] .wt,html[lang=ja] #guest input,html[lang=ja] #accB{font-family:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif}
+html[lang=ja] .wt,html[lang=ja] #guest :is(input,textarea),html[lang=ja] #accB{font-family:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif}
 html[lang=ja] #label .ar{font-weight:500}
 #label .ti.tl{font-family:Mondwest,Graphik,serif!important;letter-spacing:0!important}
 #menu .own{display:none}html.own #menu .own{display:revert}
@@ -220,7 +220,7 @@ body.reading #hint,body.reading #grain{opacity:0}
 html[lang=ja] #guest .lead,html[lang=ja] #label .ar{word-break:auto-phrase;text-align:left!important}
 /* one size for everything on the wall; hierarchy only from where things sit and the space between them */
 :root{--fs:calc(var(--t)*11.5)}
-#mark,#now,#guest .ti,#guest .lead,#guest input,#guest .send,#sent,#accB,#notes li,#notes small,#menu,#sig,#plaque,#plaque i{font-size:var(--fs)!important;line-height:1.6!important;letter-spacing:.01em}
+#mark,#now,#guest .ti,#guest .lead,#guest :is(input,textarea),#guest .send,#sent,#accB,#notes li,#notes small,#menu,#sig,#plaque,#plaque i{font-size:var(--fs)!important;line-height:1.6!important;letter-spacing:.01em}
 #label .ar,#label .ti,#label .md,#label .desc,#label .cr{font-size:calc(var(--fs)*var(--ls,1))!important;line-height:1.75!important;font-weight:400!important}
 #mark{margin-top:0!important}
 #now{top:calc(var(--mt) + var(--fs)*1.6)!important}
@@ -241,7 +241,7 @@ html[lang=ja] #guest .lead,html[lang=ja] #label .ar{word-break:auto-phrase;text-
 #now{left:calc(var(--gl) + 2*(var(--c) + var(--g)))!important;top:calc(var(--mt) + var(--fs)*1.6)!important;width:calc(1.5*var(--c) + var(--g))!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.6!important}
 #guest{top:calc(var(--mt) + 1.4*var(--rh))!important;width:calc(2*var(--c) + var(--g))}
 #guest .lead{margin:0 0 calc(var(--fs)*1.6)!important}
-#guest input{padding:calc(var(--fs)*.35) 0!important}
+#guest :is(input,textarea){padding:calc(var(--fs)*.35) 0!important}
 #acc{margin-top:calc(var(--fs)*1.6)!important;border-top:0!important}
 #accB{padding:0 0 calc(var(--fs)*.6)!important}
 #notes li{display:grid;grid-template-columns:var(--c) 1fr;column-gap:var(--g);border-top:0!important;padding:calc(var(--fs)*.3) 0!important}
@@ -481,7 +481,7 @@ body.lab-open #nowk,body.lab-open #now{transform:translateX(calc(-1*var(--sh)))!
 /* guestbook: always a field you can type into, with the button beside it; the name appears once you start */
 #gForm{max-height:none!important;opacity:1!important;overflow:visible!important;padding-top:calc(var(--fs)*.5)!important}
 #gForm .gl{display:flex;align-items:baseline;gap:calc(var(--fs)*.8)}
-#gForm .gl input{flex:1;min-width:0}
+#gForm .gl :is(input,textarea){flex:1;min-width:0}
 #gForm .send{margin:0!important;white-space:nowrap}
 #advName{max-height:0;opacity:0;overflow:hidden;padding:0!important;border-bottom-width:0!important;transition:max-height .4s ease,opacity .3s ease,padding .4s ease}
 #guest.on #advName,#guest:focus-within #advName{max-height:3em;opacity:1;padding:calc(var(--fs)*.35) 0!important;border-bottom-width:1px!important}
@@ -492,13 +492,13 @@ body.lab-open #nowk,body.lab-open #now{transform:translateX(calc(-1*var(--sh)))!
 #sig svg{height:calc(var(--fs)*.5)!important}
 /* guestbook: one hairline field; the button sits inside its right end, faint until there is something to sign */
 #gForm .gl{position:relative;display:block!important}
-#gForm .gl input{width:100%!important;padding-right:calc(var(--fs)*3.2)!important}
+#gForm .gl :is(input,textarea){width:100%!important;padding-right:calc(var(--fs)*3.2)!important}
 #gForm .gl .send{position:absolute;right:0;bottom:calc(var(--fs)*.38);text-decoration:none!important;font-size:var(--fs)!important;line-height:1;opacity:.3;transition:opacity .25s ease;pointer-events:none}
-#gForm .gl:has(input:not(:placeholder-shown)) .send{opacity:1;pointer-events:auto}
+#gForm .gl:has(:is(input,textarea):not(:placeholder-shown)) .send{opacity:1;pointer-events:auto}
 #gForm .gl .send::after{content:" →"}
-#guest input{border-bottom-color:color-mix(in srgb,var(--blue) 30%,transparent)!important}
-#guest input:focus{border-bottom-color:var(--blue)!important}
-#guest input::placeholder{color:color-mix(in srgb,var(--blue) 40%,transparent)!important}
+#guest :is(input,textarea){border-bottom-color:color-mix(in srgb,var(--blue) 30%,transparent)!important}
+#guest :is(input,textarea):focus{border-bottom-color:var(--blue)!important}
+#guest :is(input,textarea)::placeholder{color:color-mix(in srgb,var(--blue) 40%,transparent)!important}
 /* what is happening is a caption to the frame: it sits just under the frame, on its left edge, and moves with it */
 #now{left:var(--fl)!important;top:calc(var(--mt) + 8*var(--rh) + var(--fs)*1.2)!important;width:calc(var(--fr) - var(--fl))!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;opacity:.62}
 body.lab-open #now{transform:translateX(calc(-1*var(--sh)))!important;opacity:.62!important}
@@ -529,7 +529,7 @@ body.focus #board{box-shadow:0 0 0 var(--u) rgba(30,26,20,.08)!important}
 #sig svg{height:.78em!important;margin-left:.5em}
 /* guestbook: one size, one weight, quiet */
 #guest .ti{font:500 calc(var(--fs)*.85)/1.45 Graphik,"Shippori Mincho",sans-serif!important;margin-bottom:calc(var(--fs)*.4)!important}
-#guest .gl input{font-size:calc(var(--fs)*.85)!important}
+#guest .gl :is(input,textarea){font-size:calc(var(--fs)*.85)!important}
 #guest .gl .send{font-size:calc(var(--fs)*.8)!important}
 /* parallax: when the label opens, the layers arrive at different speeds */
 #frame,#board,#wrap{transition-timing-function:cubic-bezier(.45,0,.2,1)}
@@ -542,11 +542,11 @@ body.lab-open #label .ti{transform:translateX(calc(var(--fs)*-1.2))}
 body.lab-open #label .md{transform:translateX(calc(var(--fs)*-.8))}
 body.lab-open #label .desc p{transform:translateX(0)}
 /* one small size, one face, one weight for everything that is not the title or the text */
-#mark,#lcol .no,#guest .ti,#guest .gl input,#guest .gl .send,#sent,#accB,#nowk,#now,#cap,#cap b,#sig,#more,#label .md{
+#mark,#lcol .no,#guest .ti,#guest .gl :is(input,textarea),#guest .gl .send,#sent,#accB,#nowk,#now,#cap,#cap b,#sig,#more,#label .md{
   font-family:Graphik,"Shippori Mincho",sans-serif!important;font-size:calc(var(--fs)*.82)!important;font-weight:400!important;
   line-height:1.5!important;letter-spacing:.01em!important;color:var(--blue)!important}
 #mark,#guest .ti,#cap b{font-weight:500!important}
-#guest .gl input::placeholder{color:var(--blue);opacity:.45}
+#guest .gl :is(input,textarea)::placeholder{color:var(--blue);opacity:.45}
 #guest .gl .send{opacity:.45}
 #lcol .no,#label .md,#cap span,#sig,#more{opacity:.6!important}
 #label .md{margin-top:calc(var(--fs)*.6)!important}
@@ -604,9 +604,9 @@ body.lab-open #label{clip-path:inset(-60% -10% -10% -60%)!important}
 #label .desc{column-fill:auto!important}
 #now{display:none!important}
 /* guestbook fields: the same face and size as every other small line */
-#guest input,#guest input::placeholder,#guest .send,#gOpen,#guest .ti{font-family:Graphik,"Shippori Mincho",sans-serif!important;font-size:calc(var(--fs)*.82)!important;line-height:1.5!important;letter-spacing:.01em!important;font-weight:400!important}
+#guest :is(input,textarea),#guest :is(input,textarea)::placeholder,#guest .send,#gOpen,#guest .ti{font-family:Graphik,"Shippori Mincho",sans-serif!important;font-size:calc(var(--fs)*.82)!important;line-height:1.5!important;letter-spacing:.01em!important;font-weight:400!important}
 #guest .ti{font-weight:500!important}
-#guest input{height:auto!important;padding:calc(var(--fs)*.5) 0!important;border-bottom-width:1px!important}
+#guest :is(input,textarea){height:auto!important;padding:calc(var(--fs)*.5) 0!important;border-bottom-width:1px!important}
 /* nothing in the margins: the bottom band stays empty */
 #cap{display:none!important}
 #sig{top:calc(var(--mt) + var(--fs)*2.9)!important;bottom:auto!important;left:var(--m2)!important;right:auto!important;opacity:.6!important}
@@ -615,7 +615,7 @@ body.lab-open #label{clip-path:inset(-60% -10% -10% -60%)!important}
 #sig,#more,#menu{transition:transform 1.5s cubic-bezier(.65,0,.35,1),opacity .3s!important}
 body.lab-open #sig,body.lab-open #more,body.lab-open #menu{transform:translateX(calc(-1*var(--sh)))!important}
 body.lab-open #sig,body.lab-open #more{opacity:0!important;pointer-events:none}
-#guest input::placeholder{opacity:.7!important;color:var(--blue)!important}#guest input{color:var(--blue)!important}
+#guest :is(input,textarea)::placeholder{opacity:.7!important;color:var(--blue)!important}#guest :is(input,textarea){color:var(--blue)!important}
 /* left column, rows: name and number on the first line, the signature one row down, year over mark */
 #sig{top:calc(var(--mt) + var(--rh))!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:calc(var(--fs)*.5)}
 #sig svg{margin-left:0!important;height:calc(var(--fs)*.8)!important}
@@ -802,6 +802,14 @@ body.lab-open #label #sig{left:calc(2*(var(--side) + var(--gp)))!important;opaci
 #sent{display:block;text-indent:0!important;padding:0!important;margin-top:calc(var(--fs)*.6);font:400 calc(var(--fs)*.72)/1.5 Graphik,"Shippori Mincho",sans-serif!important;letter-spacing:0!important;color:var(--blue);opacity:.7}
 #gExt[hidden]{display:none!important}
 
+/* guestbook note: two lines with an example */
+#advIn{display:block;resize:none;overflow-y:auto;scrollbar-width:none;white-space:pre-wrap;font-family:inherit}
+#advIn::-webkit-scrollbar{display:none}
+/* for the owner, Admin is always out — no menu to open */
+html.own #more{display:none!important}
+html.own #menu{display:flex!important;opacity:1!important;transform:none!important;pointer-events:auto!important;top:var(--mt)!important}
+html.own #menu .own{display:revert!important}
+
 /* ---------- the owner's desk: the same wall, the same blue lettering, set as a narrow column ---------- */
 #desk,#toast{--hair:color-mix(in srgb,var(--blue) 18%,transparent);--soft:color-mix(in srgb,var(--blue) 60%,transparent);font-family:Graphik,"Hiragino Sans",system-ui,sans-serif;font-size:12px;color:var(--blue);-webkit-font-smoothing:antialiased}
 #desk{display:none}
@@ -911,7 +919,7 @@ made by everyone.</div>
       <div class="ti" data-en="Guestbook" data-ja="芳名録">Guestbook</div>
       <a class="lk" id="gExt" target="_blank" rel="noopener" hidden data-en="Sign the book ↗" data-ja="記帳する ↗">Sign the book ↗</a><button type="button" class="lk" id="gOpen" data-nosplit data-en="Sign the book" data-ja="記帳する">Sign the book</button>
       <div id="gForm">
-      <div class="gl"><input id="advIn" data-1p-ignore data-lpignore="true" maxlength="80" placeholder="Leave a note for the work" data-ph-en="Leave a note for the work" data-ph-ja="作品にひとこと残す" autocomplete="off"><button class="lk send" data-en="Sign" data-ja="記帳">Sign</button></div>
+      <div class="gl"><textarea id="advIn" rows="2" data-1p-ignore data-lpignore="true" maxlength="140" placeholder="Leave a note for the work&#10;e.g. Make the headline bolder" data-ph-en="Leave a note for the work&#10;e.g. Make the headline bolder" data-ph-ja="作品にひとこと残す&#10;例：見出しをもっと大胆に" autocomplete="off"></textarea><button class="lk send" data-en="Sign" data-ja="記帳">Sign</button></div>
       <input id="advName" data-1p-ignore data-lpignore="true" maxlength="20" placeholder="Name (optional)" data-ph-en="Name (optional)" data-ph-ja="名前（任意）" autocomplete="off">
       <span id="sent" data-nosplit></span>
       </div>
@@ -1690,6 +1698,8 @@ function sendForm(n){return new Promise(res=>{
   const q=new URLSearchParams();q.set(FORM.text,n.text);if(FORM.name)q.set(FORM.name,n.name||'');
   try{fetch(FORM.action,{method:'POST',mode:'no-cors',body:q}).then(()=>res(true),()=>res(false))}catch(e){res(false)}})}
 
+$('advIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&e.keyCode!==229){e.preventDefault();$('guest').requestSubmit()}});
+
 // ====================================================================
 // e_desk: the owner's desk. Read the notes, tell the cursors what to do, try it on the page
 // (nobody else sees a trial), then adopt it or drop it. Works on a phone.
@@ -1862,7 +1872,7 @@ function loop(now){const dt=Math.min(.05,(now-lastT)/1000);lastT=now;camStep(now
   }catch(e){console.error(e)}
   renderDesk();renderLedger();start()})();
 // the label's text runs down to the frame's bottom line, then on into the next column
-function fillDesc(){const d=document.querySelector('#label .desc'),L=$('label'),f=document.querySelector('#label .ill');if(!d||!L)return;const cs=getComputedStyle(document.documentElement),mt=parseFloat(cs.getPropertyValue('--mt')),rh=parseFloat(cs.getPropertyValue('--rh')),bottom=mt+8*rh;
+function fillDesc(){const d=document.querySelector('#label .desc'),L=$('label'),f=document.querySelector('#label .ill');if(!d||!L)return;if(document.hidden||!L.offsetParent||getComputedStyle(L).display==='none'||d.getBoundingClientRect().width<20){fillDesc.pending=true;return}fillDesc.pending=false;const cs=getComputedStyle(document.documentElement),mt=parseFloat(cs.getPropertyValue('--mt')),rh=parseFloat(cs.getPropertyValue('--rh')),bottom=mt+8*rh;
   // three columns: the text runs down the first two and into the third, stopping above the reel that stands on the bottom line
   d.style.removeProperty('margin-top');d.style.setProperty('column-count','1','important');d.style.height='auto';d.style.width=getComputedStyle(document.documentElement).getPropertyValue('--side');
   const T=d.scrollHeight,lh=parseFloat(getComputedStyle(d).lineHeight)||20,fb=f?f.offsetHeight+lh*1.5:0;d.style.removeProperty('column-count');d.style.width='';
@@ -1887,7 +1897,7 @@ function fillDesc(){const d=document.querySelector('#label .desc'),L=$('label'),
   // laid out for the open label (full height). closed, the text gives its last two lines to EN / JP and the reel keeps its place
   {const lab=document.body.classList.contains('lab-open');document.documentElement.style.setProperty('--dlh',lh+'px');d.style.setProperty('--dh',H2+'px');d.style.removeProperty('height');void lab}
   const md=document.querySelector('#label .md'),ro=$('readon');if(md&&ro)ro.style.setProperty('top',Math.round(md.getBoundingClientRect().top)+'px','important')}
-addEventListener('resize',()=>setTimeout(fillDesc,50));setTimeout(fillDesc,400);setTimeout(fillDesc,1500);document.fonts&&document.fonts.ready.then(fillDesc);
+let fdT=0;const fdLater=()=>{clearTimeout(fdT);fdT=setTimeout(fillDesc,180)};addEventListener('resize',fdLater);document.addEventListener('visibilitychange',()=>{if(!document.hidden)fdLater()});addEventListener('pageshow',fdLater);addEventListener('focus',fdLater);try{new ResizeObserver(fdLater).observe(document.documentElement)}catch(e){}setTimeout(fillDesc,400);setTimeout(fillDesc,1500);document.fonts&&document.fonts.ready.then(fillDesc);
 const _sl=window.setLang;if(_sl)window.setLang=function(){const r=_sl.apply(this,arguments);setTimeout(fillDesc,50);try{renderLedger()}catch(e){}return r};
 // a reel of the works that move
 const REEL=[['chaos1.mp4','Chaos Cam','2026'],['cm1.mp4','Sayday','2026'],['teep1.mp4','Teep','2026'],['slip1.mp4','Slip','2026'],['lab1.mp4','Camera Lab','2026'],['new1.mp4','Sayday','2026'],['chaos2.mp4','Chaos Cam','2026'],['teep2.mp4','Teep','2026'],['cm2.mp4','Sayday','2026'],['origin2.mp4','Origin Shapes','2026'],['slip2.mp4','Slip','2026'],['lab2.mp4','Camera Lab','2026'],['con1.mp4','Sayday','2026'],['teep3.mp4','Teep','2026'],['chaos3.mp4','Chaos Cam','2026'],['balloon2.mp4','Balloon Portfolio','2026'],['new2.mp4','Sayday','2026'],['slip3.mp4','Slip','2026'],['lab3.mp4','Camera Lab','2026'],['cm3.mp4','Sayday','2026'],['teep4.mp4','Teep','2026'],['con2.mp4','Sayday','2026'],['new3.mp4','Sayday','2026']];let reelI=0;
