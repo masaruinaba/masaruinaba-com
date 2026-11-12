@@ -1106,7 +1106,10 @@ const cycle=()=>{if(stop)return;if(busy()){hush();calm=0;t=setTimeout(cycle,1000
 const wait=()=>{if(stop)return;calm=busy()?0:calm+1;if(calm>=45){calm=0;cycle()}else t=setTimeout(wait,1000)}; /* 45 quiet seconds of just looking */
 setInterval(()=>{if(n.classList.contains('go')&&busy())hush()},250);
 g&&g.addEventListener('click',e=>{if(e.target.closest('.send'))stop=true,clearTimeout(t),hush()});
-setTimeout(cycle,1400);
+/* at most once a day, once per visit, and only once the guestbook is actually on screen */
+let last=0;try{last=+localStorage.getItem('ait.nudge')||0}catch(e){}
+if(Date.now()-last>864e5){let fired=false;const fire=()=>{if(fired)return;if(busy()){setTimeout(fire,1000);return}fired=true;stop=true;try{localStorage.setItem('ait.nudge',String(Date.now()))}catch(e){}play()};
+  const io='IntersectionObserver' in window?new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){io.disconnect();setTimeout(fire,1400)}},{threshold:.6}):null;if(io)io.observe(g);else setTimeout(fire,1400)}
 })();
 </script>
       <div id="gForm">
