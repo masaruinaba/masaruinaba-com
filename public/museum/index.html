@@ -181,9 +181,8 @@ body.compact #mark{left:24px;top:20px}body.compact #more{right:24px;top:14px}bod
 /* ---------- phones: visitors are sent to a bigger screen; the owner gets the desk ---------- */
 #mobile{display:none}
 @media (max-width:700px){
-  #wall,#tassel,#grain,#tip,#hint{display:none!important}
-  html:not(.own) #wrap{display:none}
-  html:not(.own) #mobile{display:flex;position:fixed;inset:0;z-index:30;flex-direction:column;justify-content:center;gap:18px;background:var(--wall);padding:0 max(28px,env(safe-area-inset-right,0px)) 0 max(28px,env(safe-area-inset-left,0px))}
+  body:not(.stack) :is(#wall,#tassel,#grain,#tip,#hint){display:none!important}
+  html:not(.own) #mobile.retired{display:flex;position:fixed;inset:0;z-index:30;flex-direction:column;justify-content:center;gap:18px;background:var(--wall);padding:0 max(28px,env(safe-area-inset-right,0px)) 0 max(28px,env(safe-area-inset-left,0px))}
   #mobile .mk{font-family:Mondwest,Graphik,serif;font-size:34px;line-height:1;margin-bottom:22px}
   #mobile .mt{font-family:Mondwest,"Hiragino Mincho ProN",serif;font-size:26px;line-height:1.25;max-width:15em}
   html[lang=ja] #mobile .mt{font-family:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;font-size:22px;line-height:1.5}
@@ -844,6 +843,53 @@ html:not(.lab-moving) #label #sig{transition:none!important}
 /* the label and everything riding on it move only while the label is opening or closing */
 html:not(.lab-moving) #label,html:not(.lab-moving) #label .in,html:not(.lab-moving) #sig{transition-property:opacity!important}
 
+/* ================= stacked: phones and portrait tablets =================
+   the frame hangs at the top under the name and the cord; the label, the guestbook and the signature are read downward under it */
+body.stack{--fs:15px}
+@media (min-width:600px){body.stack{--fs:16px}}
+body.stack .stage{overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
+body.stack #wall{position:absolute!important;left:0;right:0;top:0;bottom:auto;box-sizing:border-box;min-height:100%;padding:var(--stackH) var(--sm) calc(var(--fs)*4 + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;pointer-events:none;opacity:1!important}
+body.stack #wall>*{position:relative!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;transform:none!important;width:auto!important;max-width:none!important;clip-path:none!important;opacity:1}
+body.stack :is(#probe,#now,#nowk,#cap,#readon,#ledger,#rule,#works,#stats,#plaque,#hint,#gridov,#gridBtn){display:none!important}
+body.stack #wall #lcol{display:contents!important}
+body.stack #wall #lcol>#mark,body.stack #wall #lcol>.no{position:absolute!important;left:var(--sm)!important;margin:0!important}
+body.stack #wall #lcol>#mark{top:calc(env(safe-area-inset-top,0px) + 22px)!important}
+body.stack #wall #lcol>.no{top:calc(env(safe-area-inset-top,0px) + 22px + var(--fs)*1.3)!important}
+/* the label first: what this is */
+body.stack #label{order:1;pointer-events:auto!important;cursor:default!important}
+body.stack #label .in{transform:none!important;cursor:default!important}
+body.stack #label .ti,body.stack #label .ti.tl{font-size:calc(var(--fs)*2.5)!important;max-width:none!important;margin:0 0 calc(var(--fs)*.4)!important}
+body.stack #label .desc{column-count:1!important;column-gap:calc(var(--fs)*2)!important;column-fill:balance!important;font-size:calc(var(--fs)*.94)!important;line-height:1.85!important;margin-top:calc(var(--fs)*1.6)!important}
+@media (min-width:600px){body.stack #label .desc{column-count:2!important}}
+body.stack #label .desc p{display:block!important}
+body.stack #label .desc{height:auto!important}
+body.stack #label .ill{position:relative!important;left:auto!important;bottom:auto!important;width:auto!important;margin:calc(var(--fs)*2) 0 0!important;break-inside:avoid;--rw:min(260px,62vw)}
+body.stack #reelc{width:var(--rw)!important}
+/* then the guestbook */
+body.stack #lcol #guest{order:2;margin-top:calc(var(--fs)*3.6)!important}
+body.stack #guest.on,body.stack #guest{width:auto!important}
+body.stack #gOpen{padding:calc(var(--fs)*.4) 0!important;margin-top:0!important}
+body.stack #notes{max-height:none!important}
+body.stack #wall #guest :is(input,textarea),body.stack #wall #guest :is(input,textarea)::placeholder{font-size:16px!important}
+body.stack #gNudge{left:calc(var(--fs)*6.4)}
+/* the signature closes the page; the language switch sits on its line, at the right */
+body.stack #sig{order:3;margin-top:calc(var(--fs)*4)!important;opacity:.6!important}
+body.stack #wall #lang{position:absolute!important;left:auto!important;right:var(--sm)!important;top:auto!important;bottom:calc(var(--fs)*4 + env(safe-area-inset-bottom,0px))!important;opacity:1!important;pointer-events:auto}
+body.stack #lang button{padding:6px 0;font-size:calc(var(--fs)*.82)!important}
+/* the owner's dots, beside the cord */
+body.stack #wall #more{position:absolute!important;left:auto!important;right:calc(var(--sm) + 44px)!important;top:calc(env(safe-area-inset-top,0px) + 18px)!important;bottom:auto!important}
+body.stack #wall #menu{position:absolute!important;left:auto!important;right:calc(var(--sm) + 44px)!important;top:calc(env(safe-area-inset-top,0px) + 18px + var(--fs)*1.6)!important;bottom:auto!important;width:auto!important}
+/* the cord and its date hang in the room, so they scroll with it */
+body.stack #tassel,body.stack #tip{position:absolute}
+/* stepped closer: the page alone where the frame was; the lettering below stays */
+body.stack.focus #wall{opacity:1!important}
+/* touch screens: inputs large enough not to zoom the page; in the one-room layout nothing scrolls but the chosen notes */
+@media (pointer:coarse){
+  html body #wall #guest :is(input,textarea),html body #wall #guest :is(input,textarea)::placeholder{font-size:16px!important}
+  body:not(.stack) .stage{touch-action:none}
+  body:not(.stack) #notes{touch-action:pan-y}
+}
+
 /* ---------- the owner's desk: the same wall, the same blue lettering, set as a narrow column ---------- */
 #desk,#toast{--hair:color-mix(in srgb,var(--blue) 18%,transparent);--soft:color-mix(in srgb,var(--blue) 60%,transparent);font-family:Graphik,"Hiragino Sans",system-ui,sans-serif;font-size:12px;color:var(--blue);-webkit-font-smoothing:antialiased}
 #desk{display:none}
@@ -1129,7 +1175,7 @@ setTimeout(cycle,1400);
 <div id="toast" class="status" role="status" aria-live="polite"></div>
 
 
-<script id="seed" type="application/json">{"state": {"at": 1794445329565, "by": "Willem", "n": 3, "note": "", "st": {"arch": "#D9D4C7", "bg": "#FFFFFF", "brand": "untitled", "btn": "#222320", "face": "grotesk", "img": "", "ink": "#222320", "scale": 1, "shape": "arch", "size": 1, "cta": "Leave a mark", "gap": 52, "head": "Never\nfinished.", "sub": "Four AIs rebuild this page every day. One human keeps what works. Leave a note and watch it change."}}, "picked": [{"id": "f20261112015536", "name": "", "text": "背景を白にして", "at": 1794416270144}, {"id": "f20261112093525", "name": "", "text": "ボタンと本文の距離を近く", "at": 1794444911825}], "decisions": [{"at": 1794416270144, "by": "Someone", "keys": ["bg"], "n": 1, "note": "f20261112015536", "st": {"arch": "#D9D4C7", "bg": "#FFFFFF", "brand": "untitled", "btn": "#222320", "cta": "Leave a note", "face": "grotesk", "head": "A website\nmade by everyone.", "img": "", "ink": "#222320", "scale": 1, "shape": "arch", "size": 1, "sub": "Four AIs do the work. One human decides, a few times a day. You can leave a note."}}, {"at": 1794444911825, "by": "Harald", "keys": ["gap"], "n": 2, "note": "f20261112093525", "st": {"arch": "#D9D4C7", "bg": "#FFFFFF", "brand": "untitled", "btn": "#222320", "face": "grotesk", "img": "", "ink": "#222320", "scale": 1, "shape": "arch", "size": 1, "cta": "Leave a note", "gap": 52, "head": "A website\nmade by everyone.", "sub": "Four AIs do the work. One human decides, a few times a day. You can leave a note."}}, {"at": 1794445329565, "by": "Willem", "keys": ["head", "sub", "cta"], "n": 3, "note": "", "st": {"arch": "#D9D4C7", "bg": "#FFFFFF", "brand": "untitled", "btn": "#222320", "face": "grotesk", "img": "", "ink": "#222320", "scale": 1, "shape": "arch", "size": 1, "cta": "Leave a mark", "gap": 52, "head": "Never\nfinished.", "sub": "Four AIs rebuild this page every day. One human keeps what works. Leave a note and watch it change."}}], "notes": 6, "ledger": {"open": [{"by": "Harald", "say": "小さな四角とセリフ体", "say_en": "A small square, a serif headline", "note": false}, {"by": "Pontus", "say": "鮮青の地にピンクの形", "say_en": "Pink shape on bright blue", "note": false}, {"by": "Willem", "say": "見出しを一行に詰める", "say_en": "Headline in one short line", "note": false}], "past": [{"by": "Willem", "say": "見出しを「変わり続ける」に", "say_en": "Headline: “Never finished.”", "note": false, "status": "adopted", "n": 3}, {"by": "Harald", "say": "ボタンを本文に寄せる", "say_en": "Button closer to the intro", "note": true, "status": "adopted", "n": 2}]}, "bakedAt": "2026-11-12T10:12:03.402201+09:00", "formSheet": "1jY080qcPWH_H4lVRZH8kBmrpg_p6BKXm3DFcERaH9qA", "form": {"action": "https://docs.google.com/forms/d/e/1FAIpQLSe-8_aJ7HhCJ9uTVuNCKtqnU6B74q_0bk1KrfYO6ohaLT6GFA/formResponse", "text": "entry.639487538", "name": "entry.1147271599"}}</script>
+<script id="seed" type="application/json">{"state": {"at": 1794445329565, "by": "Willem", "n": 3, "note": "", "st": {"arch": "#D9D4C7", "bg": "#FFFFFF", "brand": "untitled", "btn": "#222320", "face": "grotesk", "img": "", "ink": "#222320", "scale": 1, "shape": "arch", "size": 1, "cta": "Leave a mark", "gap": 52, "head": "Never\nfinished.", "sub": "Four AIs rebuild this page every day. One human keeps what works. Leave a note and watch it change."}}, "picked": [{"id": "f20261112015536", "name": "", "text": "背景を白にして", "at": 1794416270144}, {"id": "f20261112093525", "name": "", "text": "ボタンと本文の距離を近く", "at": 1794444911825}], "decisions": [{"at": 1794416270144, "by": "Someone", "keys": ["bg"], "n": 1, "note": "f20261112015536", "st": {"arch": "#D9D4C7", "bg": "#FFFFFF", "brand": "untitled", "btn": "#222320", "cta": "Leave a note", "face": "grotesk", "head": "A website\nmade by everyone.", "img": "", "ink": "#222320", "scale": 1, "shape": "arch", "size": 1, "sub": "Four AIs do the work. One human decides, a few times a day. You can leave a note."}}, {"at": 1794444911825, "by": "Harald", "keys": ["gap"], "n": 2, "note": "f20261112093525", "st": {"arch": "#D9D4C7", "bg": "#FFFFFF", "brand": "untitled", "btn": "#222320", "face": "grotesk", "img": "", "ink": "#222320", "scale": 1, "shape": "arch", "size": 1, "cta": "Leave a note", "gap": 52, "head": "A website\nmade by everyone.", "sub": "Four AIs do the work. One human decides, a few times a day. You can leave a note."}}, {"at": 1794445329565, "by": "Willem", "keys": ["head", "sub", "cta"], "n": 3, "note": "", "st": {"arch": "#D9D4C7", "bg": "#FFFFFF", "brand": "untitled", "btn": "#222320", "face": "grotesk", "img": "", "ink": "#222320", "scale": 1, "shape": "arch", "size": 1, "cta": "Leave a mark", "gap": 52, "head": "Never\nfinished.", "sub": "Four AIs rebuild this page every day. One human keeps what works. Leave a note and watch it change."}}], "notes": 6, "ledger": {"open": [{"by": "Willem", "say": "ロゴを作品名に", "say_en": "Logo reads “untitled final”", "note": false}, {"by": "Harald", "say": "アーチに建物の写真", "say_en": "A curved building in the arch", "note": true}, {"by": "Pontus", "say": "暗い地に生成りの文字", "say_en": "Dark ground, cream text", "note": true}], "past": [{"by": "Willem", "say": "見出しを「変わり続ける」に", "say_en": "Headline: “Never finished.”", "note": false, "status": "adopted", "n": 3}, {"by": "Harald", "say": "ボタンを本文に寄せる", "say_en": "Button closer to the intro", "note": true, "status": "adopted", "n": 2}]}, "bakedAt": "2026-11-12T10:18:34.396364+09:00", "formSheet": "1jY080qcPWH_H4lVRZH8kBmrpg_p6BKXm3DFcERaH9qA", "form": {"action": "https://docs.google.com/forms/d/e/1FAIpQLSe-8_aJ7HhCJ9uTVuNCKtqnU6B74q_0bk1KrfYO6ohaLT6GFA/formResponse", "text": "entry.639487538", "name": "entry.1147271599"}}</script>
 <script>
 // ====================================================================
 // Ait Museum No. 01 — "A website made by everyone"
@@ -1194,10 +1240,11 @@ function put(k,v){CUR[k]=v;paint(live,CUR,[k])}
 const TPL=live.cloneNode(true);TPL.removeAttribute('id'); // a clean copy of the page, for looking back and for trying things
 
 // ---------- camera: where the wall photograph sits on the screen ----------
-let SC=1,READING=false,FOCUS=false,PHONE=false,camA=null;const VIEW={k:1,tx:0,ty:0};
+let SC=1,READING=false,FOCUS=false,PHONE=false,STACK=false,camA=null;const STK={k:1,tx:0,ty:0,T:0,sh:0,sm:18,th:118,rl:28};const VIEW={k:1,tx:0,ty:0};
 // the owner's dock takes 300px from the right of the stage while it is open (never on a phone)
 function dockW(){return !PHONE&&document.body.classList.contains('dock-open')&&!document.body.classList.contains('preview-mode')?380:0}
 function camTarget(){const dw=dockW(),vw=Math.max(innerWidth-dw,240),vh=Math.max(innerHeight,240); // a hidden or zero-size window must never turn the scale into 0
+  if(STACK){if(FOCUS){const kp=Math.min((vw-2*STK.sm)/(W*BS),FH*STK.k/(H*BS)),cx=vw/2,cy=STK.T+FH*STK.k/2;return{k:kp,tx:cx-(BX+W*BS/2)*kp,ty:cy-(BY+H*BS/2)*kp}}return{k:STK.k,tx:STK.tx,ty:STK.ty}}
   if(PHONE){const k=vw/(W*BS);return{k,tx:-BX*k,ty:-BY*k}}                      // the page alone, edge to edge
   const kc=Math.min(.8*vh/FH,.8*vw/FW);
   if(READING){const k=1.18*vh/FH;return{k,tx:.3*vw-(FX+FW)*k,ty:vh/2-(FY+FH/2)*k}} // reading: the frame, larger, steps aside and runs off the left edge
@@ -1211,13 +1258,20 @@ function camGo(dur){camA={from:{...VIEW},to:camTarget(),t0:performance.now(),dur
 function camStep(now){if(!camA)return;const u=clamp((now-camA.t0)/camA.dur,0,1),e=u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2,f=camA.from,t=camA.to;
   VIEW.k=Math.exp(Math.log(f.k)+(Math.log(t.k)-Math.log(f.k))*e);VIEW.tx=f.tx+(t.tx-f.tx)*e;VIEW.ty=f.ty+(t.ty-f.ty)*e;applyCam();if(u>=1){camA=null;applyCam()}}
 // the wall lettering starts a gutter to the right of where the frame really ends; if that leaves too little wall, the room goes compact
-function layout(){PHONE=innerWidth<=700;
+// phones and portrait tablets: the frame hangs at the top and the wall is read downward under it (the owner's phone desk keeps its own view)
+function stackWanted(){const vw=innerWidth,vh=innerHeight,m=Math.max(40,vw*.045),k=Math.min(.86*vh/FH,.42*vw/FW),fl=vw/2-FW*k/2,gap=Math.max(56,vw*.07);return !document.body.classList.contains('dock-open')&&(vw<=700||(fl-gap-m)<190)}
+function stackLayout(){const vw=innerWidth,vh=innerHeight,land=vw>vh*1.1,sm=vw<500?18:Math.round(Math.max(28,Math.min(vw,vh)*.06)),th=Math.min(vw,vh)<500?92:118,rl=vw<500?22:30;
+  // a phone on its side: the frame fills the height, the name and the cord sit in the walls beside it
+  let k=Math.min((vw-2*sm)/FW,vh/FH,.96),T=Math.round(rl+th+(vw<500?18:26));if(land){k=Math.min((vw-2*sm)/FW,(vh-28)/FH,.96);T=Math.round((vh-FH*k)/2)}
+  Object.assign(STK,{k,sm,th,rl,T,tx:vw/2-(FX+FW/2)*k,ty:T-FY*k,sh:Math.round(T+FH*k+(vw<500?36:56))});
+  const ds=document.documentElement.style;ds.setProperty('--stackH',STK.sh+'px');ds.setProperty('--sm',sm+'px')}
+function layout(){PHONE=innerWidth<=700;STACK=stackWanted();document.body.classList.toggle('stack',STACK);if(STACK)stackLayout();
   const vw=innerWidth,vh=innerHeight,m=Math.max(40,vw*.045),k=Math.min(.86*vh/FH,.42*vw/FW),fl=vw/2-FW*k/2,fr=vw/2+FW*k/2,gap=Math.max(56,vw*.07);
   const ds=document.documentElement.style;ds.setProperty('--fl',Math.round(fl)+'px');ds.setProperty('--fr',Math.round(fr)+'px');ds.setProperty('--m2',Math.round(m)+'px');ds.setProperty('--gp',Math.round(gap)+'px');ds.setProperty('--sh',SHIFT()+'px');
   ds.setProperty('--side',Math.round(fl-gap-m)+'px');
   // rows: the lettering hangs from the frame's top edge and stands on its bottom edge, eight rows between
   document.documentElement.style.setProperty('--mt',Math.round(vh/2-FH*k/2)+'px');document.documentElement.style.setProperty('--rh',(FH*k/8)+'px');
-  document.body.classList.toggle('compact',!PHONE&&(fl-gap-m)<190);if(PHONE&&FOCUS){FOCUS=false;document.body.classList.remove('focus')}
+  document.body.classList.toggle('compact',!PHONE&&!STACK&&(fl-gap-m)<190);if(PHONE&&FOCUS){FOCUS=false;document.body.classList.remove('focus')}
   Object.assign(VIEW,camTarget());camA=null;applyCam();if(typeof wallLayout==='function')wallLayout();if(typeof deskLayout==='function')deskLayout()}
 addEventListener('resize',layout);
 
@@ -1622,9 +1676,9 @@ const label=$('label');
 function setLab(v){if(document.body.classList.contains('lab-open')===v)return;label.classList.toggle('open',v);document.body.classList.toggle('lab-open',v);const de=document.documentElement;de.classList.add('lab-moving');clearTimeout(setLab.t);setLab.t=setTimeout(()=>de.classList.remove('lab-moving'),1700);camGo(1500)}
 function setLab(v){if(document.body.classList.contains('lab-open')===v)return;label.classList.toggle('open',v);document.body.classList.toggle('lab-open',v);const de=document.documentElement;de.classList.add('lab-moving');clearTimeout(setLab.t);setLab.t=setTimeout(()=>de.classList.remove('lab-moving'),1700);camGo(1500)}
 // the label opens on click, not on hover; clicking it again or anywhere else closes it
-label.querySelector('.in').addEventListener('click',e=>{e.stopPropagation();if(!PHONE&&!document.body.classList.contains('compact'))setLab(!document.body.classList.contains('lab-open'))});
+label.querySelector('.in').addEventListener('click',e=>{e.stopPropagation();if(!PHONE&&!STACK&&!document.body.classList.contains('compact'))setLab(!document.body.classList.contains('lab-open'))});
 addEventListener('pointerdown',e=>{if(document.body.classList.contains('lab-open')&&!(e.target.closest&&e.target.closest('#label,#lang,#tassel')))setLab(false)}); // switching language keeps the label open
-function setReading(v){if(PHONE||READING===v||document.body.classList.contains('compact'))return;READING=v;if(v&&FOCUS)setFocus(false);document.body.classList.toggle('reading',v);
+function setReading(v){if(PHONE||STACK||READING===v||document.body.classList.contains('compact'))return;READING=v;if(v&&FOCUS)setFocus(false);document.body.classList.toggle('reading',v);
   document.documentElement.style.setProperty('--rx',(.3*innerWidth)+'px');camGo(1000);if(typeof fitLabel==='function'&&!v)setTimeout(fitLabel,950)}
 
 addEventListener('pointerdown',e=>{if(label.classList.contains('more')&&!(e.target.closest&&e.target.closest('#label'))){label.classList.remove('more');document.body.classList.remove('lab-more')}}); // the rest of the text unfolds in place
@@ -1640,8 +1694,8 @@ function fillPlaque(){const p=n=>String(n).padStart(2,'0'),h=typeof HIST!=='unde
   pl.innerHTML='<span class="t">untitled final</span><span class="y">2026–</span><dl></dl>';const dl=pl.querySelector('dl');
   for(const [k,v] of [[T('Updated','最終更新'),d.getFullYear()+'.'+p(d.getMonth()+1)+'.'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes())],[T('Running','会期'),T('Day '+day,day+'日目')],[T('Makers','制作'),T('4 AIs, 1 person, visitors','AI4体、人間1人、来館者')],[T('Decisions','判断'),(STN||0)+T(' so far','回')],[T('Record','記録'),T('each decision is kept as a version of this Artifact','判断ごとに、このArtifactの版として残る')],[T('Medium','素材'),T('HTML, cursors, visitors’ notes','HTML、カーソル、来館者のメモ')]]){const a=document.createElement('dt'),b=document.createElement('dd');a.textContent=k;b.textContent=v;dl.append(a,b)}}
 addEventListener('resize',()=>{if(FOCUS)placePlaque()});
-function setFocus(v,auto){if(PHONE||FOCUS===v)return;FOCUS=v;if(v)placePlaque();AUTO=!!auto&&v;document.body.classList.toggle('focus',v);document.body.classList.remove('menu-open');(label.classList.remove('open'),document.body.classList.remove('lab-open'));$('hit').setAttribute('aria-label',v?'Step back':'Step closer');camGo(1100)}
-$('hit').addEventListener('click',()=>{if(!FOCUS)setFocus(true)}); // a click only steps closer; stepping back is moving off the page
+function setFocus(v,auto){if((PHONE&&!STACK)||FOCUS===v)return;FOCUS=v;if(v)placePlaque();AUTO=!!auto&&v;document.body.classList.toggle('focus',v);document.body.classList.remove('menu-open');(label.classList.remove('open'),document.body.classList.remove('lab-open'));$('hit').setAttribute('aria-label',v?'Step back':'Step closer');camGo(1100)}
+$('hit').addEventListener('click',()=>{if(!FOCUS&&performance.now()-(typeof touchBackAt==='number'?touchBackAt:0)>600)setFocus(true)}); // a click only steps closer; stepping back is moving off the page
 addEventListener('pointerdown',()=>{idleAt=performance.now()});
 addEventListener('keydown',e=>{idleAt=performance.now();if(e.key==='Escape'){setFocus(false);document.body.classList.remove('menu-open')}});
 addEventListener('pointermove',e=>{if(Math.abs(e.clientX-lastPt.x)+Math.abs(e.clientY-lastPt.y)<6)return;lastPt.x=e.clientX;lastPt.y=e.clientY;idleAt=performance.now();if(AUTO)setFocus(false)},{passive:true});
@@ -1681,11 +1735,11 @@ const tc=$('tassel'),tctx=tc.getContext('2d'),tip=$('tip'),NP=16,rope=[],ptr={x:
 let DPR=1,anchor={x:0,y:-6},restLen=0,curLen=0,grab=false,pulling=-1,still=0;
 function ropeLayout(){
   DPR=Math.min(2,devicePixelRatio||1);tc.width=innerWidth*DPR;tc.height=innerHeight*DPR;tc.style.width=innerWidth+'px';tc.style.height=innerHeight+'px';
-  const m=document.body.classList.contains('compact')?56:Math.max(48,innerWidth*.06),nx=innerWidth-Math.max(40,innerWidth*.045),dx=nx-anchor.x;anchor={x:nx,y:-6};{const cs=getComputedStyle(document.documentElement);restLen=Math.max(24,(parseFloat(cs.getPropertyValue('--mt'))||innerHeight*.12)+(parseFloat(cs.getPropertyValue('--rh'))||innerHeight*.1)-108)}if(!grab)curLen=restLen;
+  const m=document.body.classList.contains('compact')?56:Math.max(48,innerWidth*.06),nx=STACK?innerWidth-STK.sm-12:innerWidth-Math.max(40,innerWidth*.045),dx=nx-anchor.x;anchor={x:nx,y:-6};{const cs=getComputedStyle(document.documentElement);restLen=STACK?STK.rl:Math.max(24,(parseFloat(cs.getPropertyValue('--mt'))||innerHeight*.12)+(parseFloat(cs.getPropertyValue('--rh'))||innerHeight*.1)-108)}if(!grab)curLen=restLen;
   if(!rope.length)for(let i=0;i<NP;i++){const y=anchor.y+restLen*i/(NP-1);rope.push({x:nx,y,px:nx,py:y})}else for(const p of rope){p.x+=dx;p.px+=dx}
   still=0}
 function ropeStep(dt){
-  if(PHONE||!rope.length||dt<=0)return;
+  if((PHONE&&!STACK)||!rope.length||dt<=0)return;
   // held: the cord is as long as the pull. let go: it draws back up smoothly instead of snapping
   if(grab){const f=1-Math.exp(-14*dt);ptr.x+=(ptrT.x-ptr.x)*f;ptr.y+=(ptrT.y-ptr.y)*f}if(grab)curLen=Math.max(restLen*.35,Math.hypot(ptr.x-anchor.x,ptr.y-anchor.y));else curLen+=(restLen-curLen)*(1-Math.exp(-9*dt));
   const seg=curLen/(NP-1),damp=Math.exp(-(grab?14:performance.now()-brushAt<4000?1.15:9)*dt); /* brushed, it sways; left alone, it hangs still */let mv=Math.abs(curLen-restLen);
@@ -1696,7 +1750,7 @@ function ropeStep(dt){
   rope[0].x=anchor.x;rope[0].y=anchor.y;if(!grab)for(let i=1;i<NP;i++){const lo=anchor.y+seg*i*.92;if(rope[i].y<lo){rope[i].y=lo;rope[i].py=lo}}const e=rope[NP-1];
   if(grab){const pull=Math.max(0,ptr.y-(anchor.y+restLen)),fr=Math.min(1,pull/(innerHeight*.5)),n=HIST.length-1,idx=Math.round(n-fr*n);
     if(idx!==pulling){pulling=idx;showPast(idx);tip.textContent=histLine(idx)}
-    tip.style.opacity=fr>.02?1:0;tip.style.transform='translate('+Math.round(anchor.x-tip.offsetWidth-28)+'px,'+Math.round(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--mt'))||80)+'px)'}
+    tip.style.opacity=fr>.02?1:0;tip.style.transform='translate('+Math.round(anchor.x-tip.offsetWidth-28)+'px,'+Math.round(STACK?anchor.y+restLen+STK.th*.4:(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--mt'))||80))+'px)'}
   still=(grab||mv>.6)?0:still+1;if(still>40)return; // at rest there is nothing to redraw
   drawRope()}
 function drawRope(){
@@ -1720,7 +1774,7 @@ function drawRope(){
   // the tassel hangs from the end, turned with the last bit of cord; its threads lag a little behind its own movement
   const p=rope[NP-3],ang=Math.atan2(e.y-p.y,e.x-p.x)-Math.PI/2;c.save();c.translate(e.x,e.y);c.rotate(ang);
   if(TIMG.complete&&TIMG.naturalWidth){
-    const h=118,w=h*TIMG.naturalWidth/TIMG.naturalHeight,iw=TIMG.naturalWidth,ih=TIMG.naturalHeight,hd=.375;
+    const h=STACK?STK.th:118,w=h*TIMG.naturalWidth/TIMG.naturalHeight,iw=TIMG.naturalWidth,ih=TIMG.naturalHeight,hd=.375;
     const vxl=(e.x-e.px)*Math.cos(-ang)-(e.y-e.py)*Math.sin(-ang),vyl=(e.x-e.px)*Math.sin(-ang)+(e.y-e.py)*Math.cos(-ang);
     const NS=26,FR=drawRope.fr||(drawRope.fr={sw:new Float32Array(NS),swv:new Float32Array(NS),fl:0,flv:0,k:Float32Array.from({length:NS},()=>R(7,26)),c:Float32Array.from({length:NS},()=>R(2.2,3.6))}),swT=clamp(-vxl*4.5,-18,18),flT=clamp(Math.hypot(vxl,vyl)*.5,0,7);
     for(let q=0;q<NS;q++){FR.swv[q]+=((swT-FR.sw[q])*FR.k[q]-FR.swv[q]*FR.c[q])*.016;FR.sw[q]+=FR.swv[q]*.016}FR.flv+=((flT-FR.fl)*18-FR.flv*4)*.016;FR.fl+=FR.flv*.016;
@@ -1734,18 +1788,25 @@ function drawRope(){
   }
   c.restore()}
 TIMG.onload=()=>{still=0};
-function nearTassel(x,y){if(PHONE||!rope.length)return false;const e=rope[NP-1];return Math.hypot(x-e.x,y-(e.y+55))<48}
+function nearTassel(x,y){if((PHONE&&!STACK)||!rope.length)return false;const e=rope[NP-1],th=STACK?STK.th:118;return Math.hypot(x-e.x,y-(e.y+th*.47))<(STACK?44:48)}
+// stacked, the cord hangs in the scrolling room: pointer positions are read in the room's coordinates
+const SY=()=>STACK?$('stage').scrollTop:0;
 // brushing past the cord pushes it along with the hand, more toward the tassel than at the top
 let brushAt=-1e9,lastBrush=null,gOff={x:0,y:0},ptrT={x:0,y:0};
-addEventListener('pointermove',ev=>{if(grab){ptrT.x=ev.clientX+gOff.x;ptrT.y=Math.max(anchor.y+12,ev.clientY+gOff.y);return}const x=ev.clientX,y=ev.clientY;document.body.classList.toggle('near',nearTassel(x,y));
-  if(lastBrush&&rope.length&&!PHONE&&!ev.buttons){const vx=x-lastBrush.x,vy=y-lastBrush.y;let hit=false;
+addEventListener('pointermove',ev=>{if(grab){ptrT.x=ev.clientX+gOff.x;ptrT.y=Math.max(anchor.y+12,ev.clientY+SY()+gOff.y);return}const x=ev.clientX,y=ev.clientY+SY();document.body.classList.toggle('near',nearTassel(x,y));
+  if(lastBrush&&rope.length&&!(PHONE&&!STACK)&&!ev.buttons){const vx=x-lastBrush.x,vy=y-lastBrush.y;let hit=false;
     for(let i=1;i<NP;i++){const p=rope[i],r=i===NP-1?60:30,d=Math.hypot(x-p.x,y-(i===NP-1?p.y+55:p.y));if(d<r){const f=(1-d/r)*(.35+.65*i/NP);p.px-=clamp(vx,-30,30)*f*.28;p.py-=clamp(vy,-40,40)*f*.15;hit=true}}
     if(hit){brushAt=performance.now();still=0}}
   lastBrush={x,y}},{passive:true});
-addEventListener('pointerdown',ev=>{if(!nearTassel(ev.clientX,ev.clientY))return;ev.preventDefault();ev.stopPropagation();
-  {const e=rope[NP-1];gOff={x:e.x-ev.clientX,y:e.y-ev.clientY};ptr.x=e.x;ptr.y=e.y;ptrT.x=e.x;ptrT.y=e.y}grab=true;brushAt=-1e9;document.body.classList.add('pulling');pulling=-1;tip.textContent='';idleAt=performance.now()},true);
+addEventListener('pointerdown',ev=>{if(!nearTassel(ev.clientX,ev.clientY+SY()))return;ev.preventDefault();ev.stopPropagation();
+  {const e=rope[NP-1];gOff={x:e.x-ev.clientX,y:e.y-ev.clientY-SY()};ptr.x=e.x;ptr.y=e.y;ptrT.x=e.x;ptrT.y=e.y}grab=true;brushAt=-1e9;document.body.classList.add('pulling');pulling=-1;tip.textContent='';idleAt=performance.now()},true);
 function letGo(){if(!grab)return;grab=false;brushAt=-1e9;for(const p of rope){p.px=p.x;p.py=p.y}document.body.classList.remove('pulling');tip.style.opacity=0;unmount();showTrial()}
 addEventListener('pointerup',letGo);addEventListener('pointercancel',letGo);
+// on a touch screen, a finger on the tassel pulls it instead of scrolling the room
+addEventListener('touchstart',e=>{const t=e.touches[0];if(t&&e.touches.length===1&&nearTassel(t.clientX,t.clientY+SY()))e.preventDefault()},{passive:false,capture:true});
+addEventListener('touchmove',e=>{if(grab)e.preventDefault()},{passive:false,capture:true});
+// touch has no hover to leave by: stepped closer, any touch steps back (and the tap that does it does not step closer again)
+let touchBackAt=0;addEventListener('pointerdown',e=>{if(FOCUS&&e.pointerType!=='mouse'){touchBackAt=performance.now();setFocus(false)}},true);
 
 
 // ---------- layout grid overlay (G) ----------
@@ -1882,7 +1943,7 @@ function setOwner(v){
   if(v&&!setOwner.built){setOwner.built=true;buildHand();let o='1';try{o=localStorage.getItem('ait.desk')||'1'}catch(e){}if(o==='1')document.body.classList.add('dock-open')}layout();deskLayout()}
 function deskLayout(){if(!desk)return;const bottom=VIEW.ty+(BY+H*BS)*VIEW.k;desk.style.setProperty('--dh',Math.max(260,Math.round(innerHeight-bottom+14))+'px')}
 addEventListener('resize',()=>setTimeout(deskLayout,0));
-function openDesk(v){document.body.classList.toggle('dock-open',v);camGo(700);document.body.classList.remove('menu-open');if(v)setFocus(false);try{localStorage.setItem('ait.desk',v?'1':'0')}catch(e){}}
+function openDesk(v){document.body.classList.toggle('dock-open',v);if(stackWanted()!==STACK)layout();camGo(700);document.body.classList.remove('menu-open');if(v)setFocus(false);try{localStorage.setItem('ait.desk',v?'1':'0')}catch(e){}}
 $('deskOpen').addEventListener('click',()=>openDesk(true));
 $('deskHide').addEventListener('click',()=>{if(PHONE)document.body.classList.toggle('desk-min');else openDesk(false)});
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!PHONE)openDesk(false)});
@@ -2079,75 +2140,59 @@ const target=k=>E(BOX[k]||(k==='bg'||k==='ink'?'h1':k==='btn'||k==='gap'?'cta':k
 // each act: [id, kind(s), when, fn(a,d)]  kind: text colour form type place photo any  when: pre / post
 const KIND=k=>TXT[k]?'text':(k==='bg'||k==='ink'||k==='arch'||k==='btn')?'colour':(k==='face'||k==='scale')?'type':k==='gap'?'place':k==='img'?'photo':'form';
 const ACTS=[
-  // --- words ---
   ['readOld','text','pre',async(a,d)=>{const el=target(d.key),r=rect(el),n=Math.max(3,Math.min(5,String(CUR[d.key]||'').split(/\s+/).length));
     await a.move(r.x+6,r.y+r.h*.85,20);for(let i=1;i<=n;i++){await a.move(r.x+r.w*i/n,r.y+r.h*.85+R(-3,3),80);await hop(a,1,5)}await sleep(R(300,600))}],
-  ['knuckles','text','pre',async(a,d)=>{const r=rect(target(d.key));await a.move(r.x-24,r.y+r.h/2,30);for(let i=0;i<3;i++){await tw(120,k=>{a.xr=Math.sin(k*Math.PI)*(i%2?-16:16)})}a.xr=0;await sleep(R(200,400))}],
-  ['clearThroat','text','pre',async(a,d)=>{const r=rect(target(d.key));await a.move(r.x-18,r.y-10,30);await hop(a,2,6);await sleep(R(400,700))}],
   ['underline','text','post',async(a,d)=>{const r=rect(target(d.key));await drawLine(a,r.x,r.y+r.h+10,r.x+r.w)}],
   ['stepBack','text','post',async(a,d)=>{const r=rect(target(d.key)),x=a.x,y=a.y;await a.move(clamp(x+R(90,150),30,W-30),clamp(y+R(60,110),30,H-30),40);await sleep(R(500,900));await grow(a,1.15,300);await nod(a,2);await grow(a,1,300)}],
   ['proof','text','post',async(a,d)=>{const b=pick(free(a))||a;const was=b.busy;b.busy=true;try{const r=rect(target(d.key));const lines=Math.max(1,Math.round(r.h/60));
     for(let i=0;i<lines;i++){await b.move(r.x-14,r.y+r.h*(i+.5)/lines,20);await b.click()}await nod(b,1);if(b!==a){await a.move(b.x+30,b.y+26,20);await hop(a,1,6)}}finally{b.busy=was&&b===a}}],
   ['pressTest','text','post',async(a,d)=>{if(d.key!=='cta')return;const el=E('cta'),r=rect(el);await a.move(r.x+r.w/2,r.y+r.h/2,30);a.pressT=.74;tick(a);
     await tw(160,k=>{el.style.transform='scale('+(1-.06*k)+')'});await sleep(120);a.pressT=1;await tw(260,k=>{el.style.transform='scale('+(.94+.06*k+Math.sin(k*Math.PI)*.04)+')'});el.style.transform='';await hop(a,1,8)}],
-  ['stamp','text','post',async(a,d)=>{if(d.key!=='brand')return;const r=rect(E('brand'));await a.move(r.x+r.w/2,r.y+r.h/2,20);for(let i=0;i<3;i++){await tw(160,k=>{a.xy=-14*Math.sin(k*Math.PI/2)});await press(a,1,true);await tw(120,k=>{a.xy=-14*(1-k)})}a.xy=0}],
-  ['mouthing','text','post',async(a,d)=>{const r=rect(target(d.key));await a.move(r.x+r.w+16,r.y+8,24);for(let i=0;i<5;i++){await tw(140,k=>{a.xs=1+Math.sin(k*Math.PI)*.12})}a.xs=1}],
-  // --- colour ---
-  ['dip','colour','pre',async(a,d)=>{const r=rect(target(d.key));await a.move(r.x+r.w*R(.3,.7),r.y+r.h*R(.3,.7),30);await grow(a,.82,220);await shake(a,2);await grow(a,1,220)}],
-  ['sniff','colour','pre',async(a,d)=>{const r=rect(target(d.key));for(let i=0;i<3;i++){await a.move(r.x+r.w*R(.1,.9),r.y-12+R(-6,6),30);await hop(a,1,4)}}],
   ['compare','colour','post',async(a,d)=>{if(d.old==null)return;const r=rect(target(d.key));await a.move(r.x+r.w/2,r.y+r.h/2,40);for(let i=0;i<2;i++){await a.click();put(d.key,d.old);await sleep(R(380,520));await a.click();put(d.key,d.val);await sleep(R(380,520))}await nod(a,1)}],
   ['wetPaint','colour','post',async(a,d)=>{if(!HEX.test(d.val))return;paintSelf(a,d.val);await spin(a,1,600);await sleep(R(900,1500));await shake(a,4);paintSelf(a,null)}],
-  ['roller','colour','post',async(a,d)=>{if(d.key!=='bg')return;let y=90;a.pressT=.86;await a.move(60,y,40);while(y<H-60){await a.move(W-60,y+R(-4,4),220);y+=240;if(y>=H-60)break;await a.move(60,y,220);y+=240}a.pressT=1;await hop(a,2,8)}],
-  ['admire','colour','post',async(a,d)=>{const r=rect(target(d.key)),crowd=free(a).slice(0,2);for(const b of crowd)b.busy=true;
-    try{await Promise.all([a,...crowd].map((b,i)=>b.move(r.x+r.w*(.25+.25*i),r.y+r.h+R(28,50),40)));await Promise.all([a,...crowd].map(b=>nod(b,2)))}finally{for(const b of crowd)b.busy=false}}],
-  // --- form: the shape, its size ---
   ['measure','form','pre',async(a,d)=>{const r=rect(E('hero'));await a.move(r.x,r.y-14,30);for(let i=1;i<=4;i++){await a.move(r.x+r.w*i/4,r.y-14,90);await a.click()}await sleep(R(200,400))}],
   ['trace','form','post',async(a,d)=>{if(CUR.shape==='none')return;const P=shapePts();a.pressT=.9;for(const p of P)await a.move(p[0],p[1],90);a.pressT=1;await hop(a,1,8)}],
   ['poke','form','post',async(a,d)=>{if(CUR.shape==='none')return;const r=rect(E('hero'));await a.move(r.x+r.w*.5,r.y+r.h*.35,30);a.pressT=.78;tick(a);
     try{await tw(150,k=>heroScale(1+.03*k,1-.04*k));a.pressT=1;await tw(520,k=>{const w=Math.sin(k*Math.PI*3)*(1-k);heroScale(1+.03*w,1-.04*w)})}finally{heroScale(1,1)}await a.move(a.x+20,a.y-26,10);await shake(a,2)}],
   ['corners','form','post',async(a,d)=>{const b=pick(free(a));if(!b)return;b.busy=true;try{const r=rect(E('hero'));
     await Promise.all([a.move(r.x-6,r.y-6,30),b.move(r.x+r.w+6,r.y+r.h+6,30)]);await Promise.all([press(a,2),press(b,2)]);await sleep(R(300,500));await Promise.all([hop(a,1,7),hop(b,1,7)])}finally{b.busy=false}}],
-  // --- the photograph in the shape ---
   ['viewfinder','photo','post',async(a,d)=>{const b=pick(free(a));const r=rect(E('hero'));if(!b){await a.move(r.x+r.w/2,r.y+r.h/2,30);await press(a,1);return}b.busy=true;
     try{await Promise.all([a.move(r.x+r.w*.15,r.y+r.h*.2,30),b.move(r.x+r.w*.85,r.y+r.h*.8,30)]);await sleep(R(500,800));await press(a,1,true);await Promise.all([hop(a,1,6),hop(b,1,6)])}finally{b.busy=false}}],
   ['lookInside','photo','post',async(a,d)=>{const r=rect(E('hero'));for(let i=0;i<3;i++){await a.move(r.x+r.w*R(.2,.8),r.y+r.h*R(.2,.8),40);await grow(a,1.2,200);await grow(a,1,200)}}],
-  // --- type ---
   ['squint','type','pre',async(a,d)=>{const r=rect(E('h1'));await a.move(r.x+r.w*.5,r.y+r.h+150,40);await sleep(R(400,700));await a.move(r.x+r.w*.5,r.y+r.h+14,20);await grow(a,.85,200);await sleep(300);await grow(a,1,200)}],
-  ['hopLetters','type','post',async(a,d)=>{const r=rect(E('h1'));const n=5;await a.move(r.x+4,r.y-6,30);for(let i=1;i<=n;i++){await Promise.all([a.move(r.x+r.w*i/n,r.y-6,140),hop(a,1,12)])}}],
-  ['wobbleHead','type','post',async(a,d)=>{const h=E('h1'),r=rect(h);await a.move(r.x+r.w*.5,r.y+r.h*.5,30);await press(a,1);h.style.transformOrigin='50% 100%';
-    try{await tw(600,k=>{h.style.transform='scaleY('+(1+Math.sin(k*Math.PI*3)*.05*(1-k))+')'})}finally{h.style.transform=''}}],
-  // --- where the button sits ---
   ['pace','place','pre',async(a,d)=>{const s=rect(E('sub')),c=rect(E('cta')),x=c.x-20,n=4;await a.move(x,s.y+s.h,20);for(let i=1;i<=n;i++){await a.move(x,s.y+s.h+(c.y-s.y-s.h)*i/n,10);await a.click()}}],
   ['sitOn','place','post',async(a,d)=>{const c=rect(E('cta'));await a.move(c.x+c.w*.6,c.y-2,20);for(let i=0;i<3;i++){await tw(500,k=>{a.xr=Math.sin(k*Math.PI*2)*10})}a.xr=0}],
-  // --- any order ---
-  ['twirl','any','post',async(a,d)=>{await spin(a,1,560)}],
-  ['bowOut','any','post',async(a,d)=>{await bow(a)}],
-  ['thumbsUp','any','post',async(a,d)=>{await grow(a,1.25,180);await sleep(240);await grow(a,1,260)}],
+  // effort: reaches for the corner, it slips back, tries again
+  ['tryAgain','form','pre',async(a,d)=>{if(CUR.shape==='none')return;const r=rect(E('hero'));await a.move(r.x,r.y,30);a.pressT=.84;await a.move(r.x-18,r.y-14,10);a.pressT=1;await a.move(r.x+4,r.y+4,10);await shake(a,2);await sleep(R(300,500))}],
+  ['colourHunt','colour','pre',async(a,d)=>{for(const k of ['h1','cta','hero'].sort(()=>Math.random()-.5).slice(0,2)){const r=rect(E(k));await a.move(r.x+r.w*R(.3,.7),r.y+r.h*R(.3,.7),60);await sleep(R(350,600))}}],
+  ['memorise','text','pre',async(a,d)=>{const r=rect(target(d.key));await a.move(r.x+r.w*.5,r.y-16,40);await sleep(R(700,1100));await nod(a,1)}],
+  // set it a hair to the left, a hair to the right, back where it was; then step away and look
+  ['straighten','any','post',async(a,d)=>{const el=target(d.key);if(!el||el.dataset.lift)return;const r=rect(el);await a.move(r.x+r.w*.5,r.y+r.h*.5,30);a.pressT=.88;
+    try{for(const dx of [-3,2,-1,0]){await tw(160,k=>{el.style.translate=(dx*k)+'px 0'});await a.move(a.x+dx,a.y,4)}}finally{el.style.translate='';a.pressT=1}await a.move(a.x+40,a.y+50,30);await sleep(R(500,800));await nod(a,1)}],
+  ['polish','any','post',async(a,d)=>{const r=rect(target(d.key));const cx=r.x+r.w*R(.2,.8),cy=r.y+r.h*R(.3,.7);a.pressT=.9;for(let k=0;k<=10;k++){const t=k/10*Math.PI*4;await a.move(cx+Math.cos(t)*7,cy+Math.sin(t)*5,6)}a.pressT=1;await sleep(R(200,400))}],
+  // leaves, stops, comes back to look once more
+  ['checkBack','any','post',async(a,d)=>{const r=rect(target(d.key));await a.move(clamp(a.x+R(-180,180),40,W-40),clamp(a.y+R(120,200),40,H-40),40);await sleep(R(600,1000));await a.move(r.x+r.w*R(.3,.7),r.y+r.h+12,30);await sleep(R(600,900));await nod(a,1)}],
 ];
 const LAST={};
-function choose(kind,when){const L=ACTS.filter(x=>x[2]===when&&(x[1]===kind||x[1]==='any'&&Math.random()<.35));if(!L.length)return null;
+function choose(kind,when){const L=ACTS.filter(x=>x[2]===when&&(x[1]===kind||x[1]==='any'));if(!L.length)return null;
   let c=pick(L);if(c[0]===LAST[kind+when]&&L.length>1)c=pick(L.filter(x=>x!==c));LAST[kind+when]=c[0];return c}
 async function act(a,c,d){if(!c)return;try{await c[3](a,d)}catch(e){console.error(e)}finally{reset(a)}}
 
 // ---------- the team ----------
 const TEAM={
-  // a decision arrives
+  // a decision arrives: they stop and look up, then hurry to their places
   arrive:[
-    ['lookUp',async g=>{await Promise.all(g.map(async b=>{await sleep(R(0,300));await b.move(b.x+R(-20,20),b.y-R(30,60),30);await shake(b,2)}))}],
-    ['huddle',async g=>{const cx=R(260,640),cy=R(300,700);await Promise.all(g.map((b,i)=>b.move(cx+Math.cos(i/g.length*6.28)*46,cy+Math.sin(i/g.length*6.28)*46,30)));
-      for(let s=1;s<=8;s++)await Promise.all(g.map((b,i)=>{const t=(i/g.length+s/8)*6.28;return b.move(cx+Math.cos(t)*46,cy+Math.sin(t)*46,60)}));
-      await Promise.all(g.map(b=>b.move(b.x+(b.x-cx)*2.4,b.y+(b.y-cy)*2.4,40)))}],
-    ['lineUp',async g=>{const r=rect(E('h1'));await Promise.all(g.map((b,i)=>b.move(r.x+40+i*70,r.y-40,30)));await Promise.all(g.map((b,i)=>sleep(i*120).then(()=>hop(b,1,8))))}],
-    ['freeze',async g=>{await Promise.all(g.map(b=>grow(b,1.2,140)));await sleep(R(700,1000));await Promise.all(g.map(b=>grow(b,1,300)))}],
+    ['lookUp',async g=>{await Promise.all(g.map(async b=>{await sleep(R(0,300));await b.move(b.x+R(-20,20),b.y-R(30,60),30);await sleep(R(500,800))}))}],
+    ['freeze',async g=>{await Promise.all(g.map(b=>sleep(R(0,250)).then(()=>tw(140,k=>{b.xy=-5*Math.sin(k*Math.PI)}))));await sleep(R(800,1100))}],
+    ['readTogether',async g=>{const r=rect(E('brand'));await Promise.all(g.map((b,i)=>b.move(r.x+30+i*44,r.y+r.h+40+R(-6,6),30)));await sleep(R(900,1300));for(const b of g){await nod(b,1)}}],
   ],
-  // the last part of a decision is done
+  // the last part of a decision is done: they look it over together, then turn toward the human and bow
   done:[
-    ['wave',async g=>{g.sort((p,q)=>p.x-q.x);for(let t=0;t<2;t++)for(const b of g){hop(b,1,12);await sleep(140)}await sleep(400)}],
-    ['spinAll',async g=>{await Promise.all(g.map((b,i)=>sleep(i*90).then(()=>spin(b,1,640))))}],
-    ['highFive',async g=>{if(g.length<2)return spin(g[0],1);const [p,q]=g,mx=(p.x+q.x)/2,my=(p.y+q.y)/2;await Promise.all([p.move(mx-14,my,30),q.move(mx+14,my,30)]);
-      await Promise.all([hop(p,1,14),hop(q,1,14)]);await Promise.all([press(p,1,true),press(q,1,true)]);await Promise.all([p.move(mx-90,my+R(-20,20),20),q.move(mx+90,my+R(-20,20),20)])}],
-    ['bowAll',async g=>{await Promise.all(g.map(b=>bow(b)))}],
-    ['ring',async g=>{const r=rect(E('h1')),cx=r.x+r.w/2,cy=r.y+r.h/2;await Promise.all(g.map((b,i)=>b.move(cx+Math.cos(i/g.length*6.28)*r.w*.55,cy+Math.sin(i/g.length*6.28)*r.h*.8,40)));await Promise.all(g.map(b=>press(b,2)))}],
+    ['lookOver',async g=>{const ks=['h1','sub','cta','hero','c1','c2'].sort(()=>Math.random()-.5);await Promise.all(g.map((b,i)=>{const r=rect(E(ks[i%ks.length]));return b.move(r.x+r.w*R(.3,.7),r.y+r.h+R(10,24),40)}));
+      await sleep(R(900,1300));for(const b of g){await nod(b,1);await sleep(R(80,200))}}],
+    ['bowAll',async g=>{await Promise.all(g.map((b,i)=>b.move(W*(i+1)/(g.length+1),H-R(70,90),40)));for(const b of g){bow(b);await sleep(220)}await sleep(900)}],
+    ['highFive',async g=>{if(g.length<2)return nod(g[0],2);const [p,q]=g,mx=(p.x+q.x)/2,my=(p.y+q.y)/2;await Promise.all([p.move(mx-14,my,30),q.move(mx+14,my,30)]);
+      await Promise.all([press(p,1),press(q,1)]);await Promise.all([p.move(mx-70,my+R(-20,20),20),q.move(mx+70,my+R(-20,20),20)])}],
   ],
 };
 let teamLast={};async function team(kind,id){const g=free();if(!g.length)return;for(const b of g)b.busy=true;
@@ -2155,27 +2200,28 @@ let teamLast={};async function team(kind,id){const g=free();if(!g.length)return;
   try{await c[1](g)}catch(e){console.error(e)}finally{for(const b of g){reset(b);b.busy=false}}}
 
 // ---------- quiet habits for the time between decisions ----------
-const bubbleSolo=async a=>{await grow(a,.8,200);await grow(a,1.1,160);await grow(a,1,140)};
 const IDLE=[
+  // tired from the work: sits down in a corner, dozes, wakes with a start and goes back
   ['nap',async a=>{await a.move(R(40,120),H-R(40,90),40);await tw(700,k=>{a.xr=-34*k;a.xy=6*k});for(let i=0;i<4;i++)await tw(900,k=>{a.xs=1+Math.sin(k*Math.PI)*.07});
     await tw(120,k=>{a.xr=-34*(1-k);a.xy=6*(1-k)-10*Math.sin(k*Math.PI)});await shake(a,3)}],
-  ['train',async a=>{const b=pick(free(a))||pick(agents.filter(x=>x!==a));if(!b)return;for(let i=0;i<6;i++){await a.move(b.x-22,b.y+22,30);await sleep(R(120,260))}await hop(a,1,6)}],
-  ['tagYoureIt',async a=>{const b=pick(free(a));if(!b)return hop(a,2,8);b.busy=true;try{await a.move(b.x-6,b.y-6,20);await press(a,1);await Promise.all([b.move(clamp(b.x+R(-260,260),40,W-40),clamp(b.y+R(-200,200),40,H-40),40),a.move(a.x-20,a.y-10,20).then(()=>hop(a,2,7))])}finally{b.busy=false}}],
-  ['stretch',async a=>{await grow(a,1.35,900);await tw(300,k=>{a.xr=Math.sin(k*Math.PI)*12});await grow(a,1,500)}],
-  ['hopAlong',async a=>{const r=rect(E(pick(['c1','c2','c3','cta'])));await a.move(r.x,r.y-4,30);await Promise.all([a.move(r.x+r.w,r.y-4,30),hop(a,3,9)])}],
-  ['dance',async a=>{const b=pick(free(a));if(!b){await hop(a,2,10);return spin(a,1)}b.busy=true;try{const cx=a.x,cy=a.y;await b.move(cx+40,cy,30);for(let i=0;i<2;i++){await Promise.all([hop(a,1,10),sleep(130).then(()=>hop(b,1,10))])}await Promise.all([spin(a,1),spin(b,-1)])}finally{b.busy=false}}],
-  ['lookout',async a=>{await a.move(pick([40,W-40]),R(40,80),40);for(let i=0;i<3;i++){await tw(500,k=>{a.xr=Math.sin(k*Math.PI)*(i%2?-24:24)})}a.xr=0}],
-  ['stack',async a=>{const b=pick(free(a))||pick(agents.filter(x=>x!==a));if(!b)return;await a.move(b.x+2,b.y-16,20);await sleep(R(800,1400));await a.move(a.x+30,a.y-20,10);await hop(a,1,6)}],
-  ['bubble',async a=>{for(let i=0;i<3;i++){await grow(a,.7,200);await grow(a,1.15,160);await grow(a,1,120);await sleep(R(200,500))}}],
-  ['chaseVisitor',async a=>{if(performance.now()-VPT.t>1500)return bubbleSolo(a);for(let i=0;i<3;i++){await a.move(VPT.x+R(-30,30),VPT.y+R(24,40),20);await hop(a,1,7)}}],
+  // follows a senior around, a step behind
+  ['train',async a=>{const b=pick(agents.filter(x=>x!==a&&!x.guest&&x.busy))||pick(agents.filter(x=>x!==a));if(!b)return;for(let i=0;i<6;i++){await a.move(b.x-22,b.y+22,30);await sleep(R(120,260))}}],
+  // tidies the cards: each one set a hair straighter
+  ['tidy',async a=>{for(const k of ['c1','c2','c3']){const el=E(k);if(!lock(a,el))continue;try{const r=rect(el);await a.move(r.x+r.w*.5,r.y+12,30);a.pressT=.9;await tw(160,u=>{el.style.translate=(R(-1,1)*u)+'px 0'});await tw(160,u=>{el.style.translate=''});a.pressT=1}finally{el.style.translate='';unlock(a,el)}await sleep(R(150,300))}}],
+  // practises a click over the button, too lightly to count
+  ['practise',async a=>{const r=rect(E('cta'));await a.move(r.x+r.w*.5,r.y-18,30);for(let i=0;i<3;i++){a.pressT=.93;await sleep(90);a.pressT=1;await sleep(R(260,420))}await a.move(a.x+30,a.y-24,20)}],
+  // wipes a corner of the page clean
+  ['wipe',async a=>{const cx=pick([30,W-30]),cy=pick([30,H-30]);await a.move(cx,cy,40);a.pressT=.9;for(let i=0;i<6;i++)await a.move(cx+(i%2?14:-14),cy+R(-6,6),6);a.pressT=1}],
+  // waits next to someone who is working, in case it can help
+  ['waitTurn',async a=>{const b=pick(agents.filter(x=>x!==a&&x.busy&&!x.guest));if(!b)return;for(let i=0;i<4;i++){await a.move(b.x+R(40,60),b.y+R(30,46),30);await sleep(R(500,900))}}],
 ];
-for(const x of IDLE)JOBS.push([.18,async a=>{try{await x[1](a)}finally{reset(a)}return true}]);
+for(const x of IDLE)JOBS.push([.16,async a=>{try{await x[1](a)}finally{reset(a)}return true}]);
 
 // ---------- wiring into what is already there ----------
 let DIRECTING=0;const doneFor=new Set();
 const _direct=direct;
 direct=async function(a,d){DIRECTING++;d.old=CUR[d.key];const kind=KIND(d.key);
-  try{if(Math.random()<.6)await act(a,choose(kind,'pre'),d);await _direct(a,d);if(Math.random()<.85)await act(a,choose(kind,'post'),d)}
+  try{if(Math.random()<.4)await act(a,choose(kind,'pre'),d);await _direct(a,d);if(Math.random()<.6)await act(a,choose(kind,'post'),d)}
   finally{DIRECTING--}
   if(!TODO.length&&!DIRECTING&&!doneFor.has(d.n)){doneFor.add(d.n);await team('done')}};
 const _onState=onState;
@@ -2217,7 +2263,7 @@ function loop(now){const dt=Math.min(.05,(now-lastT)/1000);lastT=now;camStep(now
   }catch(e){console.error(e)}
   renderDesk();renderLedger();start()})();
 // the label's text runs down to the frame's bottom line, then on into the next column
-function fillDesc(){const d=document.querySelector('#label .desc'),L=$('label'),f=document.querySelector('#label .ill');if(!d||!L)return;if(document.hidden||!L.offsetParent||getComputedStyle(L).display==='none'||d.getBoundingClientRect().width<20){fillDesc.pending=true;return}fillDesc.pending=false;const cs=getComputedStyle(document.documentElement),mt=parseFloat(cs.getPropertyValue('--mt')),rh=parseFloat(cs.getPropertyValue('--rh')),bottom=mt+8*rh;
+function fillDesc(){const d=document.querySelector('#label .desc'),L=$('label'),f=document.querySelector('#label .ill');if(!d||!L)return;if(STACK){L.style.removeProperty('top');for(const k of ['height','width','margin-top','column-count','--dh'])d.style.removeProperty(k);if(f){f.style.removeProperty('width');f.style.removeProperty('--rw')}const rc=$('reelc');if(rc)rc.style.width='';return}if(document.hidden||!L.offsetParent||getComputedStyle(L).display==='none'||d.getBoundingClientRect().width<20){fillDesc.pending=true;return}fillDesc.pending=false;const cs=getComputedStyle(document.documentElement),mt=parseFloat(cs.getPropertyValue('--mt')),rh=parseFloat(cs.getPropertyValue('--rh')),bottom=mt+8*rh;
   // three columns: the text runs down the first two and into the third, stopping above the reel that stands on the bottom line
   d.style.removeProperty('margin-top');d.style.setProperty('column-count','1','important');d.style.height='auto';d.style.width=getComputedStyle(document.documentElement).getPropertyValue('--side');
   const T=d.scrollHeight,lh=parseFloat(getComputedStyle(d).lineHeight)||20,fb=f?f.offsetHeight+lh*1.5:0;d.style.removeProperty('column-count');d.style.width='';
