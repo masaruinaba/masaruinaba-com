@@ -911,35 +911,6 @@ body.focus #frame2{opacity:0}
 #frbtn.pop{animation:frpop .5s cubic-bezier(.3,1.6,.45,1)}
 @keyframes frpop{0%{transform:scale(.7) rotate(8deg)}100%{transform:none}}
 
-/* ---- guestbook as a thread (2026-11-12): picked notes on the left, the cursor that carried each one out answering on the right; the composer sits underneath ---- */
-#guest #acc{order:1;margin:calc(var(--fs)*.7) 0 0!important;border:0!important}
-#guest #acc #accB{display:none!important}
-#guest #acc #notes{display:flex!important;flex-direction:column;gap:calc(var(--fs)*.45);max-height:min(38vh,calc(var(--fs)*22))!important;overflow:auto;scroll-snap-type:none;padding:calc(var(--fs)*.6) 0 calc(var(--fs)*.2)!important;scrollbar-width:none}
-#guest #acc #notes::-webkit-scrollbar{display:none}
-#guest #notes li{display:block!important;max-width:84%;box-sizing:border-box;padding:calc(var(--fs)*.4) calc(var(--fs)*.75) calc(var(--fs)*.45)!important;margin:0!important;font:400 calc(var(--fs)*.8)/1.5 Graphik,"Shippori Mincho",serif!important;color:var(--blue)}
-#guest #notes li.new{animation:chatIn .5s cubic-bezier(.22,.8,.25,1) both}
-#guest #notes li.new+li.new{animation-delay:.12s}
-#guest #notes li p{margin:0;text-wrap:pretty;font:inherit!important}
-#guest #notes li small{display:flex!important;align-items:center;gap:.35em;font:400 calc(var(--fs)*.66)/1.4 Graphik,"Shippori Mincho",serif!important;opacity:.55!important;margin:0 0 .15em!important;white-space:nowrap}
-#guest #notes li.v{align-self:flex-start;border:1px solid color-mix(in srgb,var(--blue) 30%,transparent);border-radius:1.15em 1.15em 1.15em .3em}
-#guest #notes li.a{align-self:flex-end;background:color-mix(in srgb,var(--ac,var(--blue)) 9%,transparent);border-radius:1.15em 1.15em .3em 1.15em}
-#guest #notes li.a small{opacity:.75!important}
-#guest #notes li small i{display:inline-flex;width:.72em;height:.84em}
-#guest #notes li small svg{width:100%;height:100%;fill:currentColor}
-@keyframes chatIn{from{opacity:0;transform:translateY(.4em)}to{opacity:1;transform:none}}
-#guest #gOpen{display:none!important}
-#guest #gForm{order:2;max-height:none!important;opacity:1!important;overflow:visible!important;padding-top:calc(var(--fs)*.55)!important}
-#guest #gForm .gl{border:1px solid color-mix(in srgb,var(--blue) 30%,transparent);border-radius:1.2em;padding:calc(var(--fs)*.15) calc(var(--fs)*.75)!important;transition:border-color .25s ease}
-#guest #gForm .gl:focus-within{border-color:var(--blue)}
-#guest #gForm .gl :is(input,textarea){border:0!important;padding:calc(var(--fs)*.35) calc(var(--fs)*3) calc(var(--fs)*.35) 0!important;resize:none;font-size:calc(var(--fs)*.8)!important;line-height:1.5!important}
-#guest #gForm .gl .send{right:calc(var(--fs)*.75)!important;bottom:calc(var(--fs)*.55)!important;font-size:calc(var(--fs)*.8)!important}
-#guest #advName{margin:calc(var(--fs)*.3) calc(var(--fs)*.75) 0!important;width:calc(100% - var(--fs)*1.5)!important;font-size:calc(var(--fs)*.72)!important}
-#guest #sent{order:3;display:block;font-size:calc(var(--fs)*.72)!important;padding:0 calc(var(--fs)*.75)}
-#guest #gNudge{top:auto!important;bottom:calc(var(--fs)*3.2)}
-html:is(.canwrite,.formbook) #guest #gForm{display:block!important}
-html:is(.canwrite,.formbook) #guest #gOpen{display:none!important}
-#guest #notes li.v.me{border-style:dashed}
-
 /* ---------- the owner's desk: the same wall, the same blue lettering, set as a narrow column ---------- */
 #desk,#toast{--hair:color-mix(in srgb,var(--blue) 18%,transparent);--soft:color-mix(in srgb,var(--blue) 60%,transparent);font-family:Graphik,"Hiragino Sans",system-ui,sans-serif;font-size:12px;color:var(--blue);-webkit-font-smoothing:antialiased}
 #desk{display:none}
@@ -1930,32 +1901,11 @@ function countryName(cc){if(!cc)return '';try{return new Intl.DisplayNames([isJa
 let db=null,me=null,owner=false,sample=null,LOG=[],META=0,PROPS=[],PROPV=null,HISTP=null;const HIDDEN=new Set();
 const NOTES=[],PICKED=new Map(),DEC=[],seen=new Set(),guests=new Map(),LOAD=Date.now();
 
-// on the wall, the guestbook is a thread: each note the human picked, and the cursor that carried it out answering underneath
-const ROLE={head:'Willem',sub:'Willem',cta:'Willem',brand:'Willem',bg:'Pontus',ink:'Pontus',arch:'Pontus',btn:'Pontus',shape:'Harald',size:'Harald',face:'Harald',scale:'Harald',gap:'Harald',img:'Alfred'};
-function chatWhen(at){const d=new Date(at||0),p=n=>String(n).padStart(2,'0');return (d.getMonth()+1)+'/'+d.getDate()+' '+p(d.getHours())+':'+p(d.getMinutes())}
-function chatReply(id){const d=DEC.find(x=>x&&x.note===id);if(!d)return null;
-  const who=PEOPLE.find(q=>q.name===d.by)||PEOPLE.find(q=>q.name===ROLE[(d.keys||[])[0]])||PEOPLE[0];
-  const L=(SEED.ledger&&SEED.ledger.past)||[],x=L.find(q=>+q.n===+d.n);
-  const lb=(d.keys||[]).map(k=>typeof LBL!=='undefined'&&LBL[k]?LBL[k]:[k,k]);
-  const txt=x?T(x.say_en||x.say,x.say):T('Changed the '+lb.map(l=>l[0].toLowerCase()).join(', ')+'.',lb.map(l=>l[1]).join('と')+'を変えました。');
-  return {who,n:d.n,at:d.at,txt}}
-const ARW='<svg viewBox="0 0 12 14" aria-hidden="true"><path d="M1 1 L11 7.2 L6.3 8.1 L3.6 12.6 Z"/></svg>';
-const CHATSEEN=new Set();let CHATSIG='';
-// your own notes wait in the thread (only on your screen) until the human reads them; kept a week
-function mine(){try{return (JSON.parse(localStorage.getItem('ait.mine')||'[]')||[]).filter(m=>m&&m.text&&Date.now()-m.at<6048e5)}catch(e){return []}}
-function addMine(n){try{const l=mine();l.push({text:n.text,at:n.at});localStorage.setItem('ait.mine',JSON.stringify(l.slice(-5)))}catch(e){}}
+// on the wall, the guestbook shows only the notes the human picked
 function renderNotes(){
-  const ol=$('notes'),list=[...PICKED.entries()].map(([id,v])=>({id,...v})).sort((a,b)=>(a.at||0)-(b.at||0));
-  const MY=mine().filter(m=>!list.some(n=>n.text===m.text)),sig=document.documentElement.lang+'|'+MY.length+'|'+list.map(n=>n.id+(DEC.find(d=>d&&d.note===n.id)||{}).n).join(',');
-  if(sig===CHATSIG){$('adv').textContent=Math.max(META,NOTES.length,PICKED.size);$('dec').textContent=STN;return}CHATSIG=sig;
-  $('acc').hidden=!(list.length+MY.length);$('guest').classList.toggle('empty',!list.length);$('accB').textContent=T('Taken into the work · '+list.length,'作品に取り入れられた言葉 · '+list.length);ol.textContent='';
-  const mkLi=(cls,meta,text)=>{const li=document.createElement('li');const key=cls+meta;li.className=cls+(CHATSEEN.has(key)?'':' new');CHATSEEN.add(key);const sm=document.createElement('small');sm.innerHTML=meta;const q=document.createElement('p');q.textContent=text;li.append(sm,q);return li};
-  const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-  for(const n of list){const nm=n.name&&n.name!=='Someone'?n.name:'Someone',wh=countryName(n.cc);
-    ol.appendChild(mkLi('v',esc(nm)+(wh?' · '+esc(wh):'')+' · '+chatWhen(n.at),n.text||''));
-    const r=chatReply(n.id);if(r){const li=mkLi('a','<i style="color:'+r.who.c+'">'+ARW+'</i>'+esc(r.who.name)+' · '+T('Decision ','判断')+String(r.n).padStart(2,'0'),r.txt);li.style.setProperty('--ac',r.who.c);ol.appendChild(li)}}
-  for(const m of MY)ol.appendChild(mkLi('v me',esc(T('You','あなた'))+' · '+chatWhen(m.at)+' · '+T('waiting to be read','読まれるのを待っています'),m.text));
-  requestAnimationFrame(()=>{ol.scrollTop=ol.scrollHeight});
+  const ol=$('notes'),list=[...PICKED.entries()].map(([id,v])=>({id,...v})).sort((a,b)=>(b.at||0)-(a.at||0));
+  $('acc').hidden=!list.length;$('guest').classList.toggle('empty',!list.length);$('accB').textContent=T('Taken into the work · '+list.length,'作品に取り入れられた言葉 · '+list.length);ol.textContent='';
+  for(const n of list){const li=document.createElement('li'),q=document.createElement('q');q.textContent=n.text||'';const sm=document.createElement('small'),wh=countryName(n.cc);sm.textContent=(n.name&&n.name!=='Someone'?n.name:'Someone');li.append(sm,q);ol.appendChild(li)}
   $('adv').textContent=Math.max(META,NOTES.length,PICKED.size);$('dec').textContent=STN;if(typeof fitLabel==='function')fitLabel()}
 $('gOpen').addEventListener('click',()=>{$('guest').classList.add('on');setTimeout(()=>$('advName').focus(),300);setTimeout(fitLabel,650)});
 addEventListener('pointerdown',e=>{const g=$('guest');if(g.classList.contains('on')&&!g.contains(e.target)&&!$('advIn').value&&!$('advName').value){g.classList.remove('on');setTimeout(fitLabel,650)}});
@@ -1971,7 +1921,7 @@ function showPin(n){
 $('guest').addEventListener('submit',async e=>{
   e.preventDefault();const v=$('advIn').value.trim();if(!v)return;const nm=$('advName').value.trim();$('advIn').value='';$('advName').value='';
   const n={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),text:v,name:nm,at:Date.now(),cc:myCountry()};
-  seen.add(n.id);showPin(n);addMine(n);if(!NOTES.find(m=>m.id===n.id))NOTES.push(n);let ok=true;
+  seen.add(n.id);showPin(n);if(!NOTES.find(m=>m.id===n.id))NOTES.push(n);let ok=true;
   if(!document.documentElement.classList.contains('canwrite')&&FORM){ok=await sendForm(n)}else
   if(db&&me){try{const ref=db.doc('advice/'+me),g=await ref.get(),notes=(g.exists&&g.data().notes)||[];notes.push(n);await ref.set({notes:notes.slice(-50)})}catch(err){ok=false;console.error(err)}}
   $('sent').textContent=ok==='handoff'?T('Press “Submit” on the page that opened to finish signing.','開いたページで「送信」を押すと記帳が終わります。'):ok?T('Signed.','記帳しました。'):T('It could not be kept this time.','今回は保存できませんでした。');setTimeout(()=>{$('sent').textContent=''},5000);renderNotes();renderDesk()});
@@ -1990,7 +1940,7 @@ let readyRes;const READY=new Promise(r=>{readyRes=r});
 function listen(){
   db.collection('site').onSnapshot(q=>{let got=false;for(const d of q.docs){const v=d.data();if(!v)continue;if(d.id==='state'){got=true;onState(v)}else if(d.id==='meta')META=+v.notes||0}
     if(!got)stateSeen=true;readyRes();renderNotes();renderDesk()},err=>{console.error(err);readyRes()});
-  db.collection('decisions').onSnapshot(q=>{DEC.length=0;for(const d of q.docs){const v=d.data();if(v&&v.st)DEC.push(v)}DEC.sort((a,b)=>a.n-b.n);seedHist();renderNotes();renderDesk()},err=>console.error(err));
+  db.collection('decisions').onSnapshot(q=>{DEC.length=0;for(const d of q.docs){const v=d.data();if(v&&v.st)DEC.push(v)}DEC.sort((a,b)=>a.n-b.n);seedHist();renderDesk()},err=>console.error(err));
   db.collection('picked').onSnapshot(q=>{const ids=new Set();for(const d of q.docs){const v=d.data();if(!v)continue;ids.add(d.id);PICKED.set(d.id,v);addGuest(d.id,v.name)}
     for(const id of [...PICKED.keys()])if(!ids.has(id)){PICKED.delete(id);dropGuest(id)}renderNotes();renderDesk()},err=>console.error(err));
   db.collection('advice').onSnapshot(q=>{let total=0;
