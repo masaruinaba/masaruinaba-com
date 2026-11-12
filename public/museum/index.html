@@ -889,6 +889,18 @@ body.stack.focus #wall{opacity:1!important}
   body:not(.stack) .stage{touch-action:none}
   body:not(.stack) #notes{touch-action:pan-y}
 }
+/* stacked: a link to the guestbook in the top band, under the name */
+#toGuest{display:none}
+body.stack #wall #toGuest{display:block;position:absolute!important;left:var(--sm)!important;top:calc(env(safe-area-inset-top,0px) + 22px + var(--fs)*3.1)!important;border:0;background:none;padding:6px 0;margin:-6px 0 0;font:400 calc(var(--fs)*.82)/1.5 Graphik,"Shippori Mincho",sans-serif;color:var(--blue);opacity:.6;cursor:pointer;pointer-events:auto}
+html[lang=ja] body.stack #wall #toGuest{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif}
+/* stacked: the label's text is a row of pages you swipe sideways, so the guestbook is not far below */
+body.stack #label .desc{column-count:auto!important;column-width:var(--pcw,300px)!important;column-gap:var(--pg,32px)!important;column-fill:auto!important;height:var(--ph,60vh)!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+body.stack #label .desc::-webkit-scrollbar{display:none}
+#descPg{display:none}
+body.stack #descPg{display:flex;align-items:center;gap:calc(var(--fs)*1.2);margin-top:calc(var(--fs)*.9);font:400 calc(var(--fs)*.82)/1.5 Graphik,sans-serif;color:var(--blue);font-variant-numeric:tabular-nums}
+body.stack #descPg button{border:0;background:none;padding:6px 4px;margin:-6px -4px;font:inherit;color:inherit;cursor:pointer;opacity:.6}
+body.stack #descPg button:disabled{opacity:.2;cursor:default}
+body.stack #descPg span{opacity:.6;min-width:3.2em;text-align:center}
 
 /* ---------- the owner's desk: the same wall, the same blue lettering, set as a narrow column ---------- */
 #desk,#toast{--hair:color-mix(in srgb,var(--blue) 18%,transparent);--soft:color-mix(in srgb,var(--blue) 60%,transparent);font-family:Graphik,"Hiragino Sans",system-ui,sans-serif;font-size:12px;color:var(--blue);-webkit-font-smoothing:antialiased}
@@ -1105,6 +1117,7 @@ setTimeout(cycle,1400);
       <div id="acc" hidden><button type="button" id="accB" data-nosplit></button><ol id="notes" data-nosplit></ol></div>
     </form>
   </div>
+  <button type="button" class="wt" id="toGuest" data-nosplit data-en="Guestbook ↓" data-ja="芳名録 ↓">Guestbook ↓</button>
   <div class="wt" id="nowk" hidden></div>
   <div class="wt" id="now" aria-live="off"></div>
   <button type="button" class="wt" id="more" aria-label="Menu">···</button>
@@ -1821,6 +1834,21 @@ function drawGrid(){const cs=getComputedStyle(document.documentElement),px=v=>pa
 addEventListener('keydown',e=>{if((e.key==='g'||e.key==='G')&&(e.metaKey||e.ctrlKey)){e.preventDefault();document.body.classList.toggle('grid');drawGrid();return}if((e.key==='g'||e.key==='G')&&!e.metaKey&&!e.ctrlKey&&!/INPUT|TEXTAREA/.test(document.activeElement&&document.activeElement.tagName)){document.body.classList.toggle('grid');drawGrid()}});
 addEventListener('resize',()=>{if(document.body.classList.contains('grid'))setTimeout(drawGrid,0)});
 if(/[?&]grid\b/.test(location.search)){document.body.classList.add('grid');setTimeout(drawGrid,300)}
+
+// stacked, the guestbook is far down the page: a small link in the top band takes you there and opens the book
+$('toGuest').addEventListener('click',()=>{const st=$('stage'),g=$('guest');if(!st||!g)return;const y=g.getBoundingClientRect().top+st.scrollTop-Math.max(28,innerHeight*.18);st.scrollTo({top:Math.max(0,y),behavior:'smooth'});const o=$('gOpen');if(o&&o.offsetParent&&!g.classList.contains('on'))setTimeout(()=>o.click(),450)});
+
+// stacked: the label's text runs sideways in pages; a swipe settles on a page, the arrows and the count sit under it
+(function(){const d=document.querySelector('#label .desc');if(!d)return;const pg=document.createElement('div');pg.id='descPg';pg.innerHTML='<button type="button" aria-label="Previous">←</button><span></span><button type="button" aria-label="Next">→</button>';d.after(pg);
+  const [pb,num,nb]=[pg.children[0],pg.children[1],pg.children[2]];let step=1,n=1,t=0;
+  function size(){if(!STACK){d.scrollLeft=0;return}const W=d.clientWidth||1,two=innerWidth>=600,G=Math.round(two?W*.06:Math.max(24,W*.08)),ds=d.style;ds.setProperty('--pg',G+'px');ds.setProperty('--pcw',Math.floor(two?(W-G)/2:W)+'px');ds.setProperty('--ph',Math.round(Math.min(innerHeight*(innerWidth>innerHeight?.72:.6),560))+'px');step=W+G;requestAnimationFrame(()=>{n=Math.max(1,Math.round((d.scrollWidth+G)/step));show()})}
+  function at(){return Math.min(n-1,Math.max(0,Math.round(d.scrollLeft/step)))}
+  function show(){const i=at();num.textContent=(i+1)+' / '+n;pb.disabled=i===0;nb.disabled=i>=n-1;pg.style.visibility=n>1?'visible':'hidden'}
+  function go(i){d.scrollTo({left:Math.max(0,Math.min(n-1,i))*step,behavior:'smooth'})}
+  d.addEventListener('scroll',()=>{show();clearTimeout(t);t=setTimeout(()=>{if(STACK&&Math.abs(d.scrollLeft-at()*step)>2)go(at())},140)},{passive:true});
+  pb.addEventListener('click',()=>go(at()-1));nb.addEventListener('click',()=>go(at()+1));
+  addEventListener('resize',()=>setTimeout(size,60));document.fonts&&document.fonts.ready.then(size);setTimeout(size,300);setTimeout(size,1500);
+  document.querySelectorAll('[data-l]').forEach(b=>b.addEventListener('click',()=>setTimeout(()=>{d.scrollLeft=0;size()},80)))})();
 
 // ====================================================================
 // d_store: the shared store — notes from visitors, the people the human picked,
