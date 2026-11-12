@@ -841,6 +841,8 @@ html[lang=en] #gNudge{left:calc(var(--fs)*7.4)}
 @media (prefers-reduced-motion:reduce){#gNudge.go *{animation-duration:7s!important}#gArrow mask path{stroke-dashoffset:0}}
 /* the signature travels only with the label opening or closing; any other change of size it simply takes */
 html:not(.lab-moving) #label #sig{transition:none!important}
+/* the label and everything riding on it move only while the label is opening or closing */
+html:not(.lab-moving) #label,html:not(.lab-moving) #label .in,html:not(.lab-moving) #sig{transition-property:opacity!important}
 
 /* ---------- the owner's desk: the same wall, the same blue lettering, set as a narrow column ---------- */
 #desk,#toast{--hair:color-mix(in srgb,var(--blue) 18%,transparent);--soft:color-mix(in srgb,var(--blue) 60%,transparent);font-family:Graphik,"Hiragino Sans",system-ui,sans-serif;font-size:12px;color:var(--blue);-webkit-font-smoothing:antialiased}
