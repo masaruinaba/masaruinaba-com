@@ -890,9 +890,10 @@ body.stack.focus #wall{opacity:1!important}
   body:not(.stack) #notes{touch-action:pan-y}
 }
 /* stacked: a link to the guestbook in the top band, under the name */
-#toGuest{display:none}
-body.stack #wall #toGuest{display:block;position:absolute!important;left:var(--sm)!important;top:calc(env(safe-area-inset-top,0px) + 22px + var(--fs)*3.1)!important;border:0;background:none;padding:6px 0;margin:-6px 0 0;font:400 calc(var(--fs)*.82)/1.5 Graphik,"Shippori Mincho",sans-serif;color:var(--blue);opacity:.6;cursor:pointer;pointer-events:auto}
-html[lang=ja] body.stack #wall #toGuest{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif}
+#frbtn2{display:none}
+body.stack #wall #frbtn2{display:flex;align-items:center;justify-content:center;position:absolute!important;left:calc(var(--sm) - 6px)!important;top:calc(env(safe-area-inset-top,0px) + 22px + var(--fs)*3.1 - 8px)!important;width:32px;height:32px;border:0;background:none;padding:6px;margin:0;color:var(--blue);opacity:.6;cursor:pointer;pointer-events:auto}
+body.stack #wall #frbtn2 svg{width:16px;height:16px}
+#frbtn2.pop{animation:frpop .5s cubic-bezier(.3,1.6,.45,1)}
 /* stacked: the label's text is a row of pages you swipe sideways, so the guestbook is not far below */
 body.stack #label .desc{column-count:auto!important;column-width:var(--pcw,300px)!important;column-gap:var(--pg,32px)!important;column-fill:auto!important;height:var(--ph,60vh)!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
 body.stack #label .desc::-webkit-scrollbar{display:none}
@@ -937,6 +938,13 @@ html[lang=ja] body.stack #label .desc p{text-align:justify!important;text-justif
 body.stack #label .ill{width:100%!important;--rw:min(calc(100vw - 2*var(--sm)),640px)!important}
 #gNudge{display:none!important}
 body.stack #label .desc{transition:none!important}
+
+/* SP: the pager under the label is gone; the peek of the next column is enough */
+#descPg{display:none!important}
+/* SP: yakumono set half-width (the web font has no palt) */
+html[lang=ja] body.stack #label .desc .pq{letter-spacing:-.5em!important}
+html[lang=ja] body.stack #label .desc .po{margin-left:-.5em}
+html[lang=ja] body.stack #label .desc .pm{margin:0 -.25em}
 
 /* ---------- the owner's desk: the same wall, the same blue lettering, set as a narrow column ---------- */
 #desk,#toast{--hair:color-mix(in srgb,var(--blue) 18%,transparent);--soft:color-mix(in srgb,var(--blue) 60%,transparent);font-family:Graphik,"Hiragino Sans",system-ui,sans-serif;font-size:12px;color:var(--blue);-webkit-font-smoothing:antialiased}
@@ -1157,7 +1165,7 @@ if(Date.now()-last>864e5||/[?&]nudge/.test(location.search)){let fired=false;con
       <div id="acc" hidden><button type="button" id="accB" data-nosplit></button><ol id="notes" data-nosplit></ol></div>
     </form>
   </div>
-  <button type="button" class="wt" id="toGuest" data-nosplit data-en="Guestbook ↓" data-ja="芳名録 ↓">Guestbook ↓</button>
+  <button type="button" class="wt frb" id="frbtn2" aria-label="Change the frame" title="Change the frame"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><rect x="2.5" y="1" width="7" height="10" stroke="currentColor" stroke-width=".8" fill="none"/><rect x="4.5" y="3.5" width="3" height="5" stroke="currentColor" stroke-width=".6" fill="none"/></svg></button>
   <div class="wt" id="nowk" hidden></div>
   <div class="wt" id="now" aria-live="off"></div>
   <button type="button" class="wt" id="more" aria-label="Menu">···</button>
@@ -1695,7 +1703,7 @@ function slip(){const d=$('day');if(!d||document.hidden)return;const real=d.text
 const BLOCKS=[...document.querySelectorAll('.g')],CLOSE=/[、。，．」』）》！？・ー…]/,OPEN=/[「『（《]/;
 function splitNode(tn){
   const cs=Array.from(tn.nodeValue);if(!tn.nodeValue.trim())return;const f=document.createDocumentFragment();let i=0;
-  const ch=c=>{const e=document.createElement('span');e.className='ch';e.textContent=c;return e},sp=c=>/\s/.test(c),cjk=c=>c.codePointAt(0)>=0x2E80;
+  const ch=c=>{const e=document.createElement('span');e.className=/[、。，．）」』】〉》]/.test(c)?'ch pq':/[（「『【〈《]/.test(c)?'ch po':/[・：；]/.test(c)?'ch pm':'ch';e.textContent=c;return e},sp=c=>/\s/.test(c),cjk=c=>c.codePointAt(0)>=0x2E80;
   while(i<cs.length){
     if(sp(cs[i])){f.appendChild(document.createTextNode(cs[i++]));continue}
     const w=document.createElement('span');w.className='w';
@@ -1876,7 +1884,6 @@ addEventListener('resize',()=>{if(document.body.classList.contains('grid'))setTi
 if(/[?&]grid\b/.test(location.search)){document.body.classList.add('grid');setTimeout(drawGrid,300)}
 
 // stacked, the guestbook is far down the page: a small link in the top band takes you there and opens the book
-$('toGuest').addEventListener('click',()=>{const st=$('stage'),g=$('guest');if(!st||!g)return;const y=g.getBoundingClientRect().top+st.scrollTop-Math.max(28,innerHeight*.18);st.scrollTo({top:Math.max(0,y),behavior:'smooth'});const o=$('gOpen');if(o&&o.offsetParent&&!g.classList.contains('on'))setTimeout(()=>o.click(),450)});
 
 // stacked: the label's text runs sideways in pages; a swipe settles on a page, the arrows and the count sit under it
 (function(){const d=document.querySelector('#label .desc');if(!d)return;const pg=document.createElement('div');pg.id='descPg';pg.innerHTML='<button type="button" aria-label="Previous">←</button><span></span><button type="button" aria-label="Next">→</button>';d.after(pg);
@@ -1912,7 +1919,7 @@ async function set(n){n=+n||0;cur=n;try{localStorage.setItem('ait.frame',n)}catc
     for(const[a,l,da,dl]of seg)horiz?D(a,pos,l,thick,da,dpos,dl,thick*s):D(pos,a,thick,l,dpos,da,thick*s,dl)};
   edge(true,0,g.t,0);edge(true,g.h-g.b,g.b,H-g.b*s);edge(false,0,g.l,0);edge(false,g.w-g.r,g.r,W-g.r*s);
   img.style.display='none';cv.style.display='block'}
-(()=>{const fb=document.getElementById('frbtn');fb&&fb.addEventListener('click',e=>{e.stopPropagation();fb.classList.remove('pop');void fb.offsetWidth;fb.classList.add('pop');set((cur+1)%10)})})();
+['frbtn','frbtn2'].forEach(id=>{const fb=document.getElementById(id);fb&&fb.addEventListener('click',e=>{e.stopPropagation();fb.classList.remove('pop');void fb.offsetWidth;fb.classList.add('pop');set((cur+1)%10)})});
 addEventListener('keydown',e=>{if(/^[0-9]$/.test(e.key)&&!e.metaKey&&!e.ctrlKey&&!e.altKey&&!(e.target.closest&&e.target.closest('input,textarea,[contenteditable]')))set(e.key)});
 let v=0;try{v=+localStorage.getItem('ait.frame')||0}catch(e){}set(v);setTimeout(()=>{for(const k in G)load(k)},1500)})();
 
