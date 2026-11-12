@@ -839,6 +839,8 @@ html.own #menu .own{display:revert!important}
 #guest.on #gNudge,body.compact #gNudge{display:none}
 html[lang=en] #gNudge{left:calc(var(--fs)*7.4)}
 @media (prefers-reduced-motion:reduce){#gNudge.go *{animation-duration:7s!important}#gArrow mask path{stroke-dashoffset:0}}
+/* the signature travels only with the label opening or closing; any other change of size it simply takes */
+html:not(.lab-moving) #label #sig{transition:none!important}
 
 /* ---------- the owner's desk: the same wall, the same blue lettering, set as a narrow column ---------- */
 #desk,#toast{--hair:color-mix(in srgb,var(--blue) 18%,transparent);--soft:color-mix(in srgb,var(--blue) 60%,transparent);font-family:Graphik,"Hiragino Sans",system-ui,sans-serif;font-size:12px;color:var(--blue);-webkit-font-smoothing:antialiased}
@@ -1614,8 +1616,8 @@ document.querySelectorAll('[data-s]').forEach(b=>b.addEventListener('click',()=>
 
 // ---------- the label: half of it is off the wall until you come close ----------
 const label=$('label');
-function setLab(v){if(document.body.classList.contains('lab-open')===v)return;label.classList.toggle('open',v);document.body.classList.toggle('lab-open',v);camGo(1500)}
-function setLab(v){if(document.body.classList.contains('lab-open')===v)return;label.classList.toggle('open',v);document.body.classList.toggle('lab-open',v);camGo(1500)}
+function setLab(v){if(document.body.classList.contains('lab-open')===v)return;label.classList.toggle('open',v);document.body.classList.toggle('lab-open',v);const de=document.documentElement;de.classList.add('lab-moving');clearTimeout(setLab.t);setLab.t=setTimeout(()=>de.classList.remove('lab-moving'),1700);camGo(1500)}
+function setLab(v){if(document.body.classList.contains('lab-open')===v)return;label.classList.toggle('open',v);document.body.classList.toggle('lab-open',v);const de=document.documentElement;de.classList.add('lab-moving');clearTimeout(setLab.t);setLab.t=setTimeout(()=>de.classList.remove('lab-moving'),1700);camGo(1500)}
 // the label opens on click, not on hover; clicking it again or anywhere else closes it
 label.querySelector('.in').addEventListener('click',e=>{e.stopPropagation();if(!PHONE&&!document.body.classList.contains('compact'))setLab(!document.body.classList.contains('lab-open'))});
 addEventListener('pointerdown',e=>{if(document.body.classList.contains('lab-open')&&!(e.target.closest&&e.target.closest('#label,#lang,#tassel')))setLab(false)}); // switching language keeps the label open
