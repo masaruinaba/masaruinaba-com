@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "routes": [
+    { "src": "/", "has": [{ "type": "host", "value": "museum.masaruinaba.com" }], "dest": "/museum/index.html" },
+    { "src": "/(.*)", "has": [{ "type": "host", "value": "museum.masaruinaba.com" }], "dest": "/museum/$1" }
+  ]
+}
