@@ -930,6 +930,14 @@ body.stack #acc.open #notes{max-height:60vh!important}
 #accB::after{display:inline-block;transition:transform .5s cubic-bezier(.22,.8,.25,1)}
 #acc.open #accB::after{content:"+"!important;transform:rotate(45deg)}
 
+/* phones and tablets (2026-11-12): the text runs off the right edge so the next page shows; Japanese punctuation set tight, as in print */
+body.stack #label .desc{margin-right:calc(-1*var(--sm))!important;padding-right:var(--ppr,0px)!important;box-sizing:border-box!important}
+html[lang=ja] body.stack #label .desc p,html[lang=ja] body.stack #label :is(.ar,.md){font-feature-settings:"palt" 1!important;letter-spacing:.04em!important;text-spacing-trim:trim-both;hanging-punctuation:allow-end;line-break:strict}
+html[lang=ja] body.stack #label .desc p{text-align:justify!important;text-justify:inter-character}
+body.stack #label .ill{width:100%!important;--rw:min(calc(100vw - 2*var(--sm)),640px)!important}
+#gNudge{display:none!important}
+body.stack #label .desc{transition:none!important}
+
 /* ---------- the owner's desk: the same wall, the same blue lettering, set as a narrow column ---------- */
 #desk,#toast{--hair:color-mix(in srgb,var(--blue) 18%,transparent);--soft:color-mix(in srgb,var(--blue) 60%,transparent);font-family:Graphik,"Hiragino Sans",system-ui,sans-serif;font-size:12px;color:var(--blue);-webkit-font-smoothing:antialiased}
 #desk{display:none}
@@ -1873,7 +1881,7 @@ $('toGuest').addEventListener('click',()=>{const st=$('stage'),g=$('guest');if(!
 // stacked: the label's text runs sideways in pages; a swipe settles on a page, the arrows and the count sit under it
 (function(){const d=document.querySelector('#label .desc');if(!d)return;const pg=document.createElement('div');pg.id='descPg';pg.innerHTML='<button type="button" aria-label="Previous">←</button><span></span><button type="button" aria-label="Next">→</button>';d.after(pg);
   const [pb,num,nb]=[pg.children[0],pg.children[1],pg.children[2]];let step=1,n=1,t=0;
-  function size(){if(!STACK){d.scrollLeft=0;return}const W=d.clientWidth||1,two=innerWidth>=600,G=Math.round(two?W*.06:Math.max(24,W*.08)),ds=d.style;ds.setProperty('--pg',G+'px');ds.setProperty('--pcw',Math.floor(two?(W-G)/2:W)+'px');ds.setProperty('--ph',Math.round(Math.min(innerHeight*(innerWidth>innerHeight?.72:.6),560))+'px');step=W+G;requestAnimationFrame(()=>{n=Math.max(1,Math.round((d.scrollWidth+G)/step));show()})}
+  function size(){if(!STACK){d.scrollLeft=0;return}const W=d.clientWidth||1,two=innerWidth>=600,k=two?2:1,G=Math.round(two?W*.05:Math.max(22,W*.07)),peek=Math.round(W*(two?.1:.16)),cw=Math.floor((W-k*G-peek)/k),ds=d.style;ds.setProperty('--pg',G+'px');ds.setProperty('--pcw',cw+'px');ds.setProperty('--ppr',(W-k*cw-(k-1)*G)+'px');ds.setProperty('--ph',Math.round(Math.min(innerHeight*(innerWidth>innerHeight?.72:.6),560))+'px');step=k*(cw+G);requestAnimationFrame(()=>{n=Math.max(1,Math.round((d.scrollWidth+G)/step));show()})}
   function at(){return Math.min(n-1,Math.max(0,Math.round(d.scrollLeft/step)))}
   function show(){const i=at();num.textContent=(i+1)+' / '+n;pb.disabled=i===0;nb.disabled=i>=n-1;pg.style.visibility=n>1?'visible':'hidden'}
   function go(i){d.scrollTo({left:Math.max(0,Math.min(n-1,i))*step,behavior:'smooth'})}
