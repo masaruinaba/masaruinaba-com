@@ -1042,6 +1042,14 @@ body.stack #acc.open #notes{max-height:min(46vh,calc(var(--fs)*15))!important}
 #acc #notes li small time{opacity:1;color:color-mix(in srgb,var(--blue) 45%,transparent)}
 /* the badge belongs to the guestbook only, never on a cursor's name tag */
 .tag.guest.verified::after{content:none!important;display:none!important}
+/* the update time takes its own line, so the day line stays short */
+/* the owner's way into the desk sits under the guestbook, a blue pill only they see */
+#lcol .no #upd{display:block}
+body.stack #wall #frbtn2{top:calc(env(safe-area-inset-top,0px) + 22px + var(--fs)*4.5 - 8px)!important}
+#deskPill{display:none}
+html.own #deskPill{display:inline-block;align-self:flex-start;margin-top:calc(var(--fs)*1.6);padding:calc(var(--fs)*.42) calc(var(--fs)*1.1);border-radius:999px;background:#1D3BD8;color:#fff;border:0;font:400 var(--fs)/1 Graphik,sans-serif;letter-spacing:.02em;cursor:pointer;transition:opacity .2s ease}
+html.own #deskPill:hover{opacity:.85}
+#menu #deskOpen{display:none!important}
 
 /* ---------- the owner's desk: the same wall, the same blue lettering, set as a narrow column ---------- */
 #desk,#toast{--hair:color-mix(in srgb,var(--blue) 18%,transparent);--soft:color-mix(in srgb,var(--blue) 60%,transparent);font-family:Graphik,"Hiragino Sans",system-ui,sans-serif;font-size:12px;color:var(--blue);-webkit-font-smoothing:antialiased}
@@ -1339,7 +1347,7 @@ made by everyone.</div>
   <div id="probe"></div>
   <div class="wt" id="lcol">
     <div class="g" id="mark">Ait Museum</div>
-    <div class="no"><span>No. 01</span><span class="sp">　</span><span>Day </span><span id="day">1</span><span class="closed" id="closed" hidden data-en="Closed today" data-ja="本日休館">Closed today</span></div>
+    <div class="no"><span>No. 01</span><span class="sp">　</span><span>Day </span><span id="day">1</span><span id="upd"></span><span class="closed" id="closed" hidden data-en="Closed today" data-ja="本日休館">Closed today</span></div>
     <div hidden><span id="ops">0</span><span id="dec">0</span><span id="adv">0</span></div>
     <form class="wt g" id="guest">
       <div class="ti" data-en="Guestbook" data-ja="芳名録">Guestbook</div>
@@ -1370,6 +1378,7 @@ if(Date.now()-last>864e5||/[?&]nudge/.test(location.search)){let fired=false;con
       <span id="sent" data-nosplit></span>
       </div>
       <div id="acc" hidden><button type="button" id="accB" data-nosplit></button><ol id="notes" data-nosplit></ol></div>
+      <button type="button" id="deskPill" data-nosplit>Admin</button>
     </form>
   </div>
   <button type="button" class="wt frb" id="frbtn2" aria-label="Change the frame" title="Change the frame"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><rect x="2.5" y="1" width="7" height="10" stroke="currentColor" stroke-width=".8" fill="none"/><rect x="4.5" y="3.5" width="3" height="5" stroke="currentColor" stroke-width=".6" fill="none"/></svg></button>
@@ -2345,7 +2354,7 @@ function setOwner(v){
 function deskLayout(){if(!desk)return;const bottom=VIEW.ty+(BY+H*BS)*VIEW.k;desk.style.setProperty('--dh',Math.max(260,Math.round(innerHeight-bottom+14))+'px')}
 addEventListener('resize',()=>setTimeout(deskLayout,0));
 function openDesk(v){document.body.classList.toggle('dock-open',v);if(stackWanted()!==STACK)layout();camGo(700);document.body.classList.remove('menu-open');if(v)setFocus(false);try{localStorage.setItem('ait.desk',v?'1':'0')}catch(e){}}
-$('deskOpen').addEventListener('click',()=>openDesk(true));
+$('deskOpen').addEventListener('click',()=>openDesk(true));$('deskPill').addEventListener('click',e=>{e.preventDefault();openDesk(true)});
 /* tabs: one list at a time, so nothing has to be scrolled past */
 function setTab(t){desk.dataset.tab=t;desk.querySelectorAll('#dkTabs button').forEach(b=>{const on=b.dataset.tab===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on)});const c=desk.querySelector('.dock-content');if(c)c.scrollTop=0;try{localStorage.setItem('ait.tab',t)}catch(e){}}
 desk.querySelectorAll('#dkTabs button').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
@@ -2806,6 +2815,11 @@ setInterval(()=>{if(STACK||document.hidden||document.body.classList.contains('la
   let mb=0;const x2=dr.left+d.clientWidth*.3;for(const p of d.querySelectorAll('p'))for(const r of p.getClientRects())if(r.left<x2&&r.width>5)mb=Math.max(mb,r.bottom);
   if(mb&&(Math.abs(bl-dr.bottom)>1.5||dr.bottom-mb>3))fillDesc()},1200);
 addEventListener('resize',()=>{setTimeout(fillDesc,700);setTimeout(fillDesc,1600)});
+
+/* the date and time of the latest decision sit beside the day count */
+(function(){const run=()=>{const el=document.getElementById('upd');if(!el)return;let at=0;if(typeof DEC!=='undefined')for(const d of DEC)at=Math.max(at,+d.at||0);
+  if(typeof SEED!=='undefined'&&SEED&&SEED.state)at=Math.max(at,+SEED.state.at||0);if(!at){el.textContent='';return}const d=new Date(at),p=n=>String(n).padStart(2,'0');
+  const t=(d.getMonth()+1)+'.'+d.getDate()+' '+p(d.getHours())+':'+p(d.getMinutes());el.textContent='Updated '+t};run();setInterval(run,5000)})();
 
 </script>
 </body></html>
