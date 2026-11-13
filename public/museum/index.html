@@ -953,6 +953,16 @@ html[lang=ja] body.stack #label .desc .pq{letter-spacing:-.5em!important}
 html[lang=ja] body.stack #label .desc .po{margin-left:-.5em}
 html[lang=ja] body.stack #label .desc .pm{margin:0 -.25em}
 
+/* closed day: one quiet word beside the day count */
+#closed{display:block;margin-top:.15em}
+#closed[hidden]{display:none}
+body:not(.stack) #closed{display:none!important}
+body.stack.closed-day #wall #frbtn2{top:calc(env(safe-area-inset-top,0px) + 22px + var(--fs)*4.6 - 8px)!important}
+body:not(.stack) #gClosed{font-size:.8em}
+#gClosed{margin:0 0 1.3em;font-size:.86em;line-height:1.75;opacity:1;color:var(--blue);white-space:pre-line;text-align:left!important}
+#gClosed[hidden]{display:none}
+#gClosed .mk{display:inline-block;line-height:1.45;padding:0 .25em;margin-left:-.25em;background:var(--blue);color:#fff}
+
 /* ---------- the owner's desk: the same wall, the same blue lettering, set as a narrow column ---------- */
 #desk,#toast{--hair:color-mix(in srgb,var(--blue) 18%,transparent);--soft:color-mix(in srgb,var(--blue) 60%,transparent);font-family:Graphik,"Hiragino Sans",system-ui,sans-serif;font-size:12px;color:var(--blue);-webkit-font-smoothing:antialiased}
 #desk{display:none}
@@ -1141,7 +1151,7 @@ made by everyone.</div>
   <div id="probe"></div>
   <div class="wt" id="lcol">
     <div class="g" id="mark">Ait Museum</div>
-    <div class="no"><span>No. 01</span><span class="sp">　</span><span>Day </span><span id="day">1</span></div>
+    <div class="no"><span>No. 01</span><span class="sp">　</span><span>Day </span><span id="day">1</span><span class="closed" id="closed" hidden data-en="Closed today" data-ja="本日休館">Closed today</span></div>
     <div hidden><span id="ops">0</span><span id="dec">0</span><span id="adv">0</span></div>
     <form class="wt g" id="guest">
       <div class="ti" data-en="Guestbook" data-ja="芳名録">Guestbook</div>
@@ -1166,6 +1176,7 @@ if(Date.now()-last>864e5||/[?&]nudge/.test(location.search)){let fired=false;con
 })();
 </script>
       <div id="gForm">
+      <p id="gClosed" hidden><span class="mk" data-en="We are closed today." data-ja="本日は休館日です。">We are closed today.</span><br><span data-en="You are still welcome to sign the guestbook.&#10;Your note will be read on our next open day." data-ja="記帳はいつでも承っております。&#10;ご意見は、次の開館日に拝見いたします。">You are still welcome to sign the guestbook.</span></p>
       <input id="advName" data-1p-ignore data-lpignore="true" maxlength="20" placeholder="Name" data-ph-en="Name" data-ph-ja="お名前" autocomplete="off">
       <div class="gl"><textarea id="advIn" rows="3" data-1p-ignore data-lpignore="true" maxlength="600" placeholder="Your thoughts are welcome" data-ph-en="Your thoughts are welcome" data-ph-ja="ご意見をお寄せください" autocomplete="off"></textarea><button class="lk send" data-en="Sign" data-ja="記帳">Sign</button></div>
       <span id="sent" data-nosplit></span>
@@ -1262,6 +1273,9 @@ const PACE=1.9,sleep=ms=>new Promise(r=>setTimeout(r,ms*PACE));
 const isJa=()=>document.documentElement.lang==='ja';
 const T=(en,ja)=>isJa()?ja:en;
 const E=(k,root)=>(root||live).querySelector('[data-k="'+k+'"]');
+/* closed on Saturdays, Sundays and Japanese public holidays (Tokyo time): the AIs rest, nothing changes */
+const HOLIDAYS='2026-01-01 2026-01-12 2026-02-11 2026-02-23 2026-03-20 2026-04-29 2026-05-03 2026-05-04 2026-05-05 2026-05-06 2026-07-20 2026-08-11 2026-09-21 2026-09-22 2026-09-23 2026-10-12 2026-11-03 2026-11-23 2027-01-01 2027-01-11 2027-02-11 2027-02-23 2027-03-21 2027-03-22 2027-04-29 2027-05-03 2027-05-04 2027-05-05 2027-07-19 2027-08-11 2027-09-20 2027-09-23 2027-10-11 2027-11-03 2027-11-23 2027-12-31'.split(' ');
+const CLOSED=(()=>{const q=location.search;if(/[?&]open\b/.test(q))return false;if(/[?&]closed\b/.test(q))return true;const d=new Date(Date.now()+9*36e5);return d.getUTCDay()===0||d.getUTCDay()===6||HOLIDAYS.includes(d.toISOString().slice(0,10))})();
 const START=new Date('2026-11-11T00:00:00+09:00');
 
 // ---------- the page's state: everything a decision can change ----------
@@ -1651,6 +1665,7 @@ const JSUM=JOBS.reduce((s,j)=>s+j[0],0);
 /* while a photo covers the page the shape is hidden: nobody reaches for what is not there */
 const shapeGone=()=>live.classList.contains('ontop')||CUR.shape==='none';
 const ONSHAPE=new Set([JOBS[3][1],JOBS[13][1]]);
+async function closedRest(a){const r=rect(live),c=[[.08,.93],[.9,.92],[.9,.1],[.1,.12]][Math.max(0,agents.indexOf(a))%4];await a.move(r.x+r.w*c[0]+R(-12,12),r.y+r.h*c[1]+R(-10,10),60);await sleep(R(9000,16000));return true}
 function pickJob(){for(let n=0;n<12;n++){let r=Math.random()*JSUM,f=JOBS[0][1];for(const j of JOBS)if((r-=j[0])<0){f=j[1];break}if(!(shapeGone()&&ONSHAPE.has(f)))return f}return JOBS[0][1]}
 
 // ---------- a decision arrives: the cursors carry it out, one property at a time ----------
@@ -2469,6 +2484,8 @@ $('readon').addEventListener('click',e=>{e.stopPropagation();setLab(true)});
 (function(){if((typeof FORM!=='undefined'&&FORM)||/^(localhost|127\.0\.0\.1)$/.test(location.hostname))document.documentElement.classList.add('formbook');})();
 (function(){const u=SEED&&typeof SEED.formUrl==='string'&&/^https:\/\//.test(SEED.formUrl)?SEED.formUrl:'';const a=$('gExt');if(!a||!u)return;a.href=u;a.hidden=false;document.documentElement.classList.add('extbook')})();
 $('gridBtn').addEventListener('click',()=>{document.body.classList.toggle('grid');drawGrid()});
+
+(()=>{const c=document.getElementById('closed');if(c&&CLOSED){c.hidden=false;document.body.classList.add('closed-day');const g=document.getElementById('gClosed');if(g)g.hidden=false}})();
 
 </script>
 </body></html>
