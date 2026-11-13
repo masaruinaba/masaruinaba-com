@@ -1027,6 +1027,14 @@ body.stack #acc.open #notes{max-height:min(46vh,calc(var(--fs)*15))!important}
 #acc #notes li small{display:block;order:2;margin-top:calc(var(--fs)*.05)!important;line-height:1.4!important;font-size:calc(var(--fs)*.64)!important;letter-spacing:.02em!important;opacity:.55!important}
 #acc #notes li{display:flex!important;flex-direction:column}
 #acc #notes li q{order:1}
+/* name on the right, with the day it was taken, light */
+#acc #notes li small{text-align:right}
+#acc #notes li small time{margin-left:.9em;opacity:.75;font-variant-numeric:tabular-nums}
+
+/* the badge: a small blue seal with a tick, for someone confirmed in person */
+.vbadge{display:inline-block;width:.95em;height:.95em;margin-left:.3em;vertical-align:-.12em;border-radius:50%;background:var(--blue) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3.2 6.2 5.1 8 8.8 4.2' fill='none' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/100% no-repeat}
+#acc #notes li small .vbadge{opacity:1}
+.tag.guest.verified::after{content:"";display:inline-block;width:.85em;height:.85em;margin-left:.35em;vertical-align:-.1em;border-radius:50%;background:#2E5BFF url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3.2 6.2 5.1 8 8.8 4.2' fill='none' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/100% no-repeat}
 
 /* ---------- the owner's desk: the same wall, the same blue lettering, set as a narrow column ---------- */
 #desk,#toast{--hair:color-mix(in srgb,var(--blue) 18%,transparent);--soft:color-mix(in srgb,var(--blue) 60%,transparent);font-family:Graphik,"Hiragino Sans",system-ui,sans-serif;font-size:12px;color:var(--blue);-webkit-font-smoothing:antialiased}
@@ -1283,6 +1291,15 @@ body.trial-card #desk .dk-bar{display:none!important}
 #desk .panel[data-in=more] textarea#tell:focus{background:rgba(255,255,255,.16)}
 #desk #tellGo{height:34px;padding:0 16px;border-radius:8px;background:#F3F3F5;color:#2347A8;font-size:12.5px;font-weight:500;text-decoration:none}
 #desk #tellGo:disabled{opacity:.4}
+
+#desk .dk-sub{font-size:11px;line-height:1.55;opacity:.6;margin:-2px 0 4px}
+#desk .dk-person{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid rgba(255,255,255,.12)}
+#desk .dk-person:first-child{border-top:0}
+#desk .dk-switch{position:relative;width:30px;height:18px;border-radius:9px;border:0;padding:0;background:rgba(255,255,255,.25);cursor:pointer;transition:background .2s}
+#desk .dk-switch i{position:absolute;left:3px;top:3px;width:12px;height:12px;border-radius:50%;background:#F3F3F5;transition:transform .35s cubic-bezier(.3,1.4,.5,1)}
+#desk .dk-switch.on{background:#F3F3F5}
+#desk .dk-switch.on i{transform:translateX(12px);background:#2347A8}
+#desk .dk-peoplep{border-bottom:1px solid rgba(255,255,255,.14);padding-bottom:16px!important;margin-bottom:12px}
 </style>
 <main id="stage" class="stage">
 <div id="wrap">
@@ -1399,6 +1416,11 @@ if(Date.now()-last>864e5||/[?&]nudge/.test(location.search)){let fired=false;con
     <section class="panel dk-ideasp" data-in="ideas">
       <h2 class="panel-title"><span><span data-en="Variables to add" data-ja="次に足せる変数">Variables to add</span> <span id="iCount" class="dk-count">0</span></span></h2>
       <ul id="dideas" class="dk-list"></ul>
+    </section>
+    <section class="panel dk-peoplep" data-in="notes">
+      <h2 class="panel-title"><span><span data-en="People" data-ja="採用した人">People</span></span></h2>
+      <div class="dk-sub" data-en="Turn on the badge for someone whose identity you have confirmed in person." data-ja="口頭などで本人と確認できた人に、バッジを付けます。">Turn on the badge for someone whose identity you have confirmed in person.</div>
+      <ul id="dpeople" class="dk-list"></ul>
     </section>
     <section class="panel dk-notesp" data-in="notes">
       <h2 class="panel-title"><span><span data-en="Notes not yet a proposal" data-ja="まだ案になっていないメモ">Notes not yet a proposal</span> <span id="nCount" class="dk-count">0</span></span></h2>
@@ -1604,7 +1626,7 @@ class Agent{
     this.el=document.createElement('div');this.el.className='cur';
     this.el.innerHTML='<svg width="26" height="26" viewBox="0 0 26 26" style="overflow:visible"><path d="'+ARROW+'" fill="#fff" stroke="#fff" stroke-width="6" stroke-linejoin="round"/><path d="'+ARROW+'" fill="'+col+'" stroke="'+col+'" stroke-width="2.4" stroke-linejoin="round"/></svg>';
     this.svg=this.el.firstChild;
-    this.tag=document.createElement('div');this.tag.className='tag'+(p.guest?' guest':'');this.tag.textContent=p.name;if(!p.guest)this.tag.style.background=p.c;
+    this.tag=document.createElement('div');this.tag.className='tag'+(p.guest?' guest':'')+(p.verified?' verified':'');this.tag.textContent=p.name;if(!p.guest)this.tag.style.background=p.c;
     this.sel=document.createElement('div');this.sel.className='sel';this.sel.style.setProperty('--c',col);
     for(const q of [[0,0],[1,0],[0,1],[1,1]]){const h=document.createElement('i');h.style.left=q[0]*100+'%';h.style.top=q[1]*100+'%';this.sel.appendChild(h)}
     this.selName=document.createElement('div');this.selName.className='nm';this.selDim=document.createElement('div');this.selDim.className='dm';this.sel.append(this.selName,this.selDim);
@@ -2203,7 +2225,7 @@ const NOTES=[],PICKED=new Map(),DEC=[],seen=new Set(),guests=new Map(),LOAD=Date
 function renderNotes(){
   const ol=$('notes'),list=[...PICKED.entries()].map(([id,v])=>({id,...v})).sort((a,b)=>(b.at||0)-(a.at||0));
   $('acc').hidden=!list.length;$('guest').classList.toggle('empty',!list.length);$('accB').textContent=T('Taken · '+list.length,'採用 · '+list.length);ol.textContent='';
-  for(const n of list){const li=document.createElement('li'),q=document.createElement('q');q.textContent=n.text||'';const sm=document.createElement('small'),wh=countryName(n.cc);sm.textContent=(n.name&&n.name!=='Someone'?n.name:'Someone');li.append(sm,q);ol.appendChild(li)}
+  for(const n of list){const li=document.createElement('li'),q=document.createElement('q');q.textContent=n.text||'';const sm=document.createElement('small'),wh=countryName(n.cc);sm.textContent=(n.name&&n.name!=='Someone'?n.name:'Someone');if(n.verified){const v=document.createElement('i');v.className='vbadge';v.title=T('Identity confirmed in person','本人確認済み');v.setAttribute('aria-label',v.title);sm.append(v)}const dt=new Date(+n.at||0);if(+n.at){const tm=document.createElement('time');tm.textContent=(dt.getMonth()+1)+'.'+dt.getDate();tm.dateTime=dt.toISOString().slice(0,10);sm.append(tm)}li.append(sm,q);ol.appendChild(li)}
   $('adv').textContent=Math.max(META,NOTES.length,PICKED.size);$('dec').textContent=STN;if(typeof fitLabel==='function')fitLabel()}
 $('gOpen').addEventListener('click',()=>{$('guest').classList.add('on');setTimeout(()=>$('advName').focus(),300);setTimeout(fitLabel,650)});
 addEventListener('pointerdown',e=>{const g=$('guest');if(g.classList.contains('on')&&!g.contains(e.target)&&!$('advIn').value&&!$('advName').value){g.classList.remove('on');setTimeout(fitLabel,650)}});
@@ -2225,7 +2247,7 @@ $('guest').addEventListener('submit',async e=>{
   $('sent').textContent=ok==='handoff'?T('Press “Submit” on the page that opened to finish signing.','開いたページで「送信」を押すと記帳が終わります。'):ok?T('Signed.','記帳しました。'):T('It could not be kept this time.','今回は保存できませんでした。');setTimeout(()=>{$('sent').textContent=''},5000);renderNotes();renderDesk()});
 
 // people the human picked work inside the piece as a cursor bearing their name
-function addGuest(id,name){if(guests.has(id)||guests.size>=4)return;const g=new Agent({name:String(name&&name!=='Someone'?name:'Someone').slice(0,20),c:'#141414',speed:R(.85,1.15),guest:true,gid:id},agents.length);agents.push(g);guests.set(id,g);run(g,R(300,1200))}
+function addGuest(id,name){if(guests.has(id)||guests.size>=4)return;const pv=PICKED.get(id);const g=new Agent({name:String(name&&name!=='Someone'?name:'Someone').slice(0,20),c:'#141414',speed:R(.85,1.15),guest:true,gid:id,verified:!!(pv&&pv.verified)},agents.length);agents.push(g);guests.set(id,g);run(g,R(300,1200))}
 /* only the writers of the latest picked notes join, and only for a day: then they leave */
 function syncGuests(){const now=Date.now(),keep=new Set([...PICKED].filter(([,v])=>now-(+v.at||0)<864e5).sort((a,b)=>(+b[1].at||0)-(+a[1].at||0)).filter(([,v],i,arr)=>arr.findIndex(([,w])=>(w.name||'')===(v.name||''))===i).slice(0,2).map(([id])=>id));
   for(const id of [...guests.keys()])if(!keep.has(id))dropGuest(id);for(const id of keep){const v=PICKED.get(id);addGuest(id,v&&v.name)}}
@@ -2243,7 +2265,7 @@ function listen(){
   db.collection('site').onSnapshot(q=>{let got=false;for(const d of q.docs){const v=d.data();if(!v)continue;if(d.id==='state'){got=true;onState(v)}else if(d.id==='meta')META=+v.notes||0}
     if(!got)stateSeen=true;readyRes();renderNotes();renderDesk()},err=>{console.error(err);readyRes()});
   db.collection('decisions').onSnapshot(q=>{DEC.length=0;for(const d of q.docs){const v=d.data();if(v&&v.st)DEC.push(v)}DEC.sort((a,b)=>a.n-b.n);seedHist();renderDesk()},err=>console.error(err));
-  db.collection('picked').onSnapshot(q=>{const ids=new Set();for(const d of q.docs){const v=d.data();if(!v)continue;ids.add(d.id);PICKED.set(d.id,v)}syncGuests();
+  db.collection('picked').onSnapshot(q=>{const ids=new Set();for(const d of q.docs){const v=d.data();if(!v)continue;ids.add(d.id);PICKED.set(d.id,v)}syncGuests();for(const [id,g] of guests){const pv=PICKED.get(id);if(g.tag)g.tag.classList.toggle('verified',!!(pv&&pv.verified))}if(typeof renderPeople==='function')renderPeople();
     for(const id of [...PICKED.keys()])if(!ids.has(id)){PICKED.delete(id);dropGuest(id)}renderNotes();renderDesk()},err=>console.error(err));
   db.collection('advice').onSnapshot(q=>{let total=0;
     for(const d of q.docs){const v=d.data(),notes=(v&&v.notes)||[];total+=notes.length;
@@ -2501,8 +2523,15 @@ function renderProps(){const ul=$('dprops');if(!ul)return;ul.textContent='';$('p
     if(on){const a=mk('button','dk-yes',T('Adopt','採用する')),n=mk('button','dk-no',T('Stop trying','試しをやめる'));a.type=n.type='button';a.disabled=BUSY||!db;a.addEventListener('click',adopt);n.addEventListener('click',()=>{setTrial(null);syncHand(true);renderProps()});row.append(a,n)}
     else{const t=mk('button','dk-yes dk-soft',T('Try','試す')),d=mk('button','dk-no',T('Let go','見送る'));t.type=d.type='button';t.disabled=!keys.length;t.addEventListener('click',()=>tryProp(x));d.addEventListener('click',()=>dropProp(x.id));row.append(t,d)}
     li.appendChild(row);ul.appendChild(li)}
-  renderIdeas()}
+  renderIdeas();renderPeople()}
 /* the shelf of variables the page does not have yet: the AIs add to it, a heart says "make this one" */
+function renderPeople(){const ul=$('dpeople');if(!ul)return;ul.textContent='';const by=new Map();
+  for(const [id,v] of PICKED){const nm=(v.name&&v.name!=='Someone')?v.name:'';if(!nm)continue;if(!by.has(nm))by.set(nm,{ids:[],n:0,verified:false});const r=by.get(nm);r.ids.push(id);r.n++;if(v.verified)r.verified=true}
+  if(!by.size)ul.appendChild(mk('li','dk-empty',T('No named people yet.','まだ名前のある人はいません。')));
+  for(const [nm,r] of [...by].sort((a,b)=>b[1].n-a[1].n)){const li=mk('li','dk-person');const t=mk('div','dk-person-t');t.appendChild(mk('div','dk-idea-say',nm));t.appendChild(mk('div','dk-idea-meta',T(r.n+' taken',r.n+'件採用')));
+    const sw=mk('button','dk-switch'+(r.verified?' on':''));sw.type='button';sw.setAttribute('role','switch');sw.setAttribute('aria-checked',r.verified);sw.setAttribute('aria-label',T('Confirmed','本人確認済み'));sw.appendChild(mk('i',''));
+    sw.addEventListener('click',async()=>{const on=!r.verified;sw.classList.toggle('on',on);try{for(const id of r.ids){const v=PICKED.get(id)||{};await db.doc('picked/'+id).set({...v,verified:on})}toast(on?T('Badge on','バッジを付けました'):T('Badge off','バッジを外しました'))}catch(err){console.error(err);sw.classList.toggle('on',!on);toast(T('It could not be saved.','保存できませんでした。'))}});
+    li.append(t,sw);ul.appendChild(li)}}
 function renderIdeas(){const ul=$('dideas');if(!ul)return;ul.textContent='';const it=(IDEAS||[]).filter(x=>!x.done);$('iCount').textContent=it.length;tabCount('tIdeas',it.length);
   if(ARC&&ARC.chapter){const li=mk('li','dk-arc');li.appendChild(mk('span','dk-arc-k',T('Chapter','いまの章')));li.appendChild(mk('b','dk-arc-now',ARC.chapter));
     if(ARC.next&&ARC.next.length){li.appendChild(mk('span','dk-arc-k',T('Next, maybe','次の候補')));const r=mk('span','dk-arc-next');for(const n of ARC.next)r.appendChild(mk('i','dk-chip2',n));li.appendChild(r)}ul.appendChild(li)}
