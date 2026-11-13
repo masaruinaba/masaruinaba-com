@@ -693,7 +693,7 @@ body.focus #board{box-shadow:none!important;outline:0!important;border:0!importa
 @keyframes lvp{50%{opacity:.25}}
 .nav{border-bottom:1px solid color-mix(in srgb,var(--fg,#222320) 18%,transparent);height:56px!important;top:36px!important;padding-bottom:0}
 .nav .links span{position:relative}
-.nav .links span:last-child::after{content:"12";position:absolute;top:-6px;right:-15px;font-size:10px;font-variant-numeric:tabular-nums;opacity:.6}
+.nav .links span:last-child::after{content:attr(data-n);position:absolute;top:-6px;right:-15px;font-size:10px;font-variant-numeric:tabular-nums;opacity:.6}
 .fig{left:484px;top:800px;width:360px;display:flex;justify-content:space-between;font-size:11px;letter-spacing:.04em;opacity:.55}
 .side{left:862px;top:410px;writing-mode:vertical-rl;font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.4;display:flex;gap:18px}
 .ctameta{left:290px;top:646px;font-size:13px;line-height:1.45;opacity:.55}
@@ -1283,7 +1283,7 @@ made by everyone.</div>
       <div class="ed card c3" data-k="c3"><b>03</b><h3>When it's done</h3><p>Not decided. That is the study.</p></div>
       <div class="ed secs" data-k="secs"></div>
       <div class="ed gridov" data-k="gridov"></div>
-      <div class="dx foot"><span>© 2026</span><span class="le" id="lastEdit">Last edited just now</span></div>
+      <div class="dx foot"><span data-k="copy">© 2026</span><span class="le" id="lastEdit">Last edited just now</span></div>
     </div>
     <div id="ov"></div>
     <div id="past"></div>
@@ -1449,7 +1449,7 @@ function secEl(id){const d=document.createElement('section');d.className='sec se
   if(id==='how'){const r=add('sec-cols');for(const [n,h,t] of [['01','You leave a note','Anything: a colour, a word, a whole new direction.'],['02','Four AIs propose','They read it and bring a few ways to change the page.'],['03','One human decides','What is kept goes in. The rest waits for another day.']]){const c=add('sec-col',null,r);add('sec-n',n,c);add('sec-h',h,c);add('sec-t',t,c)}}
   else if(id==='notes'){const P=typeof PICKED!=='undefined'?[...PICKED.values()].sort((a,b)=>(+b.at||0)-(+a.at||0)).slice(0,4):[];if(!P.length)add('sec-t','No notes yet. Yours could be the first.');for(const n of P){const q=add('sec-q');add('sec-qt','“'+n.text+'”',q);add('sec-qn',n.name||'Someone',q)}}
   else if(id==='log'){const D=typeof DEC!=='undefined'?DEC.slice(-5).reverse():[];if(!D.length)add('sec-t','Nothing decided yet.');for(const x of D){const r=add('sec-row'),t=new Date(x.at||0),p=n=>String(n).padStart(2,'0');add('sec-rn','No. '+p(x.n),r);add('sec-rd',p(t.getMonth()+1)+'.'+p(t.getDate()),r);add('sec-rw',x.by||'Human',r);add('sec-rk',(x.keys||[]).map(k=>typeof NAME!=='undefined'&&NAME[k]?NAME[k][0].replace(/^the /,''):typeof LBL!=='undefined'&&LBL[k]?LBL[k][0].toLowerCase():k).join(', '),r)}}
-  else if(id==='team'){const r=add('sec-cols sec-team');for(const [n,c,t] of [['Willem','#F2542D','Words'],['Pontus','#F650AE','Colour'],['Harald','#12B76A','Shape and place'],['Alfred','#2E5BFF','Second look']]){const col=add('sec-col',null,r),dot=add('sec-dot',null,col);dot.style.background=c;add('sec-h',n,col);add('sec-t',t,col)}}
+  else if(id==='team'){const r=add('sec-cols sec-team');const ROLE={Willem:'Words',Pontus:'Colour',Harald:'Shape and place',Alfred:'Second look'},team=typeof agents!=='undefined'?agents.filter(a=>!a.guest).map(a=>[a.name,a.col,ROLE[a.name]||'']):[];r.style.gridTemplateColumns='repeat('+Math.max(1,team.length)+',1fr)';for(const [n,c,t] of team){const col=add('sec-col',null,r),dot=add('sec-dot',null,col);dot.style.background=c;add('sec-h',n,col);add('sec-t',t,col)}}
   else add('sec-big','This page is never the same twice.');
   return d}
 function paintSecs(root,v){const box=E('secs',root);if(!box)return;box.textContent='';for(const id of String(v||'').split(',').filter(x=>SECS[x]))box.appendChild(secEl(id))}
@@ -1467,8 +1467,8 @@ function topSlides(root,v){const b=E('band',root);if(!b)return;
   for(const L of [A,B]){L.style.clipPath='';L.style.backgroundPosition=''}
   if(!v||!TOPS[v]){A.style.backgroundImage=B.style.backgroundImage='none';return}
   t.i=TOPK().indexOf(v);A.style.backgroundImage='url('+TOPS[v][0]+')';A.style.zIndex=1;B.style.backgroundImage='none';B.style.zIndex=2;t.front=A;t.back=B;
-  if(root!==live||TOPK().length<2)return;
-  t.timer=setInterval(()=>{if(document.hidden)return;
+  if((root!==live&&!root.classList.contains('clean'))||TOPK().length<2)return;
+  t.timer=setInterval(()=>{if(!b.isConnected){clearInterval(t.timer);return}if(document.hidden)return;
     const K=TOPK(),nx=(t.i+1)%K.length,F=t.front,N=t.back,W=b.offsetWidth||900,H=b.offsetHeight||1125,t0=performance.now(),D=1600;
     N.style.backgroundImage='url('+TOPS[K[nx]][0]+')';N.style.zIndex=2;F.style.zIndex=1;
     const ease=k=>k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
@@ -1893,8 +1893,10 @@ const DIARY=[
 function sayDiary(){const d=DIARY[DI++%DIARY.length],a=agents.find(x=>x.name===d[0]);NOW={who:d[0],c:a?a.col:'#141414',diary:[d[1],d[2]]};setNow();diaryUntil=performance.now()+9000}
 /* the first-person lines are switched off */
 function record(a,did){const e={at:new Date(),who:a?a.name:'',c:a?a.col:'#141414',guest:!!(a&&a.guest),did,st:{...CUR}};HIST.push(e);if(HIST.length>1500)HIST.splice(1,1);LOGR.unshift(e);if(LOGR.length>7)LOGR.pop();if(performance.now()>diaryUntil){NOW=e;setNow()}$('ops').textContent=(++OPS).toLocaleString()}
-function mount(st,flag){past.textContent='';const c=TPL.cloneNode(true);past.appendChild(c);past.classList.add('on');paint(c,st);const f=document.createElement('div');f.className='flag';f.textContent=flag;past.appendChild(f);ov.style.visibility='hidden'}
-function unmount(){past.classList.remove('on');past.textContent='';ov.style.visibility='';syncScroll()}
+/* stepped closer, the page shows what has been decided, still: no half-typed words, no cursors */
+function cleanMount(){mount(CANON,'');const f=past.querySelector('.flag');if(f)f.remove();past.dataset.clean='1';const c=past.firstElementChild;if(c){c.classList.add('clean');c.classList.toggle('showgrid',live.classList.contains('showgrid')&&!!CANON.grid);topSlides(c,CANON.top)}}
+function mount(st,flag){delete past.dataset.clean;live.style.visibility='hidden';/* a longer live page must not show under a shorter past one */past.textContent='';const c=TPL.cloneNode(true);past.appendChild(c);past.classList.add('on');paint(c,st);const f=document.createElement('div');f.className='flag';f.textContent=flag;past.appendChild(f);ov.style.visibility='hidden'}
+function unmount(){delete past.dataset.clean;past.classList.remove('on');past.textContent='';ov.style.visibility='';live.style.visibility='';syncScroll();if(FOCUS&&!(typeof TRY!=='undefined'&&TRY)&&!(typeof grab!=='undefined'&&grab))cleanMount()}
 function histLine(i){const h=HIST[i],d=h.at,p=n=>String(n).padStart(2,'0');return d.getFullYear()+'.'+p(d.getMonth()+1)+'.'+p(d.getDate())+'  '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds())}
 function showPast(i){mount(HIST[i].st,T('Earlier · ','過去 · ')+String(i).padStart(3,'0'))}
 
@@ -1982,7 +1984,7 @@ function fillPlaque(){const p=n=>String(n).padStart(2,'0'),h=typeof HIST!=='unde
   pl.innerHTML='<span class="t">untitled final</span><span class="y">2026–</span><dl></dl>';const dl=pl.querySelector('dl');
   for(const [k,v] of [[T('Updated','最終更新'),d.getFullYear()+'.'+p(d.getMonth()+1)+'.'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes())],[T('Running','会期'),T('Day '+day,day+'日目')],[T('Makers','制作'),T('4 AIs, 1 person, visitors','AI4体、人間1人、来館者')],[T('Decisions','判断'),(STN||0)+T(' so far','回')],[T('Record','記録'),T('each decision is kept as a version of the Artifact behind this page','判断ごとに、裏側のArtifactに版として残る')],[T('Medium','素材'),T('HTML, cursors, visitors’ notes','HTML、カーソル、来館者のメモ')]]){const a=document.createElement('dt'),b=document.createElement('dd');a.textContent=k;b.textContent=v;dl.append(a,b)}}
 addEventListener('resize',()=>{if(FOCUS)placePlaque()});
-function setFocus(v,auto){if((PHONE&&!STACK)||FOCUS===v)return;FOCUS=v;if(v)placePlaque();AUTO=!!auto&&v;document.body.classList.toggle('focus',v);document.body.classList.remove('menu-open');(label.classList.remove('open'),document.body.classList.remove('lab-open'));$('hit').setAttribute('aria-label',v?'Step back':'Step closer');camGo(1100)}
+function setFocus(v,auto){if((PHONE&&!STACK)||FOCUS===v)return;FOCUS=v;if(v){if(!past.classList.contains('on'))cleanMount()}else if(past.dataset.clean)unmount();if(v)placePlaque();AUTO=!!auto&&v;document.body.classList.toggle('focus',v);document.body.classList.remove('menu-open');(label.classList.remove('open'),document.body.classList.remove('lab-open'));$('hit').setAttribute('aria-label',v?'Step back':'Step closer');camGo(1100)}
 /* inside the frame: the wheel scrolls the page when it is longer than the frame; the small word Grid shows the columns */
 function pagePt(e){const b=board.getBoundingClientRect();return{x:(e.clientX-b.left)/SC,y:(e.clientY-b.top)/SC+(PH>1125?PSY:0)}}
 const actRoot=()=>past.classList.contains('on')&&past.firstElementChild?past.firstElementChild:live;
@@ -2216,7 +2218,7 @@ function dropGuest(id){const g=guests.get(id);if(!g)return;g.dead=true;guests.de
 let SEEDN=0;
 function seedHist(){const head=[HIST[0]],p=n=>String(n).padStart(2,'0');
   for(const d of DEC){if((d.at||0)>=LOAD)continue;const st=clean(d.st);if(st)head.push({at:new Date(d.at||START),who:'',c:'#141414',did:['Decision '+p(d.n)+(d.by?' · from a note by '+d.by:''),'判断'+p(d.n)+(d.by?' · '+d.by+'のメモから':'')],st})}
-  HIST.splice(0,1+SEEDN,...head);SEEDN=head.length-1}
+  HIST.splice(0,1+SEEDN,...head);SEEDN=head.length-1;if(CUR.secs&&/log|notes/.test(CUR.secs)){paintSecs(live,CUR.secs);pageH(live)}}
 
 let readyRes;const READY=new Promise(r=>{readyRes=r});
 function listen(){
@@ -2711,10 +2713,14 @@ $('readon').addEventListener('click',e=>{e.stopPropagation();setLab(true)});
   let sx=0,sy=0;function arm(e){clearTimeout(tm);sx=e.clientX;sy=e.clientY;tm=setTimeout(()=>{if(!grab&&!FOCUS&&!document.body.classList.contains('lab-open'))setFocus(true)},1300)}
   h.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||FOCUS||needLeave)return;if(Math.hypot(e.clientX-sx,e.clientY-sy)>36)arm(e)});
   h.addEventListener('pointerleave',()=>{clearTimeout(tm);needLeave=false});
-  addEventListener('pointermove',e=>{if(!FOCUS||e.pointerType!=='mouse'||camA||grab)return;const b=$('board').getBoundingClientRect(),pad=24;/* going over to the cord, pulling it, and letting go all keep the closer view */const te=typeof rope!=='undefined'&&rope[NP-1],toCord=te&&e.clientX>b.right&&e.clientY<te.y+140;if(toCord)return;if(e.clientX<b.left-pad||e.clientX>b.right+pad||e.clientY<b.top-pad||e.clientY>b.bottom+pad){needLeave=true;setFocus(false)}},{passive:true})})();
+  /* stepping back works like stepping closer: resting outside the page for a moment does it. Passing by, going to the cord, pulling it and letting go do not */
+  let ot=0,ox=0,oy=0;const outArm=e=>{clearTimeout(ot);ox=e.clientX;oy=e.clientY;ot=setTimeout(()=>{if(FOCUS&&!grab&&!document.body.classList.contains('pulling')){needLeave=true;setFocus(false)}},1300)};
+  addEventListener('pointermove',e=>{if(!FOCUS||e.pointerType!=='mouse')return;if(camA||grab){clearTimeout(ot);ot=0;return}const b=$('board').getBoundingClientRect(),pad=24,out=e.clientX<b.left-pad||e.clientX>b.right+pad||e.clientY<b.top-pad||e.clientY>b.bottom+pad;
+    if(!out||(typeof nearTassel==='function'&&nearTassel(e.clientX,e.clientY+(typeof SY==='function'?SY():0)))){clearTimeout(ot);ot=0;return}
+    if(!ot||Math.hypot(e.clientX-ox,e.clientY-oy)>36)outArm(e)},{passive:true})})();
 // the page's own footer says who touched it last
 (function(){const el=()=>document.querySelectorAll('#lastEdit');let last=null,at=Date.now();
-  setInterval(()=>{const h=typeof HIST!=='undefined'&&HIST.length?HIST[HIST.length-1]:null;if(h&&h!==last){last=h;at=+h.at||Date.now()}
+  setInterval(()=>{/* only the four AIs count as editors: a visitor's cursor is a guest, not the hand that changed the page */let h=null;if(typeof HIST!=='undefined')for(let i=HIST.length-1;i>=0;i--)if(!HIST[i].guest){h=HIST[i];break}if(h&&h!==last){last=h;at=+h.at||Date.now()}
     const who=last&&last.who?last.who:'';if(!who)at=Math.max(at,Date.now()-60000),m=Math.floor((Date.now()-at)/60000),t=m<1?'just now':m<60?m+' min ago':Math.floor(m/60)+' h ago';
     el().forEach(e=>{e.textContent='Last edited '+(who?'by '+who+' ':'')+t})},1500)})();
 
@@ -2724,6 +2730,15 @@ $('readon').addEventListener('click',e=>{e.stopPropagation();setLab(true)});
 $('gridBtn').addEventListener('click',()=>{document.body.classList.toggle('grid');drawGrid()});
 
 (()=>{const c=document.getElementById('closed');if(c&&CLOSED){c.hidden=false;document.body.classList.add('closed-day');const g=document.getElementById('gClosed');if(g)g.hidden=false}})();
+
+/* things on the page that are facts are read, not typed: the footer's year and name, the count beside Notes */
+(function(){const run=()=>{const y=new Date().getFullYear(),n=Math.max(typeof META!=='undefined'?META:0,typeof NOTES!=='undefined'?NOTES.length:0,typeof PICKED!=='undefined'?PICKED.size:0);
+  document.querySelectorAll('.lp').forEach(r=>{const c=r.querySelector('[data-k="copy"]'),b=r.querySelector('[data-k="brand"]');if(c){const t='© '+(y>2026?'2026–'+y:y)+' '+((b&&b.textContent.trim())||'');if(c.textContent!==t)c.textContent=t}
+    const ns=[...r.querySelectorAll('.nav .links span')].find(x=>x.textContent.trim()==='Notes');if(ns)ns.dataset.n=n||''})};run();setInterval(run,1500)})();
+
+/* stepped closer: a click on the bare wall outside the page steps back at once */
+addEventListener('click',e=>{if(!FOCUS||grab)return;const b=board.getBoundingClientRect(),pad=8;if(e.clientX>=b.left-pad&&e.clientX<=b.right+pad&&e.clientY>=b.top-pad&&e.clientY<=b.bottom+pad)return;
+  if(e.target.closest&&e.target.closest('button,a,input,textarea,select,#desk,#guest,#label,#menu'))return;if(typeof nearTassel==='function'&&nearTassel(e.clientX,e.clientY+(typeof SY==='function'?SY():0)))return;setFocus(false)});
 
 </script>
 </body></html>
