@@ -1014,17 +1014,17 @@ body.on-link #hit,body.on-link #board,body.on-link #board *{cursor:pointer!impor
 #acc.open #notes{max-height:min(var(--nmax,40vh),calc(var(--fs)*13.5))!important;overflow-y:auto!important;overflow-x:hidden!important;padding-right:10px;scroll-snap-type:none;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--blue) color-mix(in srgb,var(--blue) 12%,transparent)}
 body.stack #acc.open #notes{max-height:min(46vh,calc(var(--fs)*15))!important}
 #acc #notes::-webkit-scrollbar{width:3px}
-#acc #notes::-webkit-scrollbar-track{background:color-mix(in srgb,var(--blue) 12%,transparent);border-radius:2px}
-#acc #notes::-webkit-scrollbar-thumb{background:var(--blue);border-radius:2px}
+#acc #notes::-webkit-scrollbar-track{background:color-mix(in srgb,var(--blue) 12%,transparent);border-radius:0}
+#acc #notes::-webkit-scrollbar-thumb{background:var(--blue);border-radius:0}
 /* columns of the label fill to their last line: no line is held back to keep paragraphs whole */
 #label .desc p{orphans:1;widows:1}
 /* on a photo every word on the page is white, the button included */
 .lp.ontop .cta{color:#fff!important}
 /* the adopted notes: the words first, the name small beneath them, one hairline between notes */
-#acc #notes li{display:block!important;padding:calc(var(--fs)*.75) 0!important;border-top:1px solid color-mix(in srgb,var(--blue) 14%,transparent)!important}
+#acc #notes li{display:block!important;padding:calc(var(--fs)*.55) 0!important;border-top:1px solid color-mix(in srgb,var(--blue) 14%,transparent)!important}
 #acc #notes li:first-child{border-top:0!important;padding-top:calc(var(--fs)*.2)!important}
-#acc #notes li q{display:block;font-size:calc(var(--fs)*.8)!important;line-height:1.65!important;text-indent:-.5em;quotes:"“" "”"}
-#acc #notes li small{display:block;order:2;margin-top:calc(var(--fs)*.25)!important;font-size:calc(var(--fs)*.64)!important;letter-spacing:.02em!important;opacity:.55!important}
+#acc #notes li q{display:block;font-size:calc(var(--fs)*.8)!important;line-height:1.6!important;quotes:"“" "”"}
+#acc #notes li small{display:block;order:2;margin-top:calc(var(--fs)*.05)!important;line-height:1.4!important;font-size:calc(var(--fs)*.64)!important;letter-spacing:.02em!important;opacity:.55!important}
 #acc #notes li{display:flex!important;flex-direction:column}
 #acc #notes li q{order:1}
 
