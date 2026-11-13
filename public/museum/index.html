@@ -1010,6 +1010,14 @@ body.focus #board>#ov{visibility:hidden!important}
 /* over a link the pointer says so */
 body.focus #hit,body.focus #board{cursor:default!important}
 body.on-link #hit,body.on-link #board,body.on-link #board *{cursor:pointer!important}
+/* the list of adopted notes keeps a fixed height and scrolls inside it, with a thin blue bar */
+#acc.open #notes{max-height:min(var(--nmax,40vh),calc(var(--fs)*13.5))!important;overflow-y:auto!important;overflow-x:hidden!important;padding-right:10px;scroll-snap-type:none;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--blue) color-mix(in srgb,var(--blue) 12%,transparent)}
+body.stack #acc.open #notes{max-height:min(46vh,calc(var(--fs)*15))!important}
+#acc #notes::-webkit-scrollbar{width:3px}
+#acc #notes::-webkit-scrollbar-track{background:color-mix(in srgb,var(--blue) 12%,transparent);border-radius:2px}
+#acc #notes::-webkit-scrollbar-thumb{background:var(--blue);border-radius:2px}
+/* columns of the label fill to their last line: no line is held back to keep paragraphs whole */
+#label .desc p{orphans:1;widows:1}
 
 /* ---------- the owner's desk: the same wall, the same blue lettering, set as a narrow column ---------- */
 #desk,#toast{--hair:color-mix(in srgb,var(--blue) 18%,transparent);--soft:color-mix(in srgb,var(--blue) 60%,transparent);font-family:Graphik,"Hiragino Sans",system-ui,sans-serif;font-size:12px;color:var(--blue);-webkit-font-smoothing:antialiased}
@@ -2663,7 +2671,7 @@ function loop(now){const dt=Math.min(.05,(now-lastT)/1000);lastT=now;camStep(now
 function fillDesc(){const d=document.querySelector('#label .desc'),L=$('label'),f=document.querySelector('#label .ill');if(!d||!L)return;if(STACK){L.style.removeProperty('top');for(const k of ['height','width','margin-top','column-count','--dh'])d.style.removeProperty(k);if(f){f.style.removeProperty('width');f.style.removeProperty('--rw')}const rc=$('reelc');if(rc)rc.style.width='';return}if(document.hidden||!L.offsetParent||getComputedStyle(L).display==='none'||d.getBoundingClientRect().width<20){fillDesc.pending=true;return}fillDesc.pending=false;const cs=getComputedStyle(document.documentElement),mt=parseFloat(cs.getPropertyValue('--mt')),rh=parseFloat(cs.getPropertyValue('--rh')),bottom=mt+8*rh;
   // three columns: the text runs down the first two and into the third, stopping above the reel that stands on the bottom line
   d.style.removeProperty('margin-top');d.style.setProperty('column-count','1','important');d.style.height='auto';d.style.width=getComputedStyle(document.documentElement).getPropertyValue('--side');
-  const T=d.scrollHeight,lh=parseFloat(getComputedStyle(d).lineHeight)||20,fb=f?f.offsetHeight+lh*1.5:0;d.style.removeProperty('column-count');d.style.width='';
+  /* the line height is measured from the set lines themselves, so the columns are always a whole number of lines and the last line sits on the bottom rule */const T=d.scrollHeight,lh=(()=>{const tops=[];for(const p of d.querySelectorAll('p')){for(const r of p.getClientRects()){if(!tops.length||Math.abs(r.top-tops[tops.length-1])>2)tops.push(r.top);if(tops.length>3)break}if(tops.length>3)break}const m=tops.length>2?(tops[tops.length-1]-tops[0])/(tops.length-1):0;return m>8&&m<60?m:(parseFloat(getComputedStyle(d).lineHeight)||20)})(),fb=f?f.offsetHeight+lh*1.5:0;d.style.removeProperty('column-count');d.style.width='';
   let H=Math.ceil((T+fb)/3/lh)*lh+lh;d.style.setProperty('height',H+'px','important');
   for(let k=0;k<12&&d.scrollWidth>d.clientWidth+2;k++){H+=lh;d.style.setProperty('height',H+'px','important')}
   // the last two lines of the first column are left for EN / JP; the third column's text must stop above the reel
@@ -2684,6 +2692,10 @@ function fillDesc(){const d=document.querySelector('#label .desc'),L=$('label'),
     f.style.setProperty('width',Math.round(side)+'px','important');{const w=Math.round(Math.max(side*.5,Math.min(side*.68,avail+ch)));$('reelc').style.width=w+'px';f.style.setProperty('--rw',w+'px')}}
   // laid out for the open label (full height). closed, the text gives its last two lines to EN / JP and the reel keeps its place
   {const lab=document.body.classList.contains('lab-open');document.documentElement.style.setProperty('--dlh',lh+'px');d.style.setProperty('--dh',H2+'px');d.style.removeProperty('height');void lab}
+  /* a column can end a fraction of a line short of its box (a taller glyph somewhere pushes one line over): the box gives that fraction back, so the last line itself reaches the foot */
+  {const dr=d.getBoundingClientRect(),x2=dr.left+Math.min(d.clientWidth,parseFloat(cs.getPropertyValue('--side'))||d.clientWidth)*.3;let mb=0;for(const p of d.querySelectorAll('p'))for(const r of p.getClientRects())if(r.left<x2&&r.width>5)mb=Math.max(mb,r.bottom);const gap=dr.bottom-mb;if(mb&&gap>1.2&&gap<lh*1.7){const was=H2;H2-=gap;d.style.setProperty('--dh',H2+'px');if(gap>=lh*.98&&over()){H2=was;d.style.setProperty('--dh',H2+'px')}}}
+  /* last, the text's foot is put exactly on the bottom rule, whatever rounding happened on the way */
+  {const dy=bottom-d.getBoundingClientRect().bottom;if(Math.abs(dy)>.5&&Math.abs(dy)<80)L.style.setProperty('top',(parseFloat(L.style.top)+dy)+'px','important')}
   const md=document.querySelector('#label .md'),ro=$('readon');if(md&&ro)ro.style.setProperty('top',Math.round(md.getBoundingClientRect().top)+'px','important')}
 let fdT=0;const fdLater=()=>{clearTimeout(fdT);fdT=setTimeout(fillDesc,180)};addEventListener('resize',fdLater);document.addEventListener('visibilitychange',()=>{if(!document.hidden)fdLater()});addEventListener('pageshow',fdLater);addEventListener('focus',fdLater);try{new ResizeObserver(fdLater).observe(document.documentElement)}catch(e){}setTimeout(fillDesc,400);setTimeout(fillDesc,1500);document.fonts&&document.fonts.ready.then(fillDesc);
 const _sl=window.setLang;if(_sl)window.setLang=function(){const r=_sl.apply(this,arguments);setTimeout(fillDesc,50);try{renderLedger()}catch(e){}return r};
@@ -2714,7 +2726,7 @@ $('readon').addEventListener('click',e=>{e.stopPropagation();setLab(true)});
   h.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||FOCUS||needLeave)return;if(Math.hypot(e.clientX-sx,e.clientY-sy)>36)arm(e)});
   h.addEventListener('pointerleave',()=>{clearTimeout(tm);needLeave=false});
   /* stepping back works like stepping closer: resting outside the page for a moment does it. Passing by, going to the cord, pulling it and letting go do not */
-  let ot=0,ox=0,oy=0;const outArm=e=>{clearTimeout(ot);ox=e.clientX;oy=e.clientY;ot=setTimeout(()=>{if(FOCUS&&!grab&&!document.body.classList.contains('pulling')){needLeave=true;setFocus(false)}},1300)};
+  let ot=0,ox=0,oy=0;const outArm=e=>{clearTimeout(ot);ox=e.clientX;oy=e.clientY;ot=0;/* resting outside no longer steps back: only a click on the bare wall (or Esc) does */};
   addEventListener('pointermove',e=>{if(!FOCUS||e.pointerType!=='mouse')return;if(camA||grab){clearTimeout(ot);ot=0;return}const b=$('board').getBoundingClientRect(),pad=24,out=e.clientX<b.left-pad||e.clientX>b.right+pad||e.clientY<b.top-pad||e.clientY>b.bottom+pad;
     if(!out||(typeof nearTassel==='function'&&nearTassel(e.clientX,e.clientY+(typeof SY==='function'?SY():0)))){clearTimeout(ot);ot=0;return}
     if(!ot||Math.hypot(e.clientX-ox,e.clientY-oy)>36)outArm(e)},{passive:true})})();
@@ -2739,6 +2751,15 @@ $('gridBtn').addEventListener('click',()=>{document.body.classList.toggle('grid'
 /* stepped closer: a click on the bare wall outside the page steps back at once */
 addEventListener('click',e=>{if(!FOCUS||grab)return;const b=board.getBoundingClientRect(),pad=8;if(e.clientX>=b.left-pad&&e.clientX<=b.right+pad&&e.clientY>=b.top-pad&&e.clientY<=b.bottom+pad)return;
   if(e.target.closest&&e.target.closest('button,a,input,textarea,select,#desk,#guest,#label,#menu'))return;if(typeof nearTassel==='function'&&nearTassel(e.clientX,e.clientY+(typeof SY==='function'?SY():0)))return;setFocus(false)});
+
+/* the label is set again once the webfonts are in and once more a moment later: its measure depends on them */
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{fillDesc();setTimeout(fillDesc,1200)});setTimeout(fillDesc,3000);
+
+/* the label checks itself: if its last line has drifted off the bottom rule (a resize, a panel opening, a font arriving late), it is set again */
+setInterval(()=>{if(STACK||document.hidden||document.body.classList.contains('lab-open'))return;const d=document.querySelector('#label .desc');if(!d||!d.offsetParent)return;const cs=getComputedStyle(document.documentElement),bl=parseFloat(cs.getPropertyValue('--mt'))+8*parseFloat(cs.getPropertyValue('--rh')),dr=d.getBoundingClientRect();
+  let mb=0;const x2=dr.left+d.clientWidth*.3;for(const p of d.querySelectorAll('p'))for(const r of p.getClientRects())if(r.left<x2&&r.width>5)mb=Math.max(mb,r.bottom);
+  if(mb&&(Math.abs(bl-dr.bottom)>1.5||dr.bottom-mb>3))fillDesc()},1200);
+addEventListener('resize',()=>{setTimeout(fillDesc,700);setTimeout(fillDesc,1600)});
 
 </script>
 </body></html>
