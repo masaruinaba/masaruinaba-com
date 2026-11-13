@@ -26,26 +26,6 @@
       "headers": {
         "Location": "https://museum.masaruinaba.com/$1"
       }
-    },
-    {
-      "src": "/",
-      "has": [
-        {
-          "type": "host",
-          "value": "museum.masaruinaba.com"
-        }
-      ],
-      "dest": "/museum/index.html"
-    },
-    {
-      "src": "/(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "museum.masaruinaba.com"
-        }
-      ],
-      "dest": "/museum/$1"
     }
   ]
 }
