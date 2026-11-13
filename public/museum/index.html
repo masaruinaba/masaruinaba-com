@@ -1049,6 +1049,9 @@ body.stack #wall #frbtn2{top:calc(env(safe-area-inset-top,0px) + 22px + var(--fs
 #deskPill{display:none}
 html.own #deskPill{display:inline-block;align-self:flex-start;margin-top:calc(var(--fs)*1.6);padding:calc(var(--fs)*.42) calc(var(--fs)*1.1);border-radius:999px;background:#1D3BD8;color:#fff;border:0;font:400 var(--fs)/1 Graphik,sans-serif;letter-spacing:.02em;cursor:pointer;transition:opacity .2s ease}
 html.own #deskPill:hover{opacity:.85}
+#deskPill{position:relative}
+#pillN{position:absolute;top:calc(var(--fs)*-.55);right:calc(var(--fs)*-.55);min-width:calc(var(--fs)*1.35);height:calc(var(--fs)*1.35);padding:0 calc(var(--fs)*.35);box-sizing:border-box;border-radius:999px;background:#7FD3F7;color:#1D3BD8;font:500 calc(var(--fs)*.78)/calc(var(--fs)*1.35) Graphik,sans-serif;text-align:center;font-variant-numeric:tabular-nums}
+#pillN[hidden]{display:none}
 #menu #deskOpen{display:none!important}
 
 /* ---------- the owner's desk: the same wall, the same blue lettering, set as a narrow column ---------- */
@@ -1378,7 +1381,7 @@ if(Date.now()-last>864e5||/[?&]nudge/.test(location.search)){let fired=false;con
       <span id="sent" data-nosplit></span>
       </div>
       <div id="acc" hidden><button type="button" id="accB" data-nosplit></button><ol id="notes" data-nosplit></ol></div>
-      <button type="button" id="deskPill" data-nosplit>Admin</button>
+      <button type="button" id="deskPill" data-nosplit>Admin<b id="pillN" hidden></b></button>
     </form>
   </div>
   <button type="button" class="wt frb" id="frbtn2" aria-label="Change the frame" title="Change the frame"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><rect x="2.5" y="1" width="7" height="10" stroke="currentColor" stroke-width=".8" fill="none"/><rect x="4.5" y="3.5" width="3" height="5" stroke="currentColor" stroke-width=".6" fill="none"/></svg></button>
@@ -2522,7 +2525,7 @@ function editor(x,keys,st){const box=mk('div','dk-edit'),EORD=['head','sub','cta
   const hidden=st.top?['bg','ink','arch','shape','size','img']:[],sel=mk('select','dk-input dk-add');sel.appendChild(new Option(T('+ change something else','＋ ほかの項目も変える'),''));
   for(const k of KEYS)if(!ks.includes(k)&&!hidden.includes(k)&&LBL[k])sel.appendChild(new Option(T(LBL[k][0],LBL[k][1]),k));
   sel.addEventListener('change',()=>{if(!sel.value)return;ADDK[x.id]=(ADDK[x.id]||[]).concat(sel.value);OPENP.add(x.id);renderProps()});box.appendChild(sel);return box}
-function renderProps(){const ul=$('dprops');if(!ul)return;ul.textContent='';$('pCount').textContent=PROPS.length;tabCount('tProps',PROPS.length);
+function renderProps(){const ul=$('dprops');if(!ul)return;ul.textContent='';$('pCount').textContent=PROPS.length;tabCount('tProps',PROPS.length);tabCount('pillN',PROPS.length);
   if(!PROPS.length)ul.appendChild(mk('li','dk-empty',T('Nothing proposed right now. The AIs come by at 10, 15 and 21.','いまは案がありません。AIは10時・15時・21時に来ます。')));
   const ROLE={words:T('words','言葉'),colour:T('colour','色'),shape:T('shape','形と配置'),review:T('review','見直し')};
   const KIND={now:T('a step on','いまを一歩'),turn:T('a turn','向きを変える')};
