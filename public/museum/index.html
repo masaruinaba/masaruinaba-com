@@ -954,14 +954,15 @@ html[lang=ja] body.stack #label .desc .po{margin-left:-.5em}
 html[lang=ja] body.stack #label .desc .pm{margin:0 -.25em}
 
 /* closed day: one quiet word beside the day count */
-#closed{display:block;margin-top:.15em}
+#closed{display:inline-block;margin-left:.7em;line-height:1.45;padding:0 .3em;background:var(--blue);color:#fff;font-size:.86em;vertical-align:.08em}
 #closed[hidden]{display:none}
 body:not(.stack) #closed{display:none!important}
-body.stack.closed-day #wall #frbtn2{top:calc(env(safe-area-inset-top,0px) + 22px + var(--fs)*4.6 - 8px)!important}
 body:not(.stack) #gClosed{font-size:.8em}
 #gClosed{margin:0 0 1.3em;font-size:.86em;line-height:1.75;opacity:1;color:var(--blue);white-space:pre-line;text-align:left!important}
 #gClosed[hidden]{display:none}
 #gClosed .mk{display:inline-block;line-height:1.45;padding:0 .25em;margin-left:-.25em;background:var(--blue);color:#fff}
+body.closed-day #lcol .no{opacity:1!important}
+body.closed-day #lcol .no>span:not(#closed){opacity:.6}
 
 /* ---------- the owner's desk: the same wall, the same blue lettering, set as a narrow column ---------- */
 #desk,#toast{--hair:color-mix(in srgb,var(--blue) 18%,transparent);--soft:color-mix(in srgb,var(--blue) 60%,transparent);font-family:Graphik,"Hiragino Sans",system-ui,sans-serif;font-size:12px;color:var(--blue);-webkit-font-smoothing:antialiased}
