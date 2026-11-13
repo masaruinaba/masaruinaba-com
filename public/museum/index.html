@@ -1020,6 +1020,13 @@ body.stack #acc.open #notes{max-height:min(46vh,calc(var(--fs)*15))!important}
 #label .desc p{orphans:1;widows:1}
 /* on a photo every word on the page is white, the button included */
 .lp.ontop .cta{color:#fff!important}
+/* the adopted notes: the words first, the name small beneath them, one hairline between notes */
+#acc #notes li{display:block!important;padding:calc(var(--fs)*.75) 0!important;border-top:1px solid color-mix(in srgb,var(--blue) 14%,transparent)!important}
+#acc #notes li:first-child{border-top:0!important;padding-top:calc(var(--fs)*.2)!important}
+#acc #notes li q{display:block;font-size:calc(var(--fs)*.8)!important;line-height:1.65!important;text-indent:-.5em;quotes:"“" "”"}
+#acc #notes li small{display:block;order:2;margin-top:calc(var(--fs)*.25)!important;font-size:calc(var(--fs)*.64)!important;letter-spacing:.02em!important;opacity:.55!important}
+#acc #notes li{display:flex!important;flex-direction:column}
+#acc #notes li q{order:1}
 
 /* ---------- the owner's desk: the same wall, the same blue lettering, set as a narrow column ---------- */
 #desk,#toast{--hair:color-mix(in srgb,var(--blue) 18%,transparent);--soft:color-mix(in srgb,var(--blue) 60%,transparent);font-family:Graphik,"Hiragino Sans",system-ui,sans-serif;font-size:12px;color:var(--blue);-webkit-font-smoothing:antialiased}
