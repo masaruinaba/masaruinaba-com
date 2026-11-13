@@ -1011,10 +1011,10 @@ body.focus #board>#ov{visibility:hidden!important}
 body.focus #hit,body.focus #board{cursor:default!important}
 body.on-link #hit,body.on-link #board,body.on-link #board *{cursor:pointer!important}
 /* the list of adopted notes keeps a fixed height and scrolls inside it, with a thin blue bar */
-#acc.open #notes{max-height:min(var(--nmax,40vh),calc(var(--fs)*13.5))!important;overflow-y:auto!important;overflow-x:hidden!important;padding-right:10px;scroll-snap-type:none;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--blue) color-mix(in srgb,var(--blue) 12%,transparent)}
+#acc.open #notes{max-height:min(var(--nmax,40vh),calc(var(--fs)*13.5))!important;overflow-y:auto!important;overflow-x:hidden!important;padding-right:10px;scroll-snap-type:none;overscroll-behavior:contain}
 body.stack #acc.open #notes{max-height:min(46vh,calc(var(--fs)*15))!important}
 #acc #notes::-webkit-scrollbar{width:3px}
-#acc #notes::-webkit-scrollbar-track{background:color-mix(in srgb,var(--blue) 12%,transparent);border-radius:0}
+#acc #notes::-webkit-scrollbar-track{background:transparent;border-radius:0}
 #acc #notes::-webkit-scrollbar-thumb{background:var(--blue);border-radius:0}
 /* columns of the label fill to their last line: no line is held back to keep paragraphs whole */
 #label .desc p{orphans:1;widows:1}
@@ -1032,9 +1032,13 @@ body.stack #acc.open #notes{max-height:min(46vh,calc(var(--fs)*15))!important}
 #acc #notes li small time{margin-left:.9em;opacity:.75;font-variant-numeric:tabular-nums}
 
 /* the badge: a small blue seal with a tick, for someone confirmed in person */
-.vbadge{display:inline-block;width:.95em;height:.95em;margin-left:.3em;vertical-align:-.12em;border-radius:50%;background:var(--blue) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3.2 6.2 5.1 8 8.8 4.2' fill='none' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/100% no-repeat}
+.vbadge{display:inline-block;width:1.15em;height:1.15em;margin-left:.3em;vertical-align:-.2em;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20d%3D%27M12.00%200.70%20Q16.38%201.43%2019.99%204.01%20Q22.57%207.62%2023.30%2012.00%20Q22.57%2016.38%2019.99%2019.99%20Q16.38%2022.57%2012.00%2023.30%20Q7.62%2022.57%204.01%2019.99%20Q1.43%2016.38%200.70%2012.00%20Q1.43%207.62%204.01%204.01%20Q7.62%201.43%2012.00%200.70%20Z%27%20fill%3D%27%231D3BD8%27/%3E%3Cpath%20d%3D%27M7.6%2012.3%2010.6%2015.2%2016.5%209.1%27%20fill%3D%27none%27%20stroke%3D%27white%27%20stroke-width%3D%272.1%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E") center/100% no-repeat}
 #acc #notes li small .vbadge{opacity:1}
-.tag.guest.verified::after{content:"";display:inline-block;width:.85em;height:.85em;margin-left:.35em;vertical-align:-.1em;border-radius:50%;background:#2E5BFF url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3.2 6.2 5.1 8 8.8 4.2' fill='none' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/100% no-repeat}
+.tag.guest.verified::after{content:"";display:inline-block;width:1.05em;height:1.05em;margin-left:.3em;vertical-align:-.18em;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20d%3D%27M12.00%200.70%20Q16.38%201.43%2019.99%204.01%20Q22.57%207.62%2023.30%2012.00%20Q22.57%2016.38%2019.99%2019.99%20Q16.38%2022.57%2012.00%2023.30%20Q7.62%2022.57%204.01%2019.99%20Q1.43%2016.38%200.70%2012.00%20Q1.43%207.62%204.01%204.01%20Q7.62%201.43%2012.00%200.70%20Z%27%20fill%3D%27%231D3BD8%27/%3E%3Cpath%20d%3D%27M7.6%2012.3%2010.6%2015.2%2016.5%209.1%27%20fill%3D%27none%27%20stroke%3D%27white%27%20stroke-width%3D%272.1%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E") center/100% no-repeat}
+#acc #notes::-webkit-scrollbar{width:2px}
+#acc #notes::-webkit-scrollbar-thumb{background:var(--blue);border-radius:0;border:0}
+#acc #notes::-webkit-scrollbar-button{display:none;height:0}
+@supports not selector(::-webkit-scrollbar){#acc #notes{scrollbar-width:thin;scrollbar-color:var(--blue) transparent}}
 
 /* ---------- the owner's desk: the same wall, the same blue lettering, set as a narrow column ---------- */
 #desk,#toast{--hair:color-mix(in srgb,var(--blue) 18%,transparent);--soft:color-mix(in srgb,var(--blue) 60%,transparent);font-family:Graphik,"Hiragino Sans",system-ui,sans-serif;font-size:12px;color:var(--blue);-webkit-font-smoothing:antialiased}
@@ -2456,7 +2460,7 @@ function when(at){const d=new Date(at),p=n=>String(n).padStart(2,'0');return (d.
 function renderDesk(){
   if(!owner||!desk)return;renderTrial();renderProps();
   $('tellGo').disabled=BUSY;$('tellMsg').textContent=MSG.at==='tell'?MSG.text:'';
-  const ul=$('dnotes');ul.textContent='';const all=looseNotes();$('nCount').textContent=all.length;tabCount('tNotes',all.length);if(!all.length)ul.appendChild(mk('li','dk-empty',T('Every note is either a proposal or in the work.','どのメモも、案になっているか作品に入っています。')));
+  const ul=$('dnotes');ul.textContent='';const all=looseNotes();$('nCount').textContent=all.length;tabCount('tNotes',all.length);if(!all.length)ul.appendChild(mk('li','dk-empty',T('No new notes.','新しいメモはありません。')));
   
   for(const n of all){const li=mk('li','dk-note'),picked=PICKED.has(n.id),wh=countryName(n.cc);
     li.classList.add('dk-isnote');li.appendChild(mk('div','dk-src',T('Note from a visitor','来館者のメモ')));li.appendChild(mk('q','dk-quote',n.text));li.appendChild(mk('div','dk-meta',(n.name||'Someone')+(wh?' · '+wh:'')+' · '+when(n.at)+(picked?' · '+T('invited','招待中'):'')));
