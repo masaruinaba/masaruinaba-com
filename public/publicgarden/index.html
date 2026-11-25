@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Public Garden — Furniture workshop, Nagoya</title>
+<meta name="description" content="名古屋市南区の工場街にある家具工房。無垢材のオーダー家具、オリジナル家具、造り付け家具の設計と製作。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Ctext x=%276%27 y=%2726%27 font-family=%27serif%27 font-size=%2728%27%3EP%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Noto+Sans+JP:wght@400;500&family=Shippori+Mincho+B1:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="engine/base.css">
+<style>
+/* Folio method — Public Garden renewal v4 (2026-11-25)
+   Fonts (all Google Fonts, for STUDIO): Cormorant Garamond 600 (P / G), Inter (English), Noto Sans JP (small Japanese),
+   Shippori Mincho B1 (vertical Japanese). Inter + Noto Sans JP is the same make-up as Gen Interface JP (Inter + Gen Shin Gothic).
+   The local comparison faces (?pg= ?en= ?jp=) stay in fonts/ for the proposal only.
+   Metaphor: Public Gardenは「公園」。余白は芝生、家具は点々と置かれたベンチやテーブル。整列させず、間合いで置く。
+   Grid:    独自の細かいグリッド。1440基準で左右マージン40、48列（1列 28.33u、溝なし）× 8uの行。
+            すべての要素は列と行の番号で置く（--c 列 / --r 行）。セクションの高さも行の倍数。文字の行送りも8uの倍数。
+            右下の「Grid」かキーボードのGでグリッドを表示・非表示。スマホは12列×8px。
+   FV:      巨大なPとGだけを離して置く（Cormorant Garamond 600）。屋号は右の組みで「Public Garden」と読ませる。
+   Photo:   工房の実物写真のみ（彩度を少し落として粒子を薄く）。生成画像なし。
+   Motion:  文字は行マスク / 写真はclipの方向を変える / 一覧はhoverで写真が追い、スクロールで消える
+   Layout:  48列の散らし組み。文字と写真のあいだは最低1列あける（くっつけない）。
+   Type:    英字 ABC Whyte（Book / Light / Italic）、日本語の縦組みは文久明朝（小さな横組みは青砥ゴシック）。PとGだけCormorant Garamond。
+            Whyteと石井明朝はこのMacのローカルファイル（提案用）。公開する場合はWebフォントのライセンスが別に必要。
+   Color:   紙 #f4f2ee / 墨 #1b1a18 / グリッド線だけ朱。 */
+:root {
+  --bg: #f4f2ee; --fg: #1b1a18; --mute: #8a857d; --line: rgba(27,26,24,.14);
+  --font-body: "Inter", "Noto Sans JP", sans-serif;
+  --font-jp: "Shippori Mincho B1", "Yu Mincho", "YuMincho", serif;
+  --row: calc(8 * var(--u));
+  --cols: 48;
+  --gl: rgba(214,72,48,.20); --gl-strong: rgba(214,72,48,.42);
+}
+html { background: var(--bg); }
+body { position: relative; padding-top: var(--margin); background: var(--bg); color: var(--fg); font-family: var(--font-body); font-weight: 400; line-break: strict; -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-decoration: none; }
+img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* ---------- the grid system ---------- */
+.g { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); grid-template-rows: repeat(var(--rows, 8), var(--row)); padding-inline: var(--margin); }
+.g > * { grid-column: var(--c); grid-row: var(--r); min-width: 0; }
+/* blueprint grid (drawn on a fixed canvas, aligned to the page): grey, dashed column lines, solid every 4 columns,
+   faint rows every 8u, dashed every 64u, dots where the major lines cross, small column and row numbers in the margins */
+.gridlines { position: fixed; inset: 0; z-index: 90; pointer-events: none; display: none; }
+.gridlines canvas { width: 100%; height: 100%; display: block; }
+html.show-grid .gridlines { display: block; }
+.gtog { cursor: pointer; background: none; border: 0; padding: 0; font: inherit; color: inherit; }
+.gtog::before { content: ""; display: inline-block; width: .8em; height: .8em; margin-right: .45em; vertical-align: -.05em; border: 1px solid currentColor; background: linear-gradient(currentColor, currentColor) 50% 0 / 1px 100% no-repeat, linear-gradient(currentColor, currentColor) 0 50% / 100% 1px no-repeat; opacity: .6; }
+html.show-grid .gtog::before { opacity: 1; }
+.grid-toggle { display: none !important; position: fixed; right: var(--margin); bottom: calc(16 * var(--u)); z-index: 95; font-family: var(--font-body); font-size: calc(11 * var(--u)); letter-spacing: .02em;
+  background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; cursor: pointer; min-height: 32px; transition: border-color .4s var(--ease); }
+.grid-toggle:hover { border-color: var(--fg); }
+.grid-toggle .k { color: var(--mute); margin-left: 6px; }
+
+/* ---------- type: every line-height is a multiple of the 8u row ---------- */
+.t12 { font-size: calc(9 * var(--u)); line-height: calc(16 * var(--u)); letter-spacing: .03em; }
+.t14 { font-size: calc(10 * var(--u)); line-height: calc(16 * var(--u)); letter-spacing: .02em; }
+.t26 { font-size: calc(26 * var(--u)); line-height: calc(32 * var(--u)); letter-spacing: -.015em; font-weight: 300; }
+.t32 { font-size: calc(32 * var(--u)); line-height: calc(40 * var(--u)); letter-spacing: -.02em; }
+.t64 { font-size: calc(64 * var(--u)); line-height: calc(64 * var(--u)); letter-spacing: -.035em; font-weight: 300; }
+.t120 { font-size: calc(120 * var(--u)); line-height: calc(112 * var(--u)); letter-spacing: -.045em; font-weight: 300; }
+i { font-style: italic; }
+.jp { font-family: "Noto Sans JP", sans-serif; font-size: calc(11 * var(--u)); line-height: calc(24 * var(--u)); letter-spacing: .04em; font-feature-settings: "palt"; }
+/* vertical text sits on the grid: one line per column, one character per 16u (two rows) */
+:root { --colw: calc((100vw - 2 * var(--margin)) / var(--cols)); }
+.tate { writing-mode: vertical-rl; text-orientation: mixed; font-family: var(--font-jp); font-size: calc(14 * var(--u)); line-height: var(--colw); letter-spacing: calc(2 * var(--u)); font-feature-settings: normal; }
+.tate.l { font-size: calc(24 * var(--u)); line-height: calc(var(--colw) * 2); letter-spacing: calc(8 * var(--u)); padding-right: calc(var(--colw) / 2); } /* glyphs centred in a column */
+.mute { color: var(--mute); }
+.end .big { line-height: 1; }
+.big { font-family: "Cormorant Garamond", serif; font-weight: 600; font-size: calc(400 * var(--u)); line-height: calc(312 * var(--u)); letter-spacing: -.02em; }
+/* PとGの書体は PP Fragment Glare Light（既定）。?pg=cormorant /?pg=editorial / bold / fragment / hatton で切り替えて見比べられる */
+html[data-pg="bold"] .big { font-family: "PG Editorial Bold", serif; }
+html[data-pg="fragment"] .big { font-family: "PG Fragment", serif; font-weight: 400; }
+html[data-pg="hatton"] .big { font-family: "PG Hatton", serif; }
+html[data-pg="editorial"] .big { font-family: "PG Editorial", serif; font-weight: 400; }
+/* 英字は ?en=areal / favmono / circular / general / overused / norms / whyte / nacelle で比較（既定 Fragment Sans） */
+html[data-en="areal"] { --font-body: "ABC Areal", "Helvetica Neue", sans-serif; }
+html[data-en="favmono"] { --font-body: "ABC Favorit Mono", "Helvetica Neue", sans-serif; }
+html[data-en="circular"] { --font-body: "Circular", "Helvetica Neue", sans-serif; }
+html[data-en="general"] { --font-body: "General Sans", "Helvetica Neue", sans-serif; }
+html[data-en="overused"] { --font-body: "Overused Grotesk", "Helvetica Neue", sans-serif; }
+html[data-en="norms"] { --font-body: "TT Norms", "Helvetica Neue", sans-serif; }
+html[data-en="whyte"] { --font-body: "Whyte R", "Helvetica Neue", sans-serif; }
+html[data-en="nacelle"] { --font-body: "Nacelle", "Helvetica Neue", sans-serif; }
+html[data-pg="juana"] .big { font-family: "PG Juana", serif; font-weight: 400; }
+html[data-pg="romie"] .big { font-family: "PG Romie", serif; font-weight: 400; }
+html[data-pg="kizashi"] .big { font-family: "PG Kizashi", serif; font-weight: 400; }
+/* 縦組みの明朝は ?jp=a1 / bunkyu / tarumi / bunrei / sokyu / yuso / yu36 / yu5 で比較（既定 文久明朝） */
+html[data-jp="a1"] { --font-jp: "JP A1", "Ishii Mincho Old", serif; }
+html[data-jp="bunkyu"] { --font-jp: "JP Bunkyu", "Ishii Mincho Old", serif; }
+html[data-jp="tarumi"] { --font-jp: "JP Tarumi", "JP Bunyu", "Ishii Mincho Old", serif; }
+html[data-jp="bunrei"] { --font-jp: "JP Bunrei", "JP Bunyu", "Ishii Mincho Old", serif; }
+html[data-jp="sokyu"] { --font-jp: "JP Sokyu", "JP Bunyu", "Ishii Mincho Old", serif; }
+html[data-jp="yuso"] { --font-jp: "JP Yuso", "JP Bunyu", "Ishii Mincho Old", serif; }
+html[data-jp="yu36"] { --font-jp: "JP Yu36", "JP YuMin", "Ishii Mincho Old", serif; }
+html[data-jp="yu5"] { --font-jp: "JP Yu5", "JP YuMin", "Ishii Mincho Old", serif; }
+/* FV: the two letters are cut by the edges of the screen; the photo sits on top of them */
+.fv { position: relative; overflow: hidden; }
+.fv .huge { position: absolute; grid-column: auto; grid-row: auto; z-index: 0; font-size: calc(640 * var(--u)); line-height: .9; letter-spacing: -.02em; pointer-events: none; }
+.fv .huge.hp { left: calc(24 * var(--u)); top: calc(8 * var(--u)); }
+.fv .huge.hg { right: calc(56 * var(--u)); bottom: calc(-40 * var(--u)); }
+.fv > :not(.huge) { position: relative; z-index: 2; }
+/* the scroll note keeps the same distance from the bottom of the screen as the page keeps from the top */
+.fv .scroll-note { position: absolute; grid-column: auto !important; grid-row: auto !important; left: var(--margin); top: auto; bottom: calc(max(0px, 896 * var(--u) - 100svh) + var(--margin)); margin: 0; line-height: 1; }
+.fv .fvl, .end .big { overflow: visible; line-height: 1; margin-top: calc(-24 * var(--u)); contain: none; }
+.fv > .huge { grid-column: auto !important; grid-row: auto !important; overflow: visible; padding-top: .12em; }
+.ulink { background: linear-gradient(currentColor, currentColor) 0 100% / 100% 1px no-repeat; transition: background-size .6s var(--ease); }
+.ulink:hover { background-size: 0 1px; background-position: 100% 100%; }
+a:focus-visible, button:focus-visible { outline: 1px solid var(--fg); outline-offset: 4px; }
+
+/* ---------- fixed mark after the FV ---------- */
+.mark, .tnav { position: fixed; top: calc(16 * var(--u)); z-index: 50; background: var(--bg); padding: 4px 8px; opacity: 0; pointer-events: none; transition: opacity .6s var(--ease); }
+.mark { left: calc(var(--margin) - 8px); }
+.tnav { right: calc(var(--margin) - 8px); display: flex; gap: calc(24 * var(--u)); }
+.mark.on, .tnav.on { opacity: 1; pointer-events: auto; }
+.tnav a { position: relative; }
+.tnav a::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: right; transition: transform .5s var(--ease); }
+.tnav a:hover::after, .tnav a.is-current::after { transform: scaleX(1); transform-origin: left; }
+.menu-btn { display: none; }
+#menu { display: none; }
+
+/* ---------- section heads ---------- */
+.sh { --rows: 8; }
+.sh::after { content: ""; grid-column: 1 / -1; grid-row: 8; align-self: end; height: 1px; background: var(--line); }
+.sh .lab { align-self: end; padding-bottom: calc(8 * var(--u)); }
+.sh .lab.r { text-align: right; }
+
+/* section grounds: one dark band, one tinted band */
+.dark { background: var(--fg); color: var(--bg); --mute: #a19b91; --line: rgba(244,242,238,.16); }
+.tint { background: #e8e4dc; }
+.sh.dark::after, .sh.tint::after { background: var(--line); }
+@media (max-width: 640px) { .im { aspect-ratio: var(--ar, auto); } .works .im { aspect-ratio: var(--ar); } }
+/* label beside a photo: stays level with the photo while it passes */
+.lab-s span { position: sticky; top: 45vh; display: inline-block; }
+/* develop: photos come up from washed to clear as they reach the middle of the screen (scroll-linked) */
+.im.dev img { --dev: 1; transform: scale(calc(1 + .04 * var(--dev))); transition: none; }
+
+/* Works stage: one frame in the middle; the photo changes with scroll and the four corner notes ride on its corners */
+.ws { position: relative; height: calc(var(--n) * 70svh + 100svh); }
+.ws-pin { position: sticky; top: 0; height: 100svh; display: grid; place-items: center; overflow: hidden; }
+.ws-frame { position: relative; width: var(--fw, 40vw); height: var(--fh, 30vw); }
+.ws-imgs { position: absolute; inset: 0; overflow: hidden; }
+.ws-imgs img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; clip-path: inset(100% 0 0 0); filter: none; transform: scale(1.06); }
+.ws .ws-imgs img { filter: none; }
+.ws .ws-frame .ws-imgs { position: absolute; inset: 0; aspect-ratio: auto; }
+.ws-c { position: absolute; white-space: nowrap; overflow: hidden; margin: 0; }
+.ws .ws-c.t14, .ws .ws-c.jp { font-size: calc(8.5 * var(--u)); line-height: calc(16 * var(--u)); letter-spacing: .04em; }
+@media (max-width: 640px) { .ws .ws-c.t14, .ws .ws-c.jp { font-size: 10px; line-height: 16px; } }
+.ws-c .sw { display: inline-block; }
+.ws-c.tl { left: 0; bottom: calc(100% + 10px); } .ws-c.tr { right: 0; bottom: calc(100% + 10px); }
+.ws-c.bl { left: 0; top: calc(100% + 10px); } .ws-c.br { right: 0; top: calc(100% + 10px); }
+/* air between sections (multiples of the 8u row) */
+main > section, main > div.sh, footer.end { margin-top: calc(200 * var(--u)); }
+footer.end { padding-bottom: var(--margin); overflow: hidden; }
+main > section.fv { margin-top: 0; }
+.bleed { margin-inline: calc(-1 * var(--margin)); }
+@media (max-width: 640px) { main > section, main > div.sh, footer.end { margin-top: 96px; } main > section.fv { margin-top: 0; } }
+/* Drawing view switch: a quiet word that follows in the bottom-right corner, level with the scroll note */
+.drawing { position: fixed; right: calc(var(--margin) - 8px); bottom: calc(var(--margin) - 6px); z-index: 95; background: var(--bg); padding: 6px 8px; font-family: var(--font-body); font-size: calc(9 * var(--u)); line-height: 1; letter-spacing: .03em; color: var(--mute); opacity: .7; transition: opacity .4s var(--ease), color .4s var(--ease); }
+.drawing:hover, html.show-grid .drawing { opacity: 1; color: var(--fg); }
+html.show-grid .drawing::after { content: " on"; }
+@media (max-width: 640px) { .drawing { font-size: 10px; bottom: calc(var(--margin) - 6px + env(safe-area-inset-bottom)); } }
+body > .of-tip { position: fixed !important; }
+/* logo letters are SVG outlines of PP Fragment Glare Light (box = ink, so edges line up exactly) */
+.big .lg { display: block; width: auto; fill: currentColor; overflow: visible; }
+.big .lg-p { height: calc(303 * var(--u)); }
+.big .lg-g { height: calc(314 * var(--u)); }
+.fv .fvl, .end .big { margin-top: 0 !important; line-height: 0 !important; }
+@media (max-width: 640px) { .big .lg-p { height: 144px; } .big .lg-g { height: 149px; } }
+/* ---------- blocks ---------- */
+.fig { margin: 0; display: grid; grid-template-rows: minmax(0, 1fr) calc(24 * var(--u)); }
+.fig .im { overflow: hidden; }
+/* photo treatment: the old photos sit quiet (washed, grey, grain) and clear up on hover / when centred on touch */
+.im { position: relative; overflow: hidden; }
+.im img { filter: none; transform: none; }
+.im::after { content: none; }
+.im:hover img, .fig:hover .im img, .im.is-clear img { filter: none; transform: none; }
+.im:hover::after, .fig:hover .im::after, .im.is-clear::after { opacity: .06; }
+.ipv { margin: 0; }
+.ipv img { transition: filter 1.2s var(--ease), opacity .5s var(--ease); }
+.list li { cursor: default; }
+.list li .n { color: var(--mute); font-feature-settings: "tnum"; }
+.fig figcaption { display: flex; justify-content: space-between; align-items: end; }
+.fig figcaption .y { color: var(--mute); }
+.snav a { display: block; width: max-content; }
+.snav a:hover { font-style: italic; }
+.who .name { display: block; margin-bottom: calc(16 * var(--u)); font-size: calc(15 * var(--u)); line-height: calc(16 * var(--u)); letter-spacing: 0; }
+.list ol { list-style: none; margin: 0; padding: 0; }
+.list li { display: grid; grid-template-columns: 9fr 12fr 3fr; column-gap: calc(20 * var(--u)); height: calc(48 * var(--u)); align-items: center;
+  background: linear-gradient(var(--line), var(--line)) 0 100% / 100% 1px no-repeat; transition: opacity .4s var(--ease), padding .5s var(--ease); }
+.list li .y { text-align: right; color: var(--mute); }
+.list ol:hover li:not(:hover) { opacity: .3; }
+.list li:hover { padding-left: calc(8 * var(--u)); }
+.hover-float { width: calc(255 * var(--u)); aspect-ratio: 4 / 3; }
+.hover-float img { width: 100%; height: 100%; object-fit: cover; }
+.prof dl { display: grid; grid-template-columns: calc(57 * var(--u)) 1fr; margin: 0; }
+.prof dd { margin: 0; }
+.act a { display: table; }
+
+@media (max-width: 1199px) {
+  .big { font-size: calc(360 * var(--u)); line-height: calc(288 * var(--u)); }
+}
+@media (max-width: 640px) {
+  :root { --cols: 12; --row: 8px; }
+  .gridlines::before { background-size: calc(100% / 4) 100%, calc(100% / 12) 100%, 100% 64px, 100% 8px; }
+  .t12 { font-size: 10px; line-height: 16px; } .t14 { font-size: 12px; line-height: 16px; }
+  .t26 { font-size: 22px; line-height: 32px; } .t32 { font-size: 24px; line-height: 32px; }
+  .t64 { font-size: 40px; line-height: 40px; } .t120 { font-size: 64px; line-height: 64px; }
+  .jp { font-size: 11px; line-height: 16px; } .tate { font-size: 14px; line-height: 28px; letter-spacing: 2px; } .tate.l { font-size: 18px; line-height: 40px; letter-spacing: 6px; }
+  .big { font-size: 190px; line-height: 152px; }
+  .fv .huge { font-size: 300px; }
+  .fv .huge.hp { left: 8px; top: 40px; }
+  .fv .huge.hg { left: 4px; right: auto; bottom: 64px; }
+  .grid-toggle { font-size: 12px; bottom: 12px; }
+  .mark { top: 10px; } .tnav { display: none; }
+  .menu-btn { display: inline-flex; position: fixed; right: 6px; top: 2px; z-index: 55; width: 44px; height: 44px; align-items: center; justify-content: center; background: var(--bg); border: 0; border-radius: 50%; color: inherit; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity .6s var(--ease); }
+  .menu-btn.on { opacity: 1; pointer-events: auto; }
+  .ic { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.2; stroke-linecap: round; }
+  .ic path { transition: transform .4s var(--ease); transform-origin: 12px 12px; }
+  [aria-expanded="true"] .ic .a { transform: translateY(3px) rotate(45deg); }
+  [aria-expanded="true"] .ic .b { transform: translateY(-3px) rotate(-45deg); }
+  #menu { display: flex; position: fixed; inset: 0; z-index: 52; background: var(--bg); flex-direction: column; justify-content: center; padding: 0 var(--margin); visibility: hidden; opacity: 0; transition: opacity .4s var(--ease), visibility 0s .4s; }
+  #menu.is-open { visibility: visible; opacity: 1; transition: opacity .4s var(--ease); }
+  #menu a { font-size: 40px; line-height: 48px; font-weight: 300; letter-spacing: -.03em; }
+  /* phone: sections flow on 12 columns; each block keeps a width in columns (--pc) */
+  .g:not(.fv):not(.sh):not(.end) { grid-template-rows: none; grid-auto-rows: auto; row-gap: 40px; padding-block: 40px; }
+  .g:not(.fv):not(.sh):not(.end) > * { grid-column: var(--pc, 1 / -1); grid-row: auto; }
+  .g .tate { height: var(--ph, 280px); }
+  .fv, .end { --rows: 100; }
+  .fv { height: calc(100svh - var(--margin)); grid-template-rows: repeat(120, 8px); }
+  .fv .scroll-note { bottom: var(--margin); font-size: 10px; }
+  .fv .snav a { margin-left: 0; }
+  .fv .snav { text-align: left; }
+  .fv > *, .end > * { grid-column: var(--pc); grid-row: var(--pr); }
+  .sh { --rows: 6; }
+  .sh::after { grid-row: 6; }
+  .fig { grid-template-rows: auto 32px; }
+  .fig .im { aspect-ratio: var(--ar, 4 / 3); }
+  .hide-p { display: none; }
+  .list li { grid-template-columns: 1fr auto; height: 40px; }
+  .list li .m { display: none; }
+  .prof dl { grid-template-columns: 48px 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="gridlines" aria-hidden="true"><canvas></canvas></div>
+<button class="gtog drawing" type="button" aria-pressed="false" title="図面を表示（G）">Drawing</button>
+<button class="grid-toggle" type="button" aria-pressed="true">Grid<span class="k">G</span></button>
+<a class="mark t14" href="#top">Public Garden</a>
+<nav class="tnav t14" data-nav-track aria-label="ページ内">
+  <a href="#works" data-nav-link>Works</a><a href="#craft" data-nav-link>Craft</a><a href="#about" data-nav-link>About</a><a href="#order" data-nav-link>Order</a><a href="#contact" data-nav-link>Contact</a>
+</nav>
+<button class="menu-btn" type="button" data-menu-toggle aria-controls="menu" aria-expanded="false" aria-label="メニュー">
+  <svg class="ic ic-menu" viewBox="0 0 24 24" aria-hidden="true"><path class="a" d="M5 9h14"/><path class="b" d="M5 15h14"/></svg>
+</button>
+<div id="menu" data-menu><a href="#works">Works</a><a href="#craft">Craft</a><a href="#about">About</a><a href="#order">Order</a><a href="#contact">Contact</a></div>
+
+<main>
+<!-- FV: 112 rows -->
+<section class="fv g" id="top" data-hero style="--rows:107">
+  <h1 class="big fvl" aria-label="Public Garden" style="--c:1/span 10;--r:5/span 40;--pc:1/span 6;--pr:1/span 20"><svg class="lg lg-p" aria-hidden="true" focusable="false" viewBox="61 -757 532 757"><path transform="scale(1 -1)" d="M61 0L239 0L239 3C198 27 193 58 193 127L193 364L283 364C466 364 593 424 593 565C593 704 481 757 304 757L61 757L61 754C100 730 105 703 105 630L105 127C105 58 100 27 61 3ZM193 404L193 717L299 717C422 717 503 676 503 565C503 450 413 404 278 404Z"/></svg></h1>
+  <nav class="snav t14" data-fade aria-label="目次" style="--c:17/span 6;--r:1/span 12;--pc:10/span 3;--pr:1/span 12">
+    <a href="#works">Works</a><a href="#craft">Craft</a><a href="#about">About</a><a href="#order">Order</a><a href="#contact">Contact</a>
+  </nav>
+  <p class="tate" data-fade style="--c:33/span 3;--r:1/span 32;--pc:7/span 2;--pr:1/span 24">だれが来てもいい、<br>木の工房。</p>
+  <p class="big fvl" aria-hidden="true" style="--c:26/span 11;--r:52/span 40;--pc:1/span 6;--pr:46/span 20"><svg class="lg lg-g" aria-hidden="true" focusable="false" viewBox="42 -769 762 784"><path transform="scale(1 -1)" d="M411 -15C580 -15 695 79 735 222L765 -4L804 -4L804 382L360 382L361 341L726 341C708 160 604 43 434 43C233 43 134 199 134 383C134 579 251 726 439 726C574 726 671 653 704 528L791 528C753 680 617 769 441 769C205 769 42 610 42 372C42 160 174 -15 411 -15Z"/></svg></p>
+  <p class="who t14" data-fade style="--c:37/span 12;--r:34/span 16;--pc:7/span 6;--pr:30/span 12"><span class="name">Public Garden</span>Furniture workshop<br>Minami, Nagoya<br><a class="ulink" href="tel:08016044293">080-1604-4293</a></p>
+  <figure class="im fv-photo" data-clip style="margin:0;overflow:hidden;--c:37/span 12;--r:64/span 49;--pc:7/span 6;--pr:46/span 40"><img src="ph/rounddiningset1.jpg" width="2000" height="1500" alt="ブラックチェリーの丸いテーブルと2脚の椅子に灯りが落ちている"></figure>
+  <p class="t12 mute scroll-note" style="--c:1/span 12;--r:1/span 2">Scroll to see the pieces</p>
+</section>
+
+<!-- statement: 168 rows -->
+<section class="g" aria-label="はじめに" style="--rows:168">
+  <figure class="im dev bleed" data-settle style="margin:0;--c:1/-1;--r:1/span 104;--pc:1/-1;--ar:4/5"><img src="ph/rounddiningset4.jpg" width="2000" height="1500" alt="灯りの中のブラックチェリーの椅子" loading="lazy" style="object-position:50% 60%"></figure>
+  <p class="t12 mute" data-fade style="--c:1/span 14;--r:106/span 2;--pc:1/-1">Round dining set, black cherry, 2012</p>
+  <p class="tate l" data-fade style="--c:20/span 7;--r:124/span 48;--pc:9/span 3;--ph:300px">公園のように、<br>だれもが座れる<br>家具を。</p>
+  <p class="tate" data-fade style="--c:37/span 8;--r:124/span 40;--pc:1/span 8;--ph:300px">公園は、年齢も性別も関係なく、<br>だれもがそれぞれの用事で<br>立ち寄れる場所です。<br>この工房にも、そんなふうに<br>来てほしいと考えて、<br>この名前をつけました。</p>
+</section>
+
+<!-- works -->
+<div class="sh g" id="works"><h2 class="lab t14" style="--c:1/span 12;--r:1/span 8">Works</h2><p class="lab r jp mute" style="--c:37/span 12;--r:1/span 8;--pc:7/span 6">これまでの家具</p></div>
+<section class="works ws" aria-label="作品" style="--n:11">
+  <div class="ws-pin">
+    <div class="ws-frame">
+      <div class="ws-imgs im"><img src="ph/livingboard.jpg" width="720" height="540" alt="クルミの格子戸がついたリビングボード" data-i="0"><img src="ph/cafegogo2web.jpg" width="720" height="540" alt="カフェのカウンターに並ぶタモの椅子" loading="lazy" data-i="1"><img src="ph/diningchair2web.jpg" width="640" height="540" alt="タモとヌメ革のダイニングチェア" loading="lazy" data-i="2"><img src="ph/foldingchair1.jpg" width="720" height="540" alt="ブラックチェリーとヌメ革の折りたたみ椅子" loading="lazy" data-i="3"><img src="ph/roundlowtable2web.jpg" width="540" height="540" alt="クルミの丸いローテーブル" loading="lazy" data-i="4"><img src="ph/lowtable1web.jpg" width="720" height="540" alt="作業台の上のローテーブル" loading="lazy" data-i="5"><img src="ph/phonestand2web.jpg" width="405" height="540" alt="ナラの電話台" loading="lazy" data-i="6"><img src="ph/diningset3web.jpg" width="720" height="540" alt="ウォールナットのテーブルと赤い座面の椅子" loading="lazy" data-i="7"><img src="ph/photoframe4web.jpg" width="540" height="540" alt="額の角" loading="lazy" data-i="8"><img src="ph/rounddiningset2.jpg" width="2000" height="1500" alt="丸いテーブルと2脚の椅子" loading="lazy" data-i="9"><img src="ph/yosegi1web.jpg" width="540" height="540" alt="寄木の文字盤の掛け時計" loading="lazy" data-i="10"></div>
+      <p class="ws-c tl t14"><span class="sw">Living board</span></p>
+      <p class="ws-c tr t14 mute"><span class="sw">2010</span></p>
+      <p class="ws-c bl jp mute"><span class="sw">クルミ</span></p>
+      <p class="ws-c br jp mute"><span class="sw">W2,215 × D380 × H720</span></p>
+    </div>
+  </div>
+  <script type="application/json" id="ws-data">[{"n": "Living board", "y": "2010", "m": "クルミ", "d": "W2,215 × D380 × H720", "w": 720, "h": 540}, {"n": "cafe gogo", "y": "2010", "m": "タモ", "d": "店舗の椅子とカウンター", "w": 720, "h": 540}, {"n": "Dining chair", "y": "2010", "m": "タモ・ヌメ革", "d": "W480 × D420 × H780", "w": 640, "h": 540}, {"n": "Folding chair", "y": "2010", "m": "ブラックチェリー・ヌメ革", "d": "W580 × D980 × H890", "w": 720, "h": 540}, {"n": "Round low table", "y": "2010", "m": "クルミ", "d": "W600 × D600 × H350", "w": 540, "h": 540}, {"n": "Low table", "y": "2011", "m": "ブラックウォールナット・ナラ", "d": "W900 × D450 × H350", "w": 720, "h": 540}, {"n": "Phone stand", "y": "2011", "m": "ナラ", "d": "W500 × D250 × H800", "w": 405, "h": 540}, {"n": "Dining set", "y": "2012", "m": "ブラックウォールナット・ナラ", "d": "W1,500 × D900 × H760", "w": 720, "h": 540}, {"n": "Photo frame", "y": "2012", "m": "樹種はご希望に合わせて", "d": "寸法はご相談で", "w": 540, "h": 540}, {"n": "Round dining set", "y": "2012", "m": "ブラックチェリー", "d": "W900 × D900 × H700", "w": 2000, "h": 1500}, {"n": "Wall clock “Frame”", "y": "2012", "m": "山本友丘森氏との共作", "d": "W300 × D60 × H300", "w": 540, "h": 540}]</script>
+</section>
+
+<!-- index list: 64 rows -->
+<section class="list g" aria-label="作品一覧" style="--rows:72">
+  <div style="--c:1/span 12;--r:1/span 8"><p class="t14">Index</p><p class="jp mute">寸法と材は、使う場所と人に合わせて決めています。</p></div>
+  <figure class="ipv im hide-p" style="--c:1/span 7;--r:13/span 20"><img id="ipv" src="ph/livingboardsyoumen.jpg" width="720" height="540" alt="" loading="lazy"></figure>
+  <ol class="t14" style="--c:21/span 28;--r:1/span 66">
+    <li data-img="ph/livingboardsyoumen.jpg"><span>Living board</span><span class="m jp mute">W2,215 × D380 × H720　クルミ</span><span class="y">2010</span></li>
+    <li data-img="ph/cafegogo3web.jpg"><span>cafe gogo</span><span class="m jp mute">店舗の椅子とカウンター　タモ</span><span class="y">2010</span></li>
+    <li data-img="ph/diningchair1web.jpg"><span>Dining chair</span><span class="m jp mute">W480 × D420 × H780　タモ・ヌメ革</span><span class="y">2010</span></li>
+    <li data-img="ph/foldingchair3.jpg"><span>Folding chair</span><span class="m jp mute">W580 × D980 × H890　ブラックチェリー</span><span class="y">2010</span></li>
+    <li data-img="ph/roundlowtable4web.jpg"><span>Round low table</span><span class="m jp mute">W600 × D600 × H350　クルミ</span><span class="y">2010</span></li>
+    <li data-img="ph/lowtable5web.jpg"><span>Low table</span><span class="m jp mute">W900 × D450 × H350　ウォールナット・ナラ</span><span class="y">2011</span></li>
+    <li data-img="ph/phonestand1web.jpg"><span>Phone stand</span><span class="m jp mute">W500 × D250 × H800　ナラ</span><span class="y">2011</span></li>
+    <li data-img="ph/diningset1web.jpg"><span>Dining set</span><span class="m jp mute">W1,500 × D900 × H760　ウォールナット・ナラ</span><span class="y">2012</span></li>
+    <li data-img="ph/photoframe1web.jpg"><span>Photo frame</span><span class="m jp mute">寸法・樹種はご希望に合わせて</span><span class="y">2012</span></li>
+    <li data-img="ph/rounddiningset3.jpg"><span>Round dining set</span><span class="m jp mute">W900 × D900 × H700　ブラックチェリー</span><span class="y">2012</span></li>
+    <li data-img="ph/allwallclocks.jpg"><span>Wall clock “Frame”</span><span class="m jp mute">W300 × D60 × H300　山本友丘森氏との共作</span><span class="y">2012</span></li>
+  </ol>
+</section>
+
+<!-- craft: same grammar as Works (label left, photo centre, words right) -->
+<section class="g" id="craft" aria-label="つくり方" style="--rows:136">
+  <p class="t14 lab-s" style="--c:1/span 12;--r:13/span 43;--pc:1/span 8"><span>Craft</span></p>
+  <figure class="im dev" data-clip style="margin:0;--c:17/span 16;--r:13/span 43;--pc:1/-1;--ar:4/3"><img src="ph/roundlowtable3web.jpg" width="720" height="540" alt="工房の中で仕上げを待つ丸いテーブル" loading="lazy"></figure>
+  <p class="jp mute" data-fade style="--c:37/span 12;--r:13/span 10;--pc:1/-1">材料は良質な天然木の無垢材。ホゾ組みを基本に、その家具にいちばん合う組み方を選びます。</p>
+  <p class="t14 lab-s" style="--c:1/span 12;--r:72/span 43;--pc:1/span 8"><span>Oil finish</span></p>
+  <figure class="im dev" data-clip="left" style="margin:0;--c:19/span 12;--r:72/span 43;--pc:1/-1;--ar:1/1"><img src="ph/roundlowtable1web.jpg" width="540" height="540" alt="オイルで仕上げた天板の縁" loading="lazy"></figure>
+  <p class="jp mute" data-fade style="--c:37/span 12;--r:72/span 10;--pc:1/-1">仕上げは天然塗料のオイル。表面に膜をつくらないので、手ざわりは木そのものです。</p>
+</section>
+
+<section class="g" id="about" aria-label="工房について" style="--rows:76">
+  <p class="t14 lab-s" style="--c:1/span 12;--r:13/span 43;--pc:1/span 8"><span>About</span></p>
+  <figure class="im dev" data-clip="down" style="margin:0;--c:19/span 12;--r:13/span 43;--pc:1/-1;--ar:1/1"><img src="ph/photoframe2web.jpg" width="540" height="540" alt="額の角" loading="lazy"></figure>
+  <div class="jp mute" data-fade style="--c:37/span 12;--r:13/span 40;--pc:1/-1">
+    <p>公園は、だれもがそれぞれの用事で立ち寄れる場所です。この工房にもそんなふうに来てほしいと考えて、Public Gardenと名づけました。</p>
+    <p style="margin-top:calc(16 * var(--u))"><span style="color:var(--fg)">山添 大輔</span>　Daisuke Yamazoe<br>1982　愛知県生まれ<br>2005　愛知工業大学 建築工学科 卒業<br>2007　TSD専門学校 家具デザイン学科 卒業<br>2009　北名古屋市でPublic Gardenを設立</p>
+  </div>
+</section>
+
+<section class="g" id="order" aria-label="ご注文" style="--rows:56">
+  <p class="t14" style="--c:1/span 12;--r:13/span 4;--pc:1/span 8">Order</p>
+  <div class="jp" data-fade style="--c:17/span 16;--r:13/span 24;--pc:1/-1">
+    <p>家具はすべて、ご注文を受けてからつくります。納期はおよそ1〜2ヶ月。製作の込み具合で、もう少しお待ちいただくことがあります。</p>
+    <p class="mute" style="margin-top:calc(16 * var(--u))">今月ご相談いただくと、お届けは<span id="eta">2〜3月ごろ</span>が目安です。</p>
+  </div>
+  <div class="act t14" data-fade style="--c:37/span 12;--r:13/span 8;--pc:1/-1">
+    <a class="ulink" href="mailto:publicgarden052@gmail.com?subject=%E5%AE%B6%E5%85%B7%E3%81%AE%E3%81%94%E7%9B%B8%E8%AB%87">Write to us</a>
+    <a class="ulink" href="tel:08016044293">080-1604-4293</a>
+  </div>
+</section>
+</main>
+
+<!-- end: 112 rows -->
+<footer class="end g" id="contact" style="--rows:106;border-top:1px solid var(--line)">
+  <p class="big end-g" data-fade aria-hidden="true" style="--c:33/span 12;--r:7/span 40;--pc:6/span 7;--pr:3/span 20"><svg class="lg lg-g" aria-hidden="true" focusable="false" viewBox="42 -769 762 784"><path transform="scale(1 -1)" d="M411 -15C580 -15 695 79 735 222L765 -4L804 -4L804 382L360 382L361 341L726 341C708 160 604 43 434 43C233 43 134 199 134 383C134 579 251 726 439 726C574 726 671 653 704 528L791 528C753 680 617 769 441 769C205 769 42 610 42 372C42 160 174 -15 411 -15Z"/></svg></p>
+  <div class="t14 end-info" data-fade style="--c:17/span 12;--r:7/span 32;--pc:1/span 10;--pr:28/span 34">
+    <p>Public Garden</p>
+    <p style="margin-top:calc(8 * var(--u))">3-jo 1-1-22, Minami<br>Nagoya, Aichi 457-0866</p>
+    <p class="jp mute" style="margin-top:calc(16 * var(--u))">〒457-0866<br>愛知県名古屋市南区三条1丁目1-22</p>
+    <p style="margin-top:calc(16 * var(--u))"><a class="ulink" href="mailto:publicgarden052@gmail.com">publicgarden052@gmail.com</a><br><a class="ulink" href="tel:08016044293">080-1604-4293</a><br><a class="ulink" href="https://www.google.com/maps/search/?api=1&query=%E6%84%9B%E7%9F%A5%E7%9C%8C%E5%90%8D%E5%8F%A4%E5%B1%8B%E5%B8%82%E5%8D%97%E5%8C%BA%E4%B8%89%E6%9D%A11%E4%B8%81%E7%9B%AE1-22" target="_blank" rel="noopener">Map</a></p>
+  </div>
+  <p class="big end-p" data-fade aria-hidden="true" style="--c:1/span 10;--r:62/span 40;--pc:1/span 7;--pr:66/span 20"><svg class="lg lg-p" aria-hidden="true" focusable="false" viewBox="61 -757 532 757"><path transform="scale(1 -1)" d="M61 0L239 0L239 3C198 27 193 58 193 127L193 364L283 364C466 364 593 424 593 565C593 704 481 757 304 757L61 757L61 754C100 730 105 703 105 630L105 127C105 58 100 27 61 3ZM193 404L193 717L299 717C422 717 503 676 503 565C503 450 413 404 278 404Z"/></svg></p>
+  <p class="t12 mute end-foot" style="--c:25/span 20;--r:105/span 2;--pc:1/span 12;--pr:96/span 2;text-align:right;line-height:1;align-self:end">© 2026 Public Garden　<a href="#top">Back to top</a></p>
+</footer>
+
+<script>
+  try { const q = new URLSearchParams(location.search); ['pg','en','jp'].forEach((k) => { const v = q.get(k); if (v) document.documentElement.dataset[k] = v; }); } catch (e) {}
+  (function () {
+    const m = Number(new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', month: 'numeric' }).format(new Date()).replace(/\D/g, ''));
+    document.getElementById('eta').textContent = (m % 12 + 1) + '〜' + ((m + 1) % 12 + 1) + '月ごろ';
+    // blueprint grid overlay: the Grid buttons or the G key show and hide it (remembered per viewer)
+    const root = document.documentElement, cv = document.querySelector('.gridlines canvas'), ctx = cv.getContext('2d');
+    const btns = [...document.querySelectorAll('.gtog')];
+    let on = false; try { on = localStorage.getItem('pg-grid') === '1'; } catch (e) {}
+    const draw = () => {
+      if (!on) return;
+      const dpr = devicePixelRatio || 1, W = innerWidth, H = innerHeight;
+      if (cv.width !== W * dpr || cv.height !== H * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+      const cs = getComputedStyle(root), cols = parseInt(cs.getPropertyValue('--cols')) || 48;
+      const probe = document.querySelector('.fv'); const pad = parseFloat(getComputedStyle(probe).paddingLeft);
+      const u = W <= 640 ? W / 390 : (W <= 1199 ? W / 1200 : Math.min(W, 1920) / 1440);
+      const row = W <= 640 ? 8 : 8 * u, cw = (W - 2 * pad) / cols, major = W <= 640 ? 4 : 4, rowsMajor = 8;
+      const sy = scrollY, ink = (a) => `rgba(27,26,24,${a})`;
+      // washed bands every other 4 columns
+      for (let c = 0; c < cols; c += major * 2) { ctx.fillStyle = ink(.022); ctx.fillRect(pad + c * cw, 0, cw * major, H); }
+      // rows
+      const r0 = Math.floor(sy / row);
+      for (let r = r0; r * row - sy < H; r++) {
+        const y = Math.round(r * row - sy) + .5;
+        if (r % rowsMajor === 0) { ctx.strokeStyle = ink(.2); ctx.setLineDash([1, 3]); } else { ctx.strokeStyle = ink(.05); ctx.setLineDash([]); }
+        ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(W - pad, y); ctx.stroke();
+      }
+      // columns
+      for (let c = 0; c <= cols; c++) {
+        const x = Math.round(pad + c * cw) + .5, m = c % major === 0;
+        ctx.strokeStyle = ink(c === 0 || c === cols ? .35 : (m ? .22 : .1)); ctx.setLineDash(m ? [] : [1, 3]);
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+      }
+      ctx.setLineDash([]); ctx.strokeStyle = ink(.35); const mt = Math.round(pad - sy) + .5; if (mt > 0) { ctx.beginPath(); ctx.moveTo(0, mt); ctx.lineTo(W, mt); ctx.stroke(); }
+      // dots where major lines cross
+      ctx.fillStyle = ink(.55);
+      for (let r = Math.ceil(r0 / rowsMajor) * rowsMajor; r * row - sy < H; r += rowsMajor)
+        for (let c = 0; c <= cols; c += major) ctx.fillRect(Math.round(pad + c * cw) - 1, Math.round(r * row - sy) - 1, 2, 2);
+      // numbers: columns along the top, rows (in rows of 8u) down the left margin
+      ctx.font = '9px "ABC Favorit Mono", ui-monospace, monospace'; ctx.fillStyle = ink(.5); ctx.textBaseline = 'top';
+      for (let c = 0; c < cols; c += major) ctx.fillText(String(c + 1), Math.round(pad + c * cw) + 3, 4);
+      ctx.textAlign = 'right';
+      for (let r = Math.ceil(r0 / rowsMajor) * rowsMajor; r * row - sy < H; r += rowsMajor) ctx.fillText(String(r), pad - 4, Math.round(r * row - sy) - 4);
+      ctx.textAlign = 'left';
+      ctx.fillText(`${cols} col × ${cw.toFixed(1)} / row ${row.toFixed(1)}`, pad + 3, H - 14);
+    };
+    let raf = 0; const req = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; draw(); }); };
+    const set = (v) => { on = v; root.classList.toggle('show-grid', v); btns.forEach((b) => b.setAttribute('aria-pressed', String(v))); try { localStorage.setItem('pg-grid', v ? '1' : '0'); } catch (e) {} req(); };
+    set(on); addEventListener('scroll', req, { passive: true }); addEventListener('resize', req);
+    btns.forEach((b) => b.addEventListener('click', () => set(!on)));
+    addEventListener('keydown', (e) => { if ((e.key === 'g' || e.key === 'G') && !e.metaKey && !e.ctrlKey && !/input|textarea/i.test(e.target.tagName)) set(!on); });
+  })();
+</script>
+<script>
+  window.templateIntro = (tl, gsap) => {
+    tl.fromTo('.fv .fvl', { yPercent: 8, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 1.6, ease: 'settle', stagger: .25 }, 0);
+  };
+</script>
+<script src="engine/vendor/gsap.min.js"></script>
+<script src="engine/vendor/ScrollTrigger.min.js"></script>
+<script src="engine/vendor/SplitText.min.js"></script>
+<script src="engine/vendor/CustomEase.min.js"></script>
+<script src="engine/vendor/lenis.min.js"></script>
+<script src="engine/engine.js"></script>
+<script src="engine/kit.js"></script>
+<script>
+  ScrollTrigger.create({ trigger: '.fv', start: 'bottom 80%', onLeave: () => toggle(true), onEnterBack: () => toggle(false) });
+  function toggle(on) { document.querySelectorAll('.mark,.tnav,.menu-btn').forEach((el) => el.classList.toggle('on', on)); }
+  (function () {
+    const pv = document.getElementById('ipv'); if (!pv) return;
+    const box = pv.parentElement;
+    document.querySelectorAll('.list li[data-img]').forEach((li) => li.addEventListener('mouseenter', () => {
+      if (pv.getAttribute('src') === li.dataset.img) return;
+      pv.style.opacity = 0; setTimeout(() => { pv.src = li.dataset.img; pv.style.opacity = 1; }, 220);
+    }));
+    document.querySelector('.list ol').addEventListener('mouseenter', () => box.classList.add('is-clear'));
+    document.querySelector('.list ol').addEventListener('mouseleave', () => box.classList.remove('is-clear'));
+  })();
+  // touch: photos clear up while they sit in the middle of the screen
+  if (matchMedia('(hover: none)').matches && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver((es) => es.forEach((e) => e.target.classList.toggle('is-clear', e.isIntersecting)), { rootMargin: '-35% 0px -35% 0px' });
+    document.querySelectorAll('.im').forEach((el) => io.observe(el));
+  }
+  // develop: each photo clears as it reaches the middle of the screen
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('.im.dev').forEach((fig) => {
+      const img = fig.querySelector('img');
+      gsap.fromTo(img, { '--dev': 1 }, { '--dev': 0, ease: 'none', scrollTrigger: { trigger: fig, start: 'top 85%', end: 'center 55%', scrub: .6,
+        onUpdate: (st) => fig.style.setProperty('--dev', 1 - st.progress) } });
+    });
+  } else document.querySelectorAll('.im.dev img').forEach((i) => i.style.setProperty('--dev', 0));
+  // logo letters are SVG boxes = ink; line things up against their edges.
+  // The offset goes on the inner <svg> so it never fights the reveal animation on the parent.
+  (function () {
+    const R = (el) => el.getBoundingClientRect();
+    const pY = (el) => { const m = new DOMMatrixReadOnly(getComputedStyle(el).transform); return { x: m.m41 || 0, y: m.m42 || 0 }; };
+    const S = (el) => el && el.querySelector('svg');
+    const fv = document.querySelector('.fv'), fvP = fv && fv.querySelector('h1.fvl'), fvG = fv && fv.querySelector('p.fvl'), ph = document.querySelector('.fv-photo');
+    const end = document.querySelector('.end'), eG = document.querySelector('.end-g'), eP = document.querySelector('.end-p'), info = document.querySelector('.end-info'), foot = document.querySelector('.end-foot');
+    const place = (el, dx, dy) => { S(el).style.translate = Math.round(dx) + 'px ' + Math.round(dy) + 'px'; };
+    const box = (el) => { const r = R(S(el)), t = pY(el); return { top: r.top - t.y, bottom: r.bottom - t.y, left: r.left - t.x, right: r.right - t.x }; };
+    const fit = () => {
+      [fvP, fvG, eG, eP].forEach((el) => el && S(el) && (S(el).style.translate = ''));
+      if (fv && fvG && ph) {
+        const fr = R(fv), pad = parseFloat(getComputedStyle(fv).paddingLeft);
+        if (fvP) { const p = box(fvP); place(fvP, fr.left + pad - p.left, fr.top - p.top); }
+        const g = box(fvG), top = Math.round(g.top - fr.top);
+        ph.style.gridRow = '1 / -1'; ph.style.alignSelf = 'start'; ph.style.marginTop = top + 'px'; ph.style.height = Math.round(fr.height - top + 120) + 'px';
+        const gap = innerWidth <= 640 ? 20 : innerWidth / 1440 * 85, phr = R(ph), pt = pY(ph);
+        place(fvG, (phr.left - pt.x) - gap - g.right, 0);
+      }
+      if (end && eG && eP && innerWidth > 640) {
+        const pad = parseFloat(getComputedStyle(end).paddingLeft), er = R(end);
+        const g = box(eG), p = box(eP), it = R(info).top - pY(info).y, fb = R(foot).bottom - pY(foot).y;
+        place(eG, er.right - pad - g.right, it - g.top);
+        place(eP, er.left + pad - p.left, fb - p.bottom);
+      }
+    };
+    fit(); addEventListener('load', fit); addEventListener('resize', fit); setTimeout(fit, 2600);
+  })();
+  // Works stage
+  (function () {
+    const sec = document.querySelector('.ws'); if (!sec) return;
+    const data = JSON.parse(document.getElementById('ws-data').textContent);
+    const frame = sec.querySelector('.ws-frame'), imgs = [...sec.querySelectorAll('.ws-imgs img')];
+    const corners = { tl: 'n', tr: 'y', bl: 'm', br: 'd' };
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const size = (d) => { const small = innerWidth <= 640; const maxW = innerWidth * (small ? .78 : .38), maxH = innerHeight * (small ? .5 : .56);
+      const k = Math.min(maxW / d.w, maxH / d.h); return { w: d.w * k, h: d.h * k }; };
+    let cur = -1;
+    const go = (i, instant) => {
+      if (i === cur) return; const dir = i > cur ? 1 : -1; const prev = cur; cur = i; const d = data[i], sz = size(d);
+      const dur = instant || reduce ? 0 : 1.0;
+      gsap.to(frame, { '--fw': sz.w + 'px', '--fh': sz.h + 'px', duration: dur, ease: 'settle' });
+      imgs.forEach((im, k) => { gsap.killTweensOf(im); im.style.zIndex = k === i ? 2 : (k === prev ? 1 : 0); });
+      gsap.fromTo(imgs[i], { clipPath: dir > 0 ? 'inset(100% 0% 0% 0%)' : 'inset(0% 0% 100% 0%)', scale: 1.06 }, { clipPath: 'inset(0% 0% 0% 0%)', scale: 1, duration: dur, ease: 'settle' });
+      Object.entries(corners).forEach(([c, key], j) => {
+        const el = sec.querySelector('.ws-c.' + c + ' .sw');
+        if (dur === 0) { el.textContent = d[key]; return; }
+        gsap.to(el, { yPercent: -110 * dir, duration: .35, ease: 'power2.in', delay: j * .04, onComplete: () => {
+          el.textContent = d[key]; gsap.fromTo(el, { yPercent: 110 * dir }, { yPercent: 0, duration: .6, ease: 'settle' }); } });
+      });
+    };
+    go(0, true);
+    ScrollTrigger.create({ trigger: sec, start: 'top top', end: 'bottom bottom', onUpdate: (st) => go(Math.min(data.length - 1, Math.floor(st.progress * data.length * .999))) });
+    addEventListener('resize', () => { const d = data[cur], sz = size(d); gsap.set(frame, { '--fw': sz.w + 'px', '--fh': sz.h + 'px' }); });
+  })();
+</script>
+</body>
+</html>
